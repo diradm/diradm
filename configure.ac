@@ -31,6 +31,7 @@ AC_PATH_PROGS_ERROR(TAIL, tail)
 AC_PATH_PROGS_ERROR(HEAD, head)
 AC_PATH_PROGS_ERROR(GREP, grep)
 AC_PATH_PROGS_ERROR(BASHSH, bash sh)
+AC_PATH_PROGS_ERROR(FALSE, false)
 AC_PATH_PROGS_ERROR(SED, sed)
 AC_PATH_PROGS_ERROR(CUT, cut)
 AC_PATH_PROGS_ERROR(PERL, perl)
@@ -61,6 +62,13 @@ AC_CONFIG_FILES([
    src/Makefile
    m4/Makefile
    src/diradm.conf
+   src/diradm.check.sh
+   src/diradm.common.sh
+   src/diradm.group.sh
+   src/diradm.host.sh
+   src/diradm.misc.sh
+   src/diradm.samba.sh
+   src/diradm.user.sh
 ])
 AC_CONFIG_FILES([src/diradm], [chmod +x src/diradm])
 AC_CONFIG_FILES([src/diradm-mkpasswd.pl], [chmod +x src/diradm-mkpasswd.pl])
