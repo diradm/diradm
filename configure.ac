@@ -46,9 +46,6 @@ AC_PROG_PERL_MODULES(	[Crypt::SmbHash], ,
 			AC_MSG_ERROR([Crypt::SmbHash required!]))
 if test "x${ENABLE_SAMBA}" = "xyes"; then
 	AC_PATH_PROGS_ERROR(SAMBA_NET, net)
-else
-	AC_DEFINE(SAMBA_NET, net, [Samba net utility])
-	AC_SUBST(SAMBA_NET)
 fi
 
 AC_CONFIG_FILES([
@@ -57,9 +54,9 @@ AC_CONFIG_FILES([
    diradm.spec
    src/Makefile
    m4/Makefile
-   src/diradm
-   src/diradm-mkpasswd.pl
    src/diradm.conf
 ])
+AC_CONFIG_FILES([src/diradm], [chmod +x src/diradm])
+AC_CONFIG_FILES([src/diradm-mkpasswd.pl], [chmod +x src/diradm-mkpasswd.pl])
 
 AC_OUTPUT
