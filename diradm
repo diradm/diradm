@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.19 2004/09/09 20:36:04 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.20 2004/09/22 05:16:06 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -123,11 +123,12 @@ LDAPDELETE="ldapdelete ${ADMINOPTIONS}"
 print_usage () {
 	echo "Usage: diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
 	echo "                      [-d home] [-s shell] [-c comment] [-m [-k template]]"
-	echo "                      [-f inactive] [-e expire] [-p passwd] name"
+	echo "                      [-f inactive] [-e expire] [-p passwd] [-E email] name"
 	echo
 	echo "       diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
 	echo "                      [-d home [-m]] [-s shell] [-c comment] [-l new_name]"
-	echo "                      [-f inactive] [-e expire ] [-p passwd] [-L|-U] name"
+	echo "                      [-f inactive] [-e expire ] [-p passwd] [-L|-U]"
+	echo "                      [-E email] name"
 	echo
 	echo "       diradm userdel [-r] name"
 	echo
@@ -280,7 +281,7 @@ daysnow() {
 
 useradd () {
 	[ -z "${modulename}" ] && modulename="useradd"
-	while getopts "u:og:G:h:d:s:c:mk:f:e:p:Si" OPTION; do
+	while getopts "u:og:G:h:d:s:c:mk:f:e:E:p:Si" OPTION; do
 		case "${OPTION}" in
 			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
@@ -294,6 +295,7 @@ useradd () {
 			k) SKEL="${OPTARG}";;
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
+			E) EMAIL="${OPTARG}";;
 			p) USERPASSWORD="${OPTARG}";;
 			S) SAMBA="yes";;
 			i) IRIX="yes";;
@@ -452,8 +454,13 @@ useradd () {
 	append "objectClass: shadowAccount"
 	append "objectClass: organizationalPerson"
 	append "objectClass: inetOrgperson"
+	append "objectClass: userInformation"
 	append "uid: ${LOGIN}"
-	append "userPassword: {CRYPT}$(mkpasswd.pl -m ${USERPASSWORD} | tr -d \"\n\")"
+	userPasswordCrypt="$(mkpasswd.pl -m ${USERPASSWORD})"
+	sambaNTPassword="$(mkpasswd.pl -n ${USERPASSWORD})"
+	sambaLMPassword="$(mkpasswd.pl -l ${USERPASSWORD})"
+	irixPassword="$(mkpasswd.pl -i ${USERPASSWORD})"
+	append "userPassword: {CRYPT}${userPasswordCrypt}"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
 	append "cn: ${CN}"
@@ -473,6 +480,7 @@ useradd () {
 	[ -n "${ROOMNUMBER}" ] && append "roomNumber: ${ROOMNUMBER}"
 	[ -n "${HOMEPHONE}" ] && append "homePhone: ${HOMEPHONE}"
 	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
+	[ -n "${EMAIL}" ] && append "email: ${EMAIL}"
 	append "gecos: ${COMMENT}"
 
 	if [ "${SAMBA}" = "yes" -a -n "${SAMBADOMAINSID}" ]; then
@@ -485,8 +493,8 @@ useradd () {
 		append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-${DEFAULT_SAMBAGID}"
 		append "sambaAcctFlags: [UX         ]"
 		append "sambaPwdCanChange: 0"
-		append "sambaNTPassword: $(mkpasswd.pl -n ${USERPASSWORD})"
-		append "sambaLMPassword: $(mkpasswd.pl -l ${USERPASSWORD})"
+		append "sambaNTPassword: ${sambaNTPassword}"
+		append "sambaLMPassword: ${sambaLMPassword}"
 		append "sambaPwdLastSet: $(date -u +%s)";
 		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
 		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\\\${LOGIN}"
@@ -495,10 +503,22 @@ useradd () {
 	fi
 	if [ "${IRIX}" = "yes" ]; then
 		append "objectClass: irixAccount"
-		append "irixPassword: {CRYPT}$(mkpasswd.pl -i ${USERPASSWORD})"
+		append "irixPassword: {CRYPT}${irixPassword}"
 	fi
 	append "\n\n"
+	
+	# group stuff	
+	if [ -n "${ADDTOGROUPS}" ]; then
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+		for POSIXGROUP in ${DELETEFROMGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+		done
+		for POSIXGROUP in ${ADDTOGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+		done
+	fi
 
+	# automounted homedirs etc.
 	append "dn: cn=${LOGIN},${AUTOMOUNT_USERBASE}"
 	append "changetype: add"
 	append "objectClass: automount"
@@ -510,22 +530,18 @@ useradd () {
 	append "description: ${AUTOMOUNT_USERDESC}";
 	append "\n\n"
 
-	if [ -n "${ADDTOGROUPS}" ]; then
-		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
-		for POSIXGROUP in ${DELETEFROMGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
-		done
-		for POSIXGROUP in ${ADDTOGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
-		done
-	fi
-	#echo "${COMMAND}"
+	#echo -e "${COMMAND}"
 	runmodify
-	if [ "${CREATEHOMEDIR}" = "yes" -a ! -d "${HOMEDIRECTORY}" ]; then
-		mkdir ${HOMEDIRECTORY}
-		cp -a ${SKEL}/{*,.[^.]*} ${HOMEDIRECTORY} > /dev/null 2>&1
-		chmod "${HOMEPERM}" "${HOMEDIRECTORY}"
-		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${HOMEDIRECTORY}"
+
+	# Create Homedir
+	targetdir="${AUTOMOUNT_BASE}/${AUTOMOUNT_APPEND}"
+	# strip NFS host and assume local
+	targetdir="${targetdir/*:}"
+	if [ "${CREATEHOMEDIR}" = "yes" -a ! -d "${HOMEDIRECTORY}" -a ! -d "${targetdir}" ]; then
+		echo Making Homedir stored in $targetdir, available as $HOMEDIRECTORY
+		cp -ra "${SKEL}" "${targetdir}" >/dev/null
+		chmod "${HOMEPERM}" "${targetdir}"
+		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${targetdir}"
 	fi
 }
 
@@ -549,6 +565,7 @@ usermod () {
 			m) MOVEHOMEDIR="yes";;
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
+			E) EMAIL="${OPTARG}";;
 			p) if [ -n "${LOCKED}" ]; then print_usage; exit 2; fi; USERPASSWORD="${2}";;
 			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="yes";;
 			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="no";;
@@ -710,6 +727,7 @@ usermod () {
 	append "${COMMAND_DN}"
 	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}\n-\n"
 	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}\n-\n"
+	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}\n-\n"
 	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-\n"
 	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}\n-\n"
 	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}\n-\n"
