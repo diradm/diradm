@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.5 2004/12/23 21:16:22 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.6 2004/12/23 22:23:39 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -80,8 +80,8 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-REVISION='$Revision: 1.5 $'
-DATE='$Date: 2004/12/23 21:16:22 $'
+REVISION='$Revision: 1.6 $'
+DATE='$Date: 2004/12/23 22:23:39 $'
 # get the stripped versions
 REVISION="${REVISION% *}" ; REVISION="${REVISION/* }"
 DATE="${DATE#* }" ; DATE="${DATE% *}"
@@ -1472,8 +1472,8 @@ smbhostadd() {
 	append "uid: ${NAME}\$"
 	append "sambaSID: ${SAMBADOMAINSID}-${HOSTRID}"
 	append "sambaAcctFlags: [W          ]"
-	let LMPASS="$(${MKPASSWD} -l ${NAME}\$)"
-	let NTPASS="$(${MKPASSWD} -n ${NAME}\$)"
+	LMPASS="$(${MKPASSWD} -l ${NAME}\$)"
+	NTPASS="$(${MKPASSWD} -n ${NAME}\$)"
 	append "sambaLMPassword: ${LMPASS}"
 	append "sambaNTPassword: ${NTPASS}"
 
