@@ -1,3 +1,110 @@
+2005-01-09 07:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.common.sh.in (1.2), "Exp", lines: +8 -8
+		src/diradm.in (1.13), "Exp", lines: +11 -8
+		src/diradm.user.sh.in (1.2), "Exp", lines: +1 -2
+
+	make sure LDAP.*_CMD instead of just LDAP.*.
+
+2005-01-09 07:09  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/.cvsignore (1.4), "Exp", lines: +7 -0
+
+	cvsignore.
+
+2005-01-09 07:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.in (1.12), "Exp", lines: +5 -4
+
+	add false.
+
+2005-01-09 07:07  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.12), "Exp", lines: +8 -0
+
+	build components.
+
+2005-01-09 07:06  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/Makefile.am (1.7), "Exp", lines: +1 -2
+
+	building.
+
+2005-01-09 07:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Deleted:
+		src/diradm.check.sh (1.2)
+		src/diradm.common.sh (1.2)
+		src/diradm.group.sh (1.2)
+		src/diradm.host.sh (1.2)
+		src/diradm.misc.sh (1.2)
+		src/diradm.samba.sh (1.2)
+		src/diradm.user.sh (1.2)
+	Added:
+		src/diradm.check.sh.in (1.1)
+		src/diradm.common.sh.in (1.1)
+		src/diradm.group.sh.in (1.1)
+		src/diradm.host.sh.in (1.1)
+		src/diradm.misc.sh.in (1.1)
+		src/diradm.samba.sh.in (1.1)
+		src/diradm.user.sh.in (1.1)
+	Changed:
+		src/Makefile.am (1.6), "Exp", lines: +2 -1
+
+	move to custom build of components.
+
+2005-01-09 07:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/Makefile.am (1.5), "Exp", lines: +3 -2
+
+	update for seperation.
+
+2005-01-09 07:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		src/diradm.check.sh (1.1)
+		src/diradm.common.sh (1.1)
+		src/diradm.group.sh (1.1)
+		src/diradm.host.sh (1.1)
+		src/diradm.misc.sh (1.1)
+		src/diradm.samba.sh (1.1)
+		src/diradm.user.sh (1.1)
+	Changed:
+		src/diradm.conf.in (1.8), "Exp", lines: +5 -5
+		src/diradm.in (1.11), "Exp", lines: +22 -1628
+
+	seperate groups of function, for faster load time.
+
+2005-01-09 06:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.in (1.10), "Exp", lines: +92 -98
+
+	cleanup hostdel. remove smbhostmod again - not needed. make
+	append_attrib work better.
+
+2005-01-09 06:00  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.7), "Exp", lines: +5 -5
+		src/diradm.in (1.9), "Exp", lines: +72 -78
+
+	use better BASEDN variables.
+
+2005-01-09 03:24  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.6), "Exp", lines: +4 -4
+		src/diradm.in (1.8), "Exp", lines: +51 -42
+
+	fix some glitches, add cvs_header output, change running method.
+
 2005-01-09 03:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
