@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.3 2004/12/12 07:30:14 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.4 2004/12/12 08:31:31 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -30,12 +30,17 @@
 # populated by configure...
 prefix="@prefix@"
 sysconfdir="@sysconfdir@"
-libexecdir="@libexecdir@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
 sbindir="@sbindir@"
+libexecdir="@libexecdir@"
 VERSION="@VERSION@"
+# This is the path to the script bundled with diradm
+# we use it to generate the passwords needed quickly.
+MKPASSWD="${libexecdir}/diradm-mkpasswd.pl"
 
 # for recursive calls
-DIRADM="${0}"
+#DIRADM="${0}"
 
 # find the config file
 # 1. look in SYSCONFDIR
@@ -43,17 +48,40 @@ DIRADM="${0}"
 # 3. look in ~ with prefix '.'
 CONFIG_FILENAME="diradm.conf"
 CONFIG="${sysconfdir}/${CONFIG_FILENAME}"
-if [ "${1}" == "-c" ]; then
-	CONFIG="${2}"
-	shift 2
-fi
+#if [ "${1}" == "-c" ]; then
+#	CONFIG="${2}"
+#	shift 2
+#fi
+skip=0
+for arg in ${*}; do
+	if [ $skip -gt 0 ]; then
+		skip=$(($skip - 1))
+		continue
+	fi
+	case "${arg}" in
+		-c|-C)
+			CONFIG="${2}"
+			skip=1
+			shift 2
+			;;
+		-m|-M)
+			MKPASSWD="${2}"
+			skip=1
+			shift 2
+			;;
+		*)
+			# continue outside now
+			break
+			;;
+	esac
+done
 [ ! -f "${CONFIG}" ] && CONFIG="`dirname ${0}`/${CONFIG_FILENAME}"
 [ ! -f "${CONFIG}" ] && CONFIG="~/.${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
-REVISION='$Revision: 1.3 $'
-DATE='$Date: 2004/12/12 07:30:14 $'
+REVISION='$Revision: 1.4 $'
+DATE='$Date: 2004/12/12 08:31:31 $'
 # get the stripped versions
 REVISION="${REVISION% *}" ; REVISION="${REVISION/* }"
 DATE="${DATE#* }" ; DATE="${DATE% *}"
@@ -63,15 +91,20 @@ if [ ! -r "${CONFIG}" ]; then
 	exit 1
 fi
 
-DEPENDENCIES="@GREP@ @LDAPSEARCH@ @LDAPADD@ @LDAPMODIFY@ @LDAPDELETE@ @SED@ @STAT@ @PERL@"
+DEPENDENCIES="@GREP@ @LDAPSEARCH@ @LDAPADD@ @LDAPMODIFY@ @LDAPDELETE@ @SED@ @STAT@ @PERL@ @AWK@ @EGREP@ @FGREP@ @HEAD@ @TAIL@ @BASHSH@"
+if [ "x$ENABLE_SAMBA" = "xyes" ]; then
+	DEPENDENCIES="${DEPENDENCIES} @SAMBA_NET@"
+fi
 
 selftest() {
 	for DEPENDENCY in ${DEPENDENCIES}; do
-		if [ ! -x "${EXECUTABLE}" ]; then
+		echo "Testing ${DEPENDENCY}"
+		if [ ! -x "${DEPENDENCY}" ]; then
 			echo "Cannot find \"${DEPENDENCY}\"!"
 			exit 1
 		fi
 	done
+	echo "Validating diradm-mkpasswd"
 	${MKPASSWD} 1>/dev/null
 	if [ $? -ne 1 ]; then
 		echo "${MKPASSWD} failed!"
@@ -106,9 +139,11 @@ selftest() {
 		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
 		exit 1
 	fi
+	echo "Selftest passed"
 }
 
-source "${CONFIG}"
+. "${CONFIG}"
+# TODO: need to add a lot more variables here!
 CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
 	DEFAULT_LOGINSHELL"
 CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER 
@@ -167,10 +202,14 @@ for CONFIGOPTION in ${CONFIGOPTIONS_DATE_DISABLE}; do
 done
 
 OPTIONS="-x -H ${LDAPURI}"
+if [ -n "$DEBUG" ]; then
+	OPTIONS="${OPTIONS} -v"
+fi
+ADMINOPTIONS="${OPTIONS} -D ${BINDDN}"
 if [ -n "${BINDPASS}" ]; then
-	ADMINOPTIONS="${OPTIONS} -D ${BINDDN} -w ${BINDPASS}"
+	ADMINOPTIONS="${ADMINOPTIONS} -w ${BINDPASS}"
 else
-	ADMINOPTIONS="${OPTIONS} -D ${BINDDN} -W"
+	ADMINOPTIONS="${ADMINOPTIONS} -W"
 fi
 #echo $ADMINOPTIONS
 LDAPSEARCH="@LDAPSEARCH@ ${ADMINOPTIONS}"
@@ -257,7 +296,7 @@ print_usage () {
 	list=''
 	[ -n "$1" ] && list="$1"
 	echo "Usage:"
-	if [ -z "$list" -o "$list" == "_all" ];
+	if [ -z "$list" -o "$list" == "_all" ]; then
 		list="useradd _ usermod _ userdel _ groupadd groupmod groupdel _ chsh _ chfn _ chage _ gpasswd _ hostadd hostmod hostdel"
 		[ "$ENABLE_SAMBA" = "yes" ] && list="${list} _ smbhostadd smbhostdel"
 		list="${list} _ _version _help _"
@@ -275,6 +314,16 @@ print_version () {
 	echo "This is free software; see the source for copying conditions.  There is NO"
 	echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 }
+
+grabinteractiveinput() {
+	msg="${1}"
+	setting="${2}"
+	echo -en "${msg}"
+	read userinput
+	userinput="`echo "${userinput}" | @SED@ -re 's/^[[:space:]]*//g;s/[[:space:]]*$//g;'`"
+	eval ${setting}="${userinput}"
+}
+
 
 # Call me nuts, I just wrote set functions in shell!
 # -Robin
@@ -321,6 +370,7 @@ ldap_search_getattr() {
 	search="${2}"
 	attr="${3}"
 	regex="^${attr}:{1,2} "
+	[ -n "$DEBUG" ] && echo ${LDAPSEARCH} -b "${basedn}" "${search}" ${attr}
 	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | @EGREP@ "${regex}" | @SED@ -re "s/${regex}//"
 }
 
@@ -329,6 +379,7 @@ ldap_base64_decode() {
 }
 
 search_attr() {
+	[ -n "$DEBUG" ] && echo ${LDAPSEARCH} -b "${1}" "${2}"
 	${LDAPSEARCH} -b "${1}" "${2}" | @GREP@ -qs "^${3}$"
 	return "$?"
 }
@@ -402,22 +453,156 @@ fi
 # first paramater is the days
 # rest is passed to date
 days_to_date() {
-local D="${1}"
-shift
-#date -u -d "Jan $((${D}+1)), 1970" ${OPT}
-date -u -d "00:00:00 1970-01-01 UTC +$D days" "${*}"
+	local D="${1}"
+	shift
+	#date -u -d "Jan $((${D}+1)), 1970" ${OPT}
+	date -u -d "00:00:00 1970-01-01 UTC +$D days" "${*}"
 }
 
 # Does the reverse of days_to_date
 # expects a date
 # returns a number of days since Jan 1, 1970
 date_to_days() {
-local UNIXTIMESTAMP="$(date -u +%s -d "${*}")"
-echo $((${UNIXTIMESTAMP}/(3600*24)))
+	local UNIXTIMESTAMP="$(date -u +%s -d "${*}")"
+	echo $((${UNIXTIMESTAMP}/(3600*24)))
 }
 
 daysnow() {
 	date_to_days `date -u`
+}
+
+
+groupadd () {
+	[ -z "${modulename}" ] && modulename="groupadd"
+	while getopts "g:o" OPTION; do
+		case "${OPTION}" in
+			g) GIDNUMBER="${OPTARG}";;
+			o) DUPLICATES="yes";;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		CN="${1}"
+	fi
+	echo "${CN}" | @GREP@ -qs "^[[:alnum:]]*$"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: \"${CN}\" is not a valid group name"
+		exit 3
+	else
+		search_group "cn" "${CN}"
+		if [ "$?" -eq 0 ]; then
+			echo "${modulename}: Group \"${CN}\" exists"
+			exit 9
+		fi
+	fi
+	if [ -n "${GIDNUMBER}" ]; then
+		echo "${GIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
+			exit 2
+		fi
+		search_group "gidNumber" "${GIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: gid ${GIDNUMBER} is not unique"
+			exit 4
+		fi
+	else
+		GIDNUMBER="${GIDNUMBERMIN}"
+		while [ "${GIDNUMBER}" -le "${GIDNUMBERMAX}" ]; do
+			search_group "gidNumber" "${GIDNUMBER}"
+			[ "$?" -ne 0 ] && break
+			let GIDNUMBER="${GIDNUMBER} + 1"
+		done
+		if [ "${GIDNUMBER}" -gt "${GIDNUMBERMAX}" ]; then
+			echo "${modulename}: Can't get unique gid"
+			exit 4
+		fi
+	fi
+	# setup commands
+	append "dn: cn=${CN},${GROUPBASE}"
+	append "changetype: add"
+	append "objectClass: top"
+	append "objectClass: posixGroup"
+	append "cn: ${CN}"
+	append "gidNumber: ${GIDNUMBER}"
+	append "\n\n"
+	runmodify
+}
+
+groupmod () {
+	[ -z "${modulename}" ] && modulename="groupmod"
+	if [ "${#}" -le 1 ]; then
+		echo "${modulename}: No flags given"
+		exit 2
+	fi
+	while getopts "g:on:" OPTION; do
+		case "${OPTION}" in
+			g) GIDNUMBER="${OPTARG}";;
+			o) DUPLICATES="yes";;
+			n) NEWCN="${OPTARG}";;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		CN="${1}"
+	fi
+	search_group "cn" "${CN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Group \"${CN}\" does not exist"
+		exit 6
+	fi
+	if [ -n "${GIDNUMBER}" ]; then
+		echo "${GIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
+			exit 2
+		fi
+		search_group "gidNumber" "${GIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: gid ${GIDNUMBER} is not unique"
+			exit 4
+		fi
+	fi
+	if [ -n "${NEWCN}" ]; then
+		echo "${NEWCN}" | @GREP@ -qs "^[[:alnum:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: \"${NEWCN}\" is not a valid group name"
+			exit 3
+		else
+			search_group "cn" "${NEWCN}"
+			if [ "$?" -eq 0 ]; then
+				echo "${modulename}: \"${NEWCN}\" is not a unique name"
+				exit 9
+			fi
+		fi
+	fi
+	[ -n "${GIDNUMBER}" ] && append "dn: cn=${CN},${GROUPBASE}\nreplace: gidNumber\ngidNumber: ${GIDNUMBER}\n"
+	[ -n "${NEWCN}" ] && append "dn: cn=${CN},${GROUPBASE}\nchangetype: modrdn\nnewrdn: cn=${NEWCN}"
+	runmodify
+}
+
+groupdel () {
+	[ -z "${modulename}" ] && modulename="groupdel"
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		CN="${1}"
+	fi
+	search_group "cn" "${CN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Group \"${CN}\" does not exist"
+		exit 6
+	fi
+	rundelete "cn=${CN},${GROUPBASE}" 
 }
 
 
@@ -503,7 +688,7 @@ useradd () {
 			GIDNUMBER="${DEFAULT_GIDNUMBER}"
 		else
 			# that evil redhat thing of a group for every user
-			## TODO: GROUP	
+			## TODO: TEST THIS
 			search_group "cn" "${LOGIN}"
 			if [ "$?" -eq 0 ]; then
 				echo "${modulename}: Group '${LOGIN}' already exists!"
@@ -511,7 +696,8 @@ useradd () {
 				echo "And add the user to a group afterwards."
 				exit 9
 			fi
-			${DIRADM} groupadd "${LOGIN}"
+			# recursive
+			groupadd "${LOGIN}"
 			if [ "$?" -ne 0 ]; then
 				echo "${modulename}: Failed to add group '${LOGIN}'."
 				exit 9
@@ -663,6 +849,7 @@ useradd () {
 		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
 		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
 	fi
+	# todo: config var for this
 	if [ "${IRIX}" = "yes" ]; then
 		append "objectClass: irixAccount"
 		append "irixPassword: {CRYPT}${irixPassword}"
@@ -969,148 +1156,6 @@ userdel () {
 	fi
 }
 
-groupadd () {
-	[ -z "${modulename}" ] && modulename="groupadd"
-	while getopts "g:o" OPTION; do
-		case "${OPTION}" in
-			g) GIDNUMBER="${OPTARG}";;
-			o) DUPLICATES="yes";;
-			*) print_usage ${modulename} ; exit 1;;
-		esac
-	done
-	shift $((${OPTIND} - 1))
-	if [ "${#}" -ne 1 ]; then
-		print_usage ${modulename}
-		exit 2
-	else
-		CN="${1}"
-	fi
-	echo "${CN}" | @GREP@ -qs "^[[:alnum:]]*$"
-	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: \"${CN}\" is not a valid group name"
-		exit 3
-	else
-		search_group "cn" "${CN}"
-		if [ "$?" -eq 0 ]; then
-			echo "${modulename}: Group \"${CN}\" exists"
-			exit 9
-		fi
-	fi
-	if [ -n "${GIDNUMBER}" ]; then
-		echo "${GIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
-		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
-			exit 2
-		fi
-		search_group "gidNumber" "${GIDNUMBER}"
-		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
-			echo "${modulename}: gid ${GIDNUMBER} is not unique"
-			exit 4
-		fi
-	else
-		GIDNUMBER="${GIDNUMBERMIN}"
-		while [ "${GIDNUMBER}" -le "${GIDNUMBERMAX}" ]; do
-			search_group "gidNumber" "${GIDNUMBER}"
-			[ "$?" -ne 0 ] && break
-			let GIDNUMBER="${GIDNUMBER} + 1"
-		done
-		if [ "${GIDNUMBER}" -gt "${GIDNUMBERMAX}" ]; then
-			echo "${modulename}: Can't get unique gid"
-			exit 4
-		fi
-	fi
-	# setup commands
-	append "dn: cn=${CN},${GROUPBASE}"
-	append "changetype: add"
-	append "objectClass: top"
-	append "objectClass: posixGroup"
-	append "cn: ${CN}"
-	append "gidNumber: ${GIDNUMBER}"
-	append "\n\n"
-	runmodify
-}
-
-groupmod () {
-	[ -z "${modulename}" ] && modulename="groupmod"
-	if [ "${#}" -le 1 ]; then
-		echo "${modulename}: No flags given"
-		exit 2
-	fi
-	while getopts "g:on:" OPTION; do
-		case "${OPTION}" in
-			g) GIDNUMBER="${OPTARG}";;
-			o) DUPLICATES="yes";;
-			n) NEWCN="${OPTARG}";;
-			*) print_usage ${modulename} ; exit 1;;
-		esac
-	done
-	shift $((${OPTIND} - 1))
-	if [ "${#}" -ne 1 ]; then
-		print_usage ${modulename}
-		exit 2
-	else
-		CN="${1}"
-	fi
-	search_group "cn" "${CN}"
-	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Group \"${CN}\" does not exist"
-		exit 6
-	fi
-	if [ -n "${GIDNUMBER}" ]; then
-		echo "${GIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
-		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
-			exit 2
-		fi
-		search_group "gidNumber" "${GIDNUMBER}"
-		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
-			echo "${modulename}: gid ${GIDNUMBER} is not unique"
-			exit 4
-		fi
-	fi
-	if [ -n "${NEWCN}" ]; then
-		echo "${NEWCN}" | @GREP@ -qs "^[[:alnum:]]*$"
-		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: \"${NEWCN}\" is not a valid group name"
-			exit 3
-		else
-			search_group "cn" "${NEWCN}"
-			if [ "$?" -eq 0 ]; then
-				echo "${modulename}: \"${NEWCN}\" is not a unique name"
-				exit 9
-			fi
-		fi
-	fi
-	[ -n "${GIDNUMBER}" ] && append "dn: cn=${CN},${GROUPBASE}\nreplace: gidNumber\ngidNumber: ${GIDNUMBER}\n"
-	[ -n "${NEWCN}" ] && append "dn: cn=${CN},${GROUPBASE}\nchangetype: modrdn\nnewrdn: cn=${NEWCN}"
-	runmodify
-}
-
-groupdel () {
-	[ -z "${modulename}" ] && modulename="groupdel"
-	if [ "${#}" -ne 1 ]; then
-		print_usage ${modulename}
-		exit 2
-	else
-		CN="${1}"
-	fi
-	search_group "cn" "${CN}"
-	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Group \"${CN}\" does not exist"
-		exit 6
-	fi
-	rundelete "cn=${CN},${GROUPBASE}" 
-}
-
-grabinteractiveinput() {
-	msg="${1}"
-	setting="${2}"
-	echo -en "${msg}"
-	read userinput
-	userinput="`echo "${userinput}" | @SED@ -re 's/^[[:space:]]*//g;s/[[:space:]]*$//g;'`"
-	eval ${setting}="${userinput}"
-}
-
 chsh() {
 	[ -z "${modulename}" ] && modulename="chsh"
 	while getopts "s:" OPTION; do
@@ -1138,7 +1183,7 @@ chsh() {
 }
 
 chfn() {
-	# TODO
+	# TODO: complete this
 	[ -z "${modulename}" ] && modulename="chfn"
 	while getopts "f:h:o:r:w:" OPTION; do
 		case "${OPTION}" in
@@ -1183,9 +1228,9 @@ chfn() {
 }
 
 chage() {
-	# TODO
+	# TODO: complete this
 	LISTONLY="0"
-	[ -z "${modulename}" ] && modulename="chsh"
+	[ -z "${modulename}" ] && modulename="chage"
 	while getopts "lm:M:W:I:E:d:" OPTION; do
 		case "${OPTION}" in
 			l) LISTONLY="1";;
@@ -1266,7 +1311,8 @@ chage() {
 
 
 gpasswd() {
-	# TODO
+	# TODO: set admin
+	# TODO: password mode
 	[ -z "${modulename}" ] && modulename="gpasswd"
 	PASSWD_SET=0
 	MEMBERS_ADD=''
@@ -1429,6 +1475,7 @@ smbhostdel () {
 }
 
 hostadd () {
+	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostadd"
 	while getopts "e:i:a:" OPTION; do
 		case "${OPTION}" in
@@ -1485,6 +1532,7 @@ hostadd () {
 }
 
 hostdel () {
+	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostdel"
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
@@ -1506,6 +1554,7 @@ hostdel () {
 }
 
 hostmod () {
+	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostmod"
 	if [ "${#}" -le 1 ]; then
 		echo "${modulename}: No flags given"
@@ -1611,6 +1660,7 @@ hostmod () {
 	runmodify
 }
 
+# TODO: can we ditch this totally?
 cvsadd() {
 	# TODO
 	[ -z "${modulename}" ] && modulename="hostadd"
@@ -1647,6 +1697,7 @@ cvsadd() {
 		done
 	fi
 }
+
 
 case "${1}" in
 	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel|hostadd|hostdel|hostmod|selftest)
