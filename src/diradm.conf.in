@@ -1,6 +1,7 @@
 # Begin /etc/diradm.conf
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Attic/diradm.conf,v 1.1 2004/12/10 03:46:37 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.1 2004/12/12 02:44:30 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
+# @PACKAGE@ @VERSION@
 
 # Options for user accounts
 # ---------------------------------
@@ -17,7 +18,7 @@ SHADOWMIN="0"
 SHADOWMAX="99999"
 SHADOWWARNING="7"
 SHADOWFLAG="0"
-MKPASSWD="diradm-mkpasswd.pl"
+MKPASSWD="${libexecdir}/diradm-mkpasswd.pl"
 
 # Options for group accounts
 # ----------------------------------

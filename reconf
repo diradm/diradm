@@ -13,9 +13,9 @@ rm -f config.cache
 echo "- aclocal."
 aclocal -I m4
 echo "- autoconf."
-autoconf
+autoconf-2.59
 echo "- autoheader."
-autoheader
+autoheader-2.59
 echo "- automake."
-automake -a
+automake-1.9 -a
 exit

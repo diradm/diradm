@@ -1,3 +1,4 @@
 diradm
 diradm-mkpasswd
 Makefile
+Makefile.in
