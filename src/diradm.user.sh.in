@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.1 2005/01/09 07:05:14 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.2 2005/01/09 07:18:49 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -418,7 +418,6 @@ usermod() {
 			fi
 		fi
 		if [ -z "${ADDTOGROUPS}" ]; then
-			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUP_BASEDN}" "memberUid=${LOGIN}" | ${GREP} "^cn:" | ${SED} "s/^cn: //")"
 			ADDTOGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		fi
 	fi

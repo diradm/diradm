@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.12 2005/01/09 07:08:55 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.13 2005/01/09 07:18:49 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -96,9 +96,9 @@ done
 ##################### Don't touch anything below this line #####################
 
 # these are defined here as this is what we track primarily for bugs.
-CVS_REVISION='$Revision: 1.12 $'
-CVS_DATE='$Date: 2005/01/09 07:08:55 $'
-CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.12 2005/01/09 07:08:55 robbat2 Exp $'
+CVS_REVISION='$Revision: 1.13 $'
+CVS_DATE='$Date: 2005/01/09 07:18:49 $'
+CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.13 2005/01/09 07:18:49 robbat2 Exp $'
 # get the stripped versions
 CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
 CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
@@ -147,10 +147,10 @@ else
 	ADMINOPTIONS="${ADMINOPTIONS} -W"
 fi
 #echo $ADMINOPTIONS
-LDAPSEARCH="${LDAPSEARCH} ${ADMINOPTIONS}"
-LDAPADD="${LDAPADD} ${ADMINOPTIONS}"
-LDAPMODIFY="${LDAPMODIFY} -c ${ADMINOPTIONS}"
-LDAPDELETE="${LDAPDELETE} ${ADMINOPTIONS}"
+LDAPSEARCH_CMD="${LDAPSEARCH} ${ADMINOPTIONS}"
+LDAPADD_CMD="${LDAPADD} ${ADMINOPTIONS}"
+LDAPMODIFY_CMD="${LDAPMODIFY} -c ${ADMINOPTIONS}"
+LDAPDELETE_CMD="${LDAPDELETE} ${ADMINOPTIONS}"
 
 commands_user="useradd usermod userdel chsh chfn chage"
 commands_group="groupadd groupmod groupdel gpasswd"
@@ -160,6 +160,7 @@ commands_misc="help version check _revision _date _header"
 valid_commands="${commands_user} ${commands_group} ${commands_host} ${commands_misc}"
 [ "$ENABLE_SAMBA" = "yes" ] && valid_commands="${valid_commands} ${commands_samba}"
 
+# check for the correct command
 ACTION=""
 for vc in ${valid_commands}; do
 	if [ "x${vc}" == "x${1}" ]; then
@@ -167,12 +168,14 @@ for vc in ${valid_commands}; do
 		break
 	fi
 done
+# now bring in just the set we need
 case ${ACTION} in
 	useradd|usermod|userdel|chsh|chfn|chage) . ${libexecdir}/diradm.user.sh ;;
 	groupadd|groupmod|groupdel|gpasswd) . ${libexecdir}/diradm.group.sh ;;
 	smbhostadd|smbhostdel) . ${libexecdir}/diradm.samba.sh ;;
 	hostadd|hostdel|hostmod) . ${libexecdir}/diradm.host.sh  ;;
 esac
+# now run it
 if [ -n "${ACTION}" ]; then
 	shift 1
 	${ACTION} "$@"
