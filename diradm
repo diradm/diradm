@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.5 2003/07/12 11:02:44 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.6 2003/07/14 09:36:56 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -138,6 +138,17 @@ print_usage () {
 	echo
     echo "       diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
 	echo "                   [-o other] name"
+	echo
+	echo "       diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]"
+	echo "	                  [-E expiredate] [-W warndays] user"
+	echo "       diradm chage -l user"
+	echo
+	echo "       diradm gpasswd group"
+	echo "       diradm gpasswd -a user group"
+	echo "       diradm gpasswd -d user group"
+	echo "       diradm gpasswd -R group"
+	echo "       diradm gpasswd -r group"
+	echo "       diradm gpasswd [-A user,...] [-M user,...] group"
 	echo
 	echo "       diradm --version   Print diradm version number, then exit"
 	echo
@@ -798,8 +809,6 @@ chsh() {
 }
 
 chfn() {
-    #chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
-	#     [-o other] name"
 	[ -z "${modulename}" ] && modulename="chfn"
 	while getopts "s:" OPTION; do
 		case "$OPTION" in
@@ -817,8 +826,24 @@ chfn() {
 	else
 		LOGIN="$1"
 	fi
-
 	
+}
+
+# Convert N days since Jan 1, 1970 to a date
+# first paramater is the days
+# rest is passed to date
+days_to_date() {
+local D="${1}"
+shift
+[ -n "$*" ] && local OPT="+'${*}'"
+date -u -d "Jan $((${D}+1)), 1970" $OPT
+}
+
+# Does the reverse of days_to_date
+# expects a date
+# returns a number of days since Jan 1, 1970
+date_to_days() {
+date +%s -d "${*}"
 }
 
 case "$1" in
