@@ -8,6 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+AC_PREREQ(2.59)
 AC_INIT([diradm],
         [0.0.1],
         [Robin Hugh Johnson robbat2@orbis-terrarum.net],
