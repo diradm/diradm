@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.20 2004/09/22 05:16:06 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.21 2004/11/19 02:26:51 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -41,7 +41,7 @@ if [ ! -r "${CONFIG}" ]; then
 	exit 1
 fi
 
-DEPENDENCIES="grep ldapsearch ldapadd ldapmodify ldapdelete sed stat"
+DEPENDENCIES="grep ldapsearch ldapadd ldapmodify ldapdelete sed stat perl"
 for DEPENDENCY in ${DEPENDENCIES}; do
 	EXECUTABLE="$(which "${DEPENDENCY}" 2> /dev/null)"
 	if [ ! -x "${EXECUTABLE}" ]; then
@@ -186,6 +186,10 @@ ldap_search_getattr() {
 	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | egrep "${regex}" | sed -re "s/${regex}//"
 }
 
+ldap_base64_decode() {
+	echo "$*" | perl -e 'use MIME::Base64; print(decode_base64(<STDIN>));'
+}
+
 search_attr() {
 	${LDAPSEARCH} -b "${1}" "${2}" | grep -qs "^${3}$"
 	return "$?"
@@ -211,7 +215,7 @@ search_group() {
 }
 
 append() {
-[ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
+	[ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
 }
 
 append_attrib_replace() {
@@ -706,14 +710,24 @@ usermod () {
 		fi
 	fi
 	if [ -n "${LOCKED}" ]; then
-		OLDPASSWORD="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" userPassword)"
+		OLDPASSWORDENCODED="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" userPassword)"
+		OLDPASSWORD="$(ldap_base64_decode "${OLDPASSWORDENCODED}")"
+		sambaNTPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" sambaNTPassword)"
+		sambaLMPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" sambaLMPassword)"
+		irixPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" irixPassword)"
 		if [ "${LOCKED}" = "yes" ]; then
-			USERPASSWORD="!${OLDPASSWORD}"
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | sed -re 's/}[!]?/}!/')"
+			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | sed -re 's/^[!]?/!/')"
+			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | sed -re 's/^[!]?/!/')"
+			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | sed -re 's/}[!]?/}!/')"
 		elif [ "${LOCKED}" = "no" ]; then
-			USERPASSWORD="$(echo "${OLDPASSWORD}" | sed -re "s/^!//")"
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | sed -re 's/}!/}/')"
+			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | sed -re 's/^[!]//')"
+			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | sed -re 's/^[!]//')"
+			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | sed -re 's/}!/}/')"
 		fi
 	fi
-	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}\n"
+	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}"
 	if [ -n "${ADDTOGROUPS}" ]; then
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
@@ -725,20 +739,23 @@ usermod () {
 		done
 	fi
 	append "${COMMAND_DN}"
-	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}\n-\n"
-	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}\n-\n"
-	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}\n-\n"
-	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-\n"
-	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}\n-\n"
-	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}\n-\n"
+	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}\n-"
+	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}\n-"
+	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}\n-"
+	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-"
+	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}\n-"
+	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}\n-"
 	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
-	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
-	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}\n-\n"
-	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}\n-\n"
-	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}\n-\n"
+	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-"
+	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}\n-"
+	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}\n-"
+	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}\n-"
+	[ -n "${sambaNTPassword}" ] && append_attrib_replace "sambaNTPassword" "${sambaNTPassword}\n-"
+	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}\n-"
+	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}\n-"
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
-	echo "${COMMAND}"
+	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}"
+	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
 	runmodify
 	if [ "${MOVEHOMEDIR}" = "yes" ]; then
 		mv ${OLDHOMEDIRECTORY} ${HOMEDIRECTORY} > /dev/null 2>&1
