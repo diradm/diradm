@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.6 2004/12/23 22:23:39 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.7 2005/01/09 03:03:43 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -80,11 +80,11 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-REVISION='$Revision: 1.6 $'
-DATE='$Date: 2004/12/23 22:23:39 $'
+CVS_REVISION='$Revision: 1.7 $'
+CVS_DATE='$Date: 2005/01/09 03:03:43 $'
 # get the stripped versions
-REVISION="${REVISION% *}" ; REVISION="${REVISION/* }"
-DATE="${DATE#* }" ; DATE="${DATE% *}"
+CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
+CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
 
 if [ ! -r "${CONFIG}" ]; then
 	echo "Unable to open configuration file \"${CONFIG}\"!"
@@ -106,14 +106,17 @@ FGREP="@FGREP@"
 HEAD="@HEAD@"
 TAIL="@TAIL@"
 BASHSH="@BASHSH@"
+DATE="@DATE@"
+CUT="@CUT@"
+UNIQ="@UNIQ@"
 SAMBA_NET="@SAMBA_NET@"
 
-DEPENDENCIES="${GREP} ${LDAPSEARCH} ${LDAPADD} ${LDAPMODIFY} ${LDAPDELETE} ${SED} ${STAT} ${PERL} ${AWK} ${EGREP} ${FGREP} ${HEAD} ${TAIL} ${BASHSH}"
+DEPENDENCIES="${GREP} ${LDAPSEARCH} ${LDAPADD} ${LDAPMODIFY} ${LDAPDELETE} ${SED} ${STAT} ${PERL} ${AWK} ${EGREP} ${FGREP} ${HEAD} ${TAIL} ${BASHSH} ${DATE} ${CUT} ${UNIQ}"
 if [ "x$ENABLE_SAMBA" = "xyes" ]; then
 	DEPENDENCIES="${DEPENDENCIES} @SAMBA_NET@"
 fi
 
-selftest() {
+check_self() {
 	for DEPENDENCY in ${DEPENDENCIES}; do
 		echo "Testing ${DEPENDENCY}"
 		if [ ! -x "${DEPENDENCY}" ]; then
@@ -160,63 +163,12 @@ selftest() {
 }
 
 . "${CONFIG}"
-# TODO: need to add a lot more variables here!
-CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
-	DEFAULT_LOGINSHELL"
-CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER 
-	GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID"
+# Up to date as of 2.2
+CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPHOMEBASE HOMEBASE SKEL DEFAULT_LOGINSHELL USERGROUPS BASEDN LDAPURI BINDPASS USERBASE GROUPBASE HOSTBASE SAMBAHOSTBASE ENABLE_SAMBA SAMBADOMAIN SAMBADOMAINSID SAMBAPATHPREPEND SAMBADRIVEi AUTOMOUNT_BASEDN AUTOMOUNT_USERDESC AUTOMOUNT_GROUPDESC AUTOMOUNT_USERMAP AUTOMOUNT_GROUPMAP AUTOMOUNT_USERBASE AUTOMOUNT_GROUPBASE AUTOMOUNT_OPTIONS AUTOMOUNT_BASE AUTOMOUNT_HASHING"
+CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID SAMBAHOSTRIDMIN SAMBAHOSTRIDMAX"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
 CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
-for CONFIGOPTION in ${CONFIGOPTIONS_STRING}; do
-	eval VALUE="\$${CONFIGOPTION}"
-	if [ -z "${VALUE}" ]; then
-		echo "Configuration error: ${CONFIGOPTION} not defined!"
-		exit 1
-	fi
-done
-for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT}; do
-	eval VALUE="\$${CONFIGOPTION}"
-	if [ -z "${VALUE}" ]; then
-		echo "Configuration error: ${CONFIGOPTION} not defined!"
-		exit 1
-	else
-		echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
-		if [ "$?" -ne 0 ]; then
-			echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
-			exit 1
-		fi
-	fi
-done
-for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT_DISABLE}; do
-	eval VALUE="\$${CONFIGOPTION}"
-	if [ -z "${VALUE}" ]; then
-		echo "Configuration error: ${CONFIGOPTION} not defined!"
-		exit 1
-	else
-		if [ "${VALUE}" != "-1" ]; then
-			echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
-			if [ "$?" -ne 0 ]; then
-				echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
-				exit 1
-			fi
-		fi
-	fi
-done
-for CONFIGOPTION in ${CONFIGOPTIONS_DATE_DISABLE}; do
-	eval VALUE="\$${CONFIGOPTION}"
-	if [ -z "${VALUE}" ]; then
-		echo "Configuration error: ${CONFIGOPTION} not defined!"
-		exit 1
-	else
-		if [ "${VALUE}" != "-1" ]; then
-			echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
-			if [ "$?" -ne 0 ]; then
-				echo "Configuration error: ${CONFIGOPTION} has invalid date value \"${VALUE}\"!"
-				exit 1
-			fi
-		fi
-	fi
-done
+
 
 OPTIONS="-x -H ${LDAPURI}"
 if [ -n "$DEBUG" ]; then
@@ -297,11 +249,13 @@ print_usage_sub() {
 	hostdel)
 	echo " diradm hostdel host"
 	;;
+	_check)
+	echo " diradm check [self|config]   Run tests for: ALL/self/config"
 	_version)
 	echo " diradm version   Print diradm version number, then exit"
 	;;
 	_help)
-	echo " diradm help      Print this help, then exit"
+	echo " diradm help [command1]...    Print help, then exit"
 	;;
 	_)
 	echo
@@ -316,17 +270,17 @@ print_usage () {
 	if [ -z "$list" -o "$list" == "_all" ]; then
 		list="useradd _ usermod _ userdel _ groupadd groupmod groupdel _ chsh _ chfn _ chage _ gpasswd _ hostadd hostmod hostdel"
 		[ "$ENABLE_SAMBA" = "yes" ] && list="${list} _ smbhostadd smbhostdel"
-		list="${list} _ _version _help _"
+		list="${list} _ _check _version _help _"
 	fi
 	for i in $list; do
 		print_usage_sub ${i}
 	done;
 }
 
-print_version () {
+version() {
 	echo "diradm ${VERSION}"
 	echo "Copyright (C) 2003 Daniel Himler <dan@hits.at>"
-	echo "Copyright (C) 2003-2004 Robin H. Johnson <robbat2@orbis-terrarum.net>"
+	echo "Copyright (C) 2003-2005 Robin H. Johnson <robbat2@orbis-terrarum.net>"
 	echo "Copyright (C) 2003-2004 Patrick Lougheed <pat@tfsb.org>"
 	echo "This is free software; see the source for copying conditions.  There is NO"
 	echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
@@ -339,6 +293,59 @@ grabinteractiveinput() {
 	read userinput
 	userinput="`echo "${userinput}" | ${SED} -re 's/^[[:space:]]*//g;s/[[:space:]]*$//g;'`"
 	eval ${setting}="${userinput}"
+}
+
+check_config() {
+	for CONFIGOPTION in ${CONFIGOPTIONS_STRING}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		fi
+	done
+	for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		else
+			echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
+			if [ "$?" -ne 0 ]; then
+				echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
+				exit 1
+			fi
+		fi
+	done
+	for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT_DISABLE}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		else
+			if [ "${VALUE}" != "-1" ]; then
+				echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
+				if [ "$?" -ne 0 ]; then
+					echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
+					exit 1
+				fi
+			fi
+		fi
+	done
+	for CONFIGOPTION in ${CONFIGOPTIONS_DATE_DISABLE}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		else
+			if [ "${VALUE}" != "-1" ]; then
+				echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+				if [ "$?" -ne 0 ]; then
+					echo "Configuration error: ${CONFIGOPTION} has invalid date value \"${VALUE}\"!"
+					exit 1
+				fi
+			fi
+		fi
+	done
 }
 
 
@@ -364,7 +371,7 @@ set_intersection() {
 		t=''
 	else
 		for i in $a; do
-			echo "${b}" | /bin/grep -wqs "${i}"
+			echo "${b}" | ${GREP} -wqs "${i}"
 			# if there, add
 			[ "$?" -eq 0 ] && t="${t} ${i}"
 		done
@@ -383,7 +390,7 @@ set_complement() {
 	# base case
 	else
 		for i in $a; do
-			echo "${b}" | /bin/grep -wqs "${i}"
+			echo "${b}" | ${GREP} -wqs "${i}"
 			# if not there, add
 			[ "$?" -ne 0 ] && t="${t} ${i}"
 		done
@@ -451,7 +458,7 @@ runmodify() {
 if [ -n "${DEBUG}" ]; then
 	echo LDAP Modify:
 	echo -------
-	[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | uniq
+	[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${UNIQ}
 	echo -------
 fi
 
@@ -462,7 +469,7 @@ runadd() {
 if [ -n "${DEBUG}" ]; then
 	echo LDAP Add:
 	echo -------
-	[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | uniq
+	[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${UNIQ}
 	echo -------
 fi
 [ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPADD} > /dev/null
@@ -484,20 +491,20 @@ fi
 days_to_date() {
 	local D="${1}"
 	shift
-	#date -u -d "Jan $((${D}+1)), 1970" ${OPT}
-	date -u -d "00:00:00 1970-01-01 UTC +$D days" "${*}"
+	#${DATE} -u -d "Jan $((${D}+1)), 1970" ${OPT}
+	${DATE} -u -d "00:00:00 1970-01-01 UTC +$D days" "${*}"
 }
 
 # Does the reverse of days_to_date
 # expects a date
 # returns a number of days since Jan 1, 1970
 date_to_days() {
-	local UNIXTIMESTAMP="$(date -u +%s -d "${*}")"
+	local UNIXTIMESTAMP="$(${DATE} -u +%s -d "${*}")"
 	echo $((${UNIXTIMESTAMP}/(3600*24)))
 }
 
 daysnow() {
-	date_to_days `date -u`
+	date_to_days `${DATE} -R -u`
 }
 
 
@@ -635,7 +642,7 @@ groupdel () {
 }
 
 
-useradd () {
+useradd() {
 	[ -z "${modulename}" ] && modulename="useradd"
 	while getopts "u:og:G:h:d:s:rRc:mk:f:e:E:p:Si" OPTION; do
 		case "${OPTION}" in
@@ -814,10 +821,10 @@ useradd () {
 	SHADOWLASTCHANGE="$(daysnow)"
 
 	# Users Full Name
-	FULLNAME="$(echo ${COMMENT} | cut -d, -f1)"
-	ROOMNUMBER="$(echo ${COMMENT} | cut -d, -f2)"
-	WORKPHONE="$(echo ${COMMENT} | cut -d, -f3)"
-	HOMEPHONE="$(echo ${COMMENT} | cut -d, -f4)"
+	FULLNAME="$(echo ${COMMENT} | ${CUT} -d, -f1)"
+	ROOMNUMBER="$(echo ${COMMENT} | ${CUT} -d, -f2)"
+	WORKPHONE="$(echo ${COMMENT} | ${CUT} -d, -f3)"
+	HOMEPHONE="$(echo ${COMMENT} | ${CUT} -d, -f4)"
 	FIRSTNAME="${FULLNAME// *}"
 	SURNAME="${FULLNAME##* }"
 	CN="${FIRSTNAME}"
@@ -872,7 +879,7 @@ useradd () {
 		append "sambaPwdCanChange: 0"
 		append "sambaNTPassword: ${sambaNTPassword}"
 		append "sambaLMPassword: ${sambaLMPassword}"
-		append "sambaPwdLastSet: $(date -u +%s)";
+		append "sambaPwdLastSet: $(${DATE} -u +%s)";
 		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
 		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\\\${LOGIN}"
 		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
@@ -896,6 +903,7 @@ useradd () {
 		done
 	fi
 
+	# TODO: abstract this to a new automount function
 	# automounted homedirs etc.
 	append "dn: cn=${LOGIN},${AUTOMOUNT_USERBASE}"
 	append "changetype: add"
@@ -1079,7 +1087,7 @@ usermod () {
 				echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
 				exit 3
 			else
-				let SHADOWEXPIRE="$(date -d "${SHADOWEXPIRE}" +%s) / 86400"
+				let SHADOWEXPIRE="$(${DATE} -d "${SHADOWEXPIRE}" +%s) / 86400"
 			fi
 		fi
 	fi
@@ -1232,10 +1240,10 @@ chfn() {
 	fi
 
 	[ -n "${HOMEPH}" ] && append ""
-	#FULLNAME="$(echo ${COMMENT} | cut -d, -f1)"
-	#ROOMNUMBER="$(echo ${COMMENT} | cut -d, -f2)"
-	#WORKPHONE="$(echo ${COMMENT} | cut -d, -f3)"
-	#HOMEPHONE="$(echo ${COMMENT} | cut -d, -f4)"
+	#FULLNAME="$(echo ${COMMENT} | ${CUT} -d, -f1)"
+	#ROOMNUMBER="$(echo ${COMMENT} | ${CUT} -d, -f2)"
+	#WORKPHONE="$(echo ${COMMENT} | ${CUT} -d, -f3)"
+	#HOMEPHONE="$(echo ${COMMENT} | ${CUT} -d, -f4)"
 	
 	if [ -n "${FULLNAME}" ]; then
 		FIRSTNAME="${FULLNAME// *}"
@@ -1482,7 +1490,7 @@ smbhostadd() {
 	append "sambaBadPasswordCount: 0"
 	append "sambaBadPasswordTime: 0"
 
-	let CANCHANGE="$(date -u +%s)"
+	let CANCHANGE="$(${DATE} -u +%s)"
 	let MUSTCHANGE="${CANCHANGE} + 1814400"
 	# leave password rotation alone for now
 	# all of the following are timestamps
@@ -1703,47 +1711,56 @@ hostmod () {
 	runmodify
 }
 
-# TODO: can we ditch this totally?
-cvsadd() {
-	# TODO
-	[ -z "${modulename}" ] && modulename="hostadd"
-	while getopts "m:" OPTION; do
-		case "${OPTION}" in
-			m) MEMBERS="${OPTARG}";;
-			*) print_usage ${modulename} ; exit 1;;
+check() {
+	[ -z "${modulename}" ] && modulename="check"
+	if [ "${#}" -le 1 ]; then
+		echo "${modulename}: No arguments given"
+		exit 2
+	fi
+	args="$@"
+	[ -z "${args}" ] && args="all"
+	[ "${args/all}" != "${args}" ] && args="${args//all/self config}"
+	for a in ${args}; do
+		case ${a} in
+			self) 
+				check_self 
+				;;
+			config) 
+				check_config 
+				;;
+			*) 
+				echo "${modulename}: Unknown test" 
+				exit 2 
+				;;
 		esac
 	done
-	shift $((${OPTIND} - 1))
-	if [ "${#}" -ne 1 ]; then
-		print_usage 
-		exit 2
-	else
-		NAME="${1}"
-	fi
-	search_group "cn" "${NAME}"
-	if [ "$?" -eq 0 ]; then
-		echo "${modulename}: Group \"${NAME}\" exists"
-		exit 9
-	fi
-
-	# Setup the commands
-	append "dn: cn=${NAME},${GROUPBASE}"
-	append "changetype: add"
-	append "objectClass: top"
-	append "objectClass: device"
-	append "cn: ${NAME}"
-
-	if [ -n "${MEMBERS}" ]; then
-		MEMBERS="${MEMBERS//,/ }"
-		for i in ${MEMBERS}; do
-			append "memberUid: ${i}"
-		done
-	fi
 }
 
+help() {
+	[ -z "${modulename}" ] && modulename="help"
+	local helptopic
+	if [ "${#}" -le 1 ]; then
+		helptopic="_all"
+	else
+		helptopic="${@}"
+	fi
+	for topic in ${helptopic}; do
+		print_usage ${topic}
+	done
+	exit 0
+}
+
+commands_user="useradd usermod userdel"
+commands_group="groupadd groupmod groupdel gpasswd"
+commands_change="chsh chfn chage"
+commands_samba="smbhostadd smbhostdel"
+commands_host="hostadd hostdel hostmod"
+commands_misc="help version check"
+valid_commands="${commands_user} ${commands_group} ${commands_change} ${commands_host} ${commands_misc}"
+[ "$ENABLE_SAMBA" = "yes" ] && valid_commands="${valid_commands} ${commands_samba}"
 
 case "${1}" in
-	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel|hostadd|hostdel|hostmod|selftest)
+	${valid_commands// /|})
 		ACTION="${1}"
 		shift 1
 		${ACTION} "$@"
@@ -1761,23 +1778,15 @@ case "${1}" in
 		# automount
 		# aliases - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/aliases.htm#idx12
 	_revision)
-		echo ${REVISION}
+		echo ${CVS_REVISION}
 		exit 0
 		;;
 	_date)
-		echo ${DATE}
-		exit 0
-		;;
-	version|--version)
-		print_version
-		exit 0
-		;;
-	help|--help)
-		print_usage _all
+		echo ${CVS_DATE}
 		exit 0
 		;;
 	*)
-		print_usage _all
+		help
 		exit 1
 		;;
 esac
