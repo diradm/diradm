@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.6 2003/07/14 09:36:56 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.7 2003/07/14 10:08:21 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -27,95 +27,95 @@
 
 CONFIG_FILENAME="diradm.conf"
 CONFIG="/etc/${CONFIG_FILENAME}"
-[ ! -f "${CONFIG}" ] && CONFIG="`dirname $0`/${CONFIG_FILENAME}"
+[ ! -f "${CONFIG}" ] && CONFIG="`dirname ${0}`/${CONFIG_FILENAME}"
 [ ! -f "${CONFIG}" ] && CONFIG="~/.${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
 VERSION="1.1"
 
-if [ ! -r "$CONFIG" ]; then
-	echo "Unable to open configuration file \"$CONFIG\"!"
+if [ ! -r "${CONFIG}" ]; then
+	echo "Unable to open configuration file \"${CONFIG}\"!"
 	exit 1
 fi
 
 DEPENDENCIES="grep ldapsearch ldapadd ldapmodify ldapdelete sed stat"
-for DEPENDENCY in $DEPENDENCIES; do
-	EXECUTABLE="$(which "$DEPENDENCY" 2> /dev/null)"
-	if [ ! -x "$EXECUTABLE" ]; then
-		echo "Cannot find \"$DEPENDENCY\"!"
+for DEPENDENCY in ${DEPENDENCIES}; do
+	EXECUTABLE="$(which "${DEPENDENCY}" 2> /dev/null)"
+	if [ ! -x "${EXECUTABLE}" ]; then
+		echo "Cannot find \"${DEPENDENCY}\"!"
 		exit 1
 	fi
 done
 
-source "$CONFIG"
+source "${CONFIG}"
 CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
 	DEFAULT_LOGINSHELL"
 CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER
 	GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
 CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
-for CONFIGOPTION in $CONFIGOPTIONS_STRING; do
-	eval VALUE="\$$CONFIGOPTION"
-	if [ -z "$VALUE" ]; then
-		echo "Configuration error: $CONFIGOPTION not defined!"
+for CONFIGOPTION in ${CONFIGOPTIONS_STRING}; do
+	eval VALUE="\$${CONFIGOPTION}"
+	if [ -z "${VALUE}" ]; then
+		echo "Configuration error: ${CONFIGOPTION} not defined!"
 		exit 1
 	fi
 done
-for CONFIGOPTION in $CONFIGOPTIONS_DIGIT; do
-	eval VALUE="\$$CONFIGOPTION"
-	if [ -z "$VALUE" ]; then
-		echo "Configuration error: $CONFIGOPTION not defined!"
+for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT}; do
+	eval VALUE="\$${CONFIGOPTION}"
+	if [ -z "${VALUE}" ]; then
+		echo "Configuration error: ${CONFIGOPTION} not defined!"
 		exit 1
 	else
-		echo "$VALUE" | grep -qs "^[[:digit:]]*$"
+		echo "${VALUE}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "Configuration error: $CONFIGOPTION has invalid numerical value \"$VALUE\"!"
+			echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
 			exit 1
 		fi
 	fi
 done
-for CONFIGOPTION in $CONFIGOPTIONS_DIGIT_DISABLE; do
-	eval VALUE="\$$CONFIGOPTION"
-	if [ -z "$VALUE" ]; then
-		echo "Configuration error: $CONFIGOPTION not defined!"
+for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT_DISABLE}; do
+	eval VALUE="\$${CONFIGOPTION}"
+	if [ -z "${VALUE}" ]; then
+		echo "Configuration error: ${CONFIGOPTION} not defined!"
 		exit 1
 	else
-		if [ "$VALUE" != "-1" ]; then
-			echo "$VALUE" | grep -qs "^[[:digit:]]*$"
+		if [ "${VALUE}" != "-1" ]; then
+			echo "${VALUE}" | grep -qs "^[[:digit:]]*$"
 			if [ "$?" -ne 0 ]; then
-				echo "Configuration error: $CONFIGOPTION has invalid numerical value \"$VALUE\"!"
+				echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
 				exit 1
 			fi
 		fi
 	fi
 done
-for CONFIGOPTION in $CONFIGOPTIONS_DATE_DISABLE; do
-	eval VALUE="\$$CONFIGOPTION"
-	if [ -z "$VALUE" ]; then
-		echo "Configuration error: $CONFIGOPTION not defined!"
+for CONFIGOPTION in ${CONFIGOPTIONS_DATE_DISABLE}; do
+	eval VALUE="\$${CONFIGOPTION}"
+	if [ -z "${VALUE}" ]; then
+		echo "Configuration error: ${CONFIGOPTION} not defined!"
 		exit 1
 	else
-		if [ "$VALUE" != "-1" ]; then
-			echo "$VALUE" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+		if [ "${VALUE}" != "-1" ]; then
+			echo "${VALUE}" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 			if [ "$?" -ne 0 ]; then
-				echo "Configuration error: $CONFIGOPTION has invalid date value \"$VALUE\"!"
+				echo "Configuration error: ${CONFIGOPTION} has invalid date value \"${VALUE}\"!"
 				exit 1
 			fi
 		fi
 	fi
 done
 
-OPTIONS="-x -H $LDAPURI"
-if [ -n "$BINDPASS" ]; then
-	ADMINOPTIONS="$OPTIONS -D $BINDDN -w $BINDPASS"
+OPTIONS="-x -H ${LDAPURI}"
+if [ -n "${BINDPASS}" ]; then
+	ADMINOPTIONS="${OPTIONS} -D ${BINDDN} -w ${BINDPASS}"
 else
-	ADMINOPTIONS="$OPTIONS -D $BINDDN -W"
+	ADMINOPTIONS="${OPTIONS} -D ${BINDDN} -W"
 fi
-LDAPSEARCH="ldapsearch $ADMINOPTIONS"
-LDAPADD="ldapadd $ADMINOPTIONS"
-LDAPMODIFY="ldapmodify $ADMINOPTIONS"
-LDAPDELETE="ldapdelete $ADMINOPTIONS"
+LDAPSEARCH="ldapsearch ${ADMINOPTIONS}"
+LDAPADD="ldapadd ${ADMINOPTIONS}"
+LDAPMODIFY="ldapmodify ${ADMINOPTIONS}"
+LDAPDELETE="ldapdelete ${ADMINOPTIONS}"
 
 print_usage () {
 	echo "Usage: diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
@@ -156,228 +156,245 @@ print_usage () {
 }
 
 print_version () {
-	echo "diradm $VERSION"
+	echo "diradm ${VERSION}"
 	echo "Copyright (C) 2003 Daniel Himler <dan@hits.at>"
 	echo "This is free software; see the source for copying conditions.  There is NO"
 	echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 }
 
 # eg: 
-# ldap_search_getattr "$GROUPBASE" "gidNumber=100" cn
+# ldap_search_getattr "${GROUPBASE}" "gidNumber=100" cn
 # (returns 'users' on systems with that initial data in LDAP)
 ldap_search_getattr() {
 	basedn="${1}"
 	search="${2}"
 	attr="${3}"
 	regex="^${attr}:{1,2} "
-	$LDAPSEARCH -b "${basedn}" "${search}" ${attr} | egrep "${regex}" | sed -re "s/${regex}//"
+	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | egrep "${regex}" | sed -re "s/${regex}//"
 }
 
-search_user () {
-	$LDAPSEARCH -b "$USERBASE" "$1=$2" | grep -qs "^$1: $2$"
+search_user() {
+	${LDAPSEARCH} -b "${USERBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
 	return "$?"
 }
 
-search_group () {
-	$LDAPSEARCH -b "$GROUPBASE" "$1=$2" | grep -qs "^$1: $2$"
+search_group() {
+	${LDAPSEARCH} -b "${GROUPBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
 	return "$?"
+}
+
+append() {
+[ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
+}
+
+runmodify() {
+[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPMODIFY} > /dev/null
+}
+
+runadd() {
+[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPADD} > /dev/null
+}
+
+rundelete() {
+[ -n "${*}" ] && ${LDAPDELETE} "${*}" > /dev/null
 }
 
 useradd () {
 	[ -z "${modulename}" ] && modulename="useradd"
 	while getopts "u:og:G:h:d:s:c:mk:f:e:p:" OPTION; do
-		case "$OPTION" in
-			u) UIDNUMBER="$OPTARG";;
+		case "${OPTION}" in
+			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
-			g) GID="$OPTARG";;
-			G) OTHERGROUPS="$OPTARG";;
-			h) HOSTLIST="$OPTARG";;
-			d) HOMEDIRECTORY="$OPTARG";;
-			s) LOGINSHELL="$OPTARG";;
-			c) COMMENT="$OPTARG";;
+			g) GID="${OPTARG}";;
+			G) OTHERGROUPS="${OPTARG}";;
+			h) HOSTLIST="${OPTARG}";;
+			d) HOMEDIRECTORY="${OPTARG}";;
+			s) LOGINSHELL="${OPTARG}";;
+			c) COMMENT="${OPTARG}";;
 			m) CREATEHOMEDIR="yes";;
-			k) SKEL="$OPTARG";;
-			f) SHADOWINACTIVE="$OPTARG";;
-			e) SHADOWEXPIRE="$OPTARG";;
-			p) USERPASSWORD="$OPTARG";;
+			k) SKEL="${OPTARG}";;
+			f) SHADOWINACTIVE="${OPTARG}";;
+			e) SHADOWEXPIRE="${OPTARG}";;
+			p) USERPASSWORD="${OPTARG}";;
 			*) exit 1;;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		LOGIN="$1"
+		LOGIN="${1}"
 	fi
-	echo "$LOGIN" | grep -qs "^[[:alnum:]]*$"
+	echo "${LOGIN}" | grep -qs "^[[:alnum:]]*$"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Invalid user name \"$LOGIN\""
+		echo "${modulename}: Invalid user name \"${LOGIN}\""
 		exit 3
 	else
-		search_user "uid" "$LOGIN"
+		search_user "uid" "${LOGIN}"
 		if [ "$?" -eq 0 ]; then
-			echo "${modulename}: User \"$LOGIN\" exists"
+			echo "${modulename}: User \"${LOGIN}\" exists"
 			exit 9
 		fi
 	fi
-	if [ -n "$UIDNUMBER" ]; then
-		echo "$UIDNUMBER" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${UIDNUMBER}" ]; then
+		echo "${UIDNUMBER}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"$UIDNUMBER\""
+			echo "${modulename}: Invalid numeric argument \"${UIDNUMBER}\""
 			exit 3
 		fi
-		search_user "uidNumber" "$UIDNUMBER"
-		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
-			echo "${modulename}: uid $UIDNUMBER is not unique"
+		search_user "uidNumber" "${UIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: uid ${UIDNUMBER} is not unique"
 			exit 4
 		fi
 	else
-		UIDNUMBER="$UIDNUMBERMIN"
-		while [ "$UIDNUMBER" -le "$UIDNUMBERMAX" ]; do
-			search_user "uidNumber" "$UIDNUMBER"
+		UIDNUMBER="${UIDNUMBERMIN}"
+		while [ "${UIDNUMBER}" -le "${UIDNUMBERMAX}" ]; do
+			search_user "uidNumber" "${UIDNUMBER}"
 			[ "$?" -ne 0 ] && break
-			let UIDNUMBER="$UIDNUMBER + 1"
+			let UIDNUMBER="${UIDNUMBER} + 1"
 		done
 	fi
-	if [ -n "$GID" ]; then
-		echo "$GID" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${GID}" ]; then
+		echo "${GID}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -eq 0 ]; then
-			GIDNUMBER="$GID"
+			GIDNUMBER="${GID}"
 		else
-			#GIDNUMBER="$($LDAPSEARCH -b "$GROUPBASE" "cn=$GID" | grep "gidNumber: " | sed "s/gidNumber: //")"
-			GIDNUMBER="$(ldap_search_getattr "$GROUPBASE" "cn=$GID" gidNumber)"
-			if [ -z "$GIDNUMBER" ]; then
-				echo "${modulename}: Unknown group \"$GID\""
+			#GIDNUMBER="$(${LDAPSEARCH} -b "${GROUPBASE}" "cn=${GID}" | grep "gidNumber: " | sed "s/gidNumber: //")"
+			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${GID}" gidNumber)"
+			if [ -z "${GIDNUMBER}" ]; then
+				echo "${modulename}: Unknown group \"${GID}\""
 				exit 6
 			fi
 		fi
 	else
-		GIDNUMBER="$DEFAULT_GIDNUMBER"
+		GIDNUMBER="${DEFAULT_GIDNUMBER}"
 	fi
-	search_group "gidNumber" "$GIDNUMBER"
+	search_group "gidNumber" "${GIDNUMBER}"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Warning! Group $GIDNUMBER not found. Adding user anyway."
+		echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Adding user anyway."
 	fi
-	if [ -n "$OTHERGROUPS" ]; then
+	if [ -n "${OTHERGROUPS}" ]; then
 		OTHERGROUPS="${OTHERGROUPS//,/ }"
-		for POSIXGROUP in $OTHERGROUPS; do
-			echo "$POSIXGROUP" | grep -qs "^[[:digit:]]*$"
+		for POSIXGROUP in ${OTHERGROUPS}; do
+			echo "${POSIXGROUP}" | grep -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
-				search_group "gidNumber" "$POSIXGROUP"
+				search_group "gidNumber" "${POSIXGROUP}"
 				if [ "$?" -ne 0 ]; then
-					echo "${modulename}: Unknown group \"$POSIXGROUP\""
+					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
 					exit 6
 				fi
-				#POSIXGROUP="$($LDAPSEARCH -b "$GROUPBASE" "gidNumber=$POSIXGROUP" |
+				#POSIXGROUP="$(${LDAPSEARCH} -b "${GROUPBASE}" "gidNumber=${POSIXGROUP}" |
 				#	grep "^cn:" |
 				#	sed "s/cn: //")"
-				POSIXGROUP="$(ldap_search_getattr "$GROUPBASE" "gidNumber=$POSIXGROUP" cn)"
-				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+				POSIXGROUP="$(ldap_search_getattr "${GROUPBASE}" "gidNumber=${POSIXGROUP}" cn)"
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
-				search_group "cn" "$POSIXGROUP"
+				search_group "cn" "${POSIXGROUP}"
 				if [ "$?" -ne 0 ]; then
-					echo "${modulename}: Unknown group \"$POSIXGROUP\""
+					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
 					exit 6
 				fi
-				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			fi
 		done
 	fi
-	if [ -n "$HOSTLIST" ]; then
+	if [ -n "${HOSTLIST}" ]; then
 		HOSTLIST="${HOSTLIST//,/ }"
-		for HOST in $HOSTLIST; do
-			HOSTS="${HOSTS}host: $HOST\n"
+		for HOST in ${HOSTLIST}; do
+			HOSTS="${HOSTS}host: ${HOST}\n"
 		done
-		HOSTS="$(echo -e "$HOSTS")"
+		HOSTS="$(echo -e "${HOSTS}")"
 	fi
-	[ -z "$HOMEDIRECTORY" ] && HOMEDIRECTORY="$HOMEBASE/$LOGIN"
-	echo "$HOMEDIRECTORY" | grep -qs "^/"
+	[ -z "${HOMEDIRECTORY}" ] && HOMEDIRECTORY="${HOMEBASE}/${LOGIN}"
+	echo "${HOMEDIRECTORY}" | grep -qs "^/"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Invalid home directory \"$HOMEDIRECTORY\""
+		echo "${modulename}: Invalid home directory \"${HOMEDIRECTORY}\""
 		exit 3
 	fi
-	[ -z "$LOGINSHELL" ] && LOGINSHELL="$DEFAULT_LOGINSHELL"
-	echo "$LOGINSHELL" | grep -qs "^/"
+	[ -z "${LOGINSHELL}" ] && LOGINSHELL="${DEFAULT_LOGINSHELL}"
+	echo "${LOGINSHELL}" | grep -qs "^/"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Invalid shell \"$LOGINSHELL\""
+		echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
 		exit 3
 	fi
-	[ -z "$COMMENT" ] && COMMENT="$LOGIN"
-	if [ -n "$HOMEDIRECTORY" -a "$CREATEHOMEDIR" = "yes" ]; then
+	[ -z "${COMMENT}" ] && COMMENT="${LOGIN}"
+	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" = "yes" ]; then
 		if [ "$(whoami)" != "root" ]; then
 			echo "${modulename}: Only root may create home directories"
 			exit 12
 		fi
-		PARENTDIR="$(dirname "$HOMEDIRECTORY")"
-		if [ ! -w "$PARENTDIR" ]; then
-			echo "${modulename}: Cannot create directory \"$HOMEDIRECTORY\""
+		PARENTDIR="$(dirname "${HOMEDIRECTORY}")"
+		if [ ! -w "${PARENTDIR}" ]; then
+			echo "${modulename}: Cannot create directory \"${HOMEDIRECTORY}\""
 			exit 12
 		fi
 	fi
-	[ -z "$SHADOWINACTIVE" ] && SHADOWINACTIVE="$DEFAULT_SHADOWINACTIVE"
-	if [ "$SHADOWINACTIVE" != "-1" ]; then
-		echo "$SHADOWINACTIVE" | grep -qs "^[[:digit:]]*$"
+	[ -z "${SHADOWINACTIVE}" ] && SHADOWINACTIVE="${DEFAULT_SHADOWINACTIVE}"
+	if [ "${SHADOWINACTIVE}" != "-1" ]; then
+		echo "${SHADOWINACTIVE}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"$SHADOWINACTIVE\""
+			echo "${modulename}: Invalid numeric argument \"${SHADOWINACTIVE}\""
 			exit 3
 		fi
 	fi
-	[ -z "$SHADOWEXPIRE" ] && SHADOWEXPIRE="$DEFAULT_SHADOWEXPIRE"
-	if [ "$SHADOWEXPIRE" != "-1" ]; then
-		echo "$SHADOWEXPIRE" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+	[ -z "${SHADOWEXPIRE}" ] && SHADOWEXPIRE="${DEFAULT_SHADOWEXPIRE}"
+	if [ "${SHADOWEXPIRE}" != "-1" ]; then
+		echo "${SHADOWEXPIRE}" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid date \"$SHADOWEXPIRE\""
+			echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
 			exit 3
 		else
-			let SHADOWEXPIRE="$(date -d "$SHADOWEXPIRE" +%s) / 86400"
+			let SHADOWEXPIRE="$(date -d "${SHADOWEXPIRE}" +%s) / 86400"
 		fi
 	fi
 	# Set this to today's date
 	# This is N days since Jan 1, 1970
 	SHADOWLASTCHANGE=$((`date +%s`/3600/24+1))
 	FULLNAME=${COMMENT//,.*}
-	(
-	cat << EOF
-dn: uid=$LOGIN,$USERBASE
-objectClass: top
-objectClass: account
-objectClass: posixAccount
-objectClass: shadowAccount
-uid: $LOGIN
-userPassword: $USERPASSWORD
-uidNumber: $UIDNUMBER
-gidNumber: $GIDNUMBER
-cn: $FULLNAME
-gecos: $COMMENT
-homeDirectory: $HOMEDIRECTORY
-loginShell: $LOGINSHELL
-shadowLastChange: $SHADOWLASTCHANGE
-shadowInactive: $SHADOWINACTIVE
-shadowExpire: $SHADOWEXPIRE
-shadowMin: $SHADOWMIN
-shadowMax: $SHADOWMAX
-shadowWarning: $SHADOWWARNING
-shadowFlag: $SHADOWFLAG
-$HOSTS
-EOF
-	) | $LDAPADD > /dev/null
-	if [ -n "$ADDTOGROUPS" ]; then
-		#DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
-		DELETEFROMGROUPS="$(ldap_search_getattr "$GROUPBASE" "memberUid=$LOGIN" cn)"
-		for POSIXGROUP in $DELETEFROMGROUPS; do
-			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\ndelete: memberUid\nmemberUid: $LOGIN\n"
+
+	# Setup the commands
+	append "dn: uid=${LOGIN},${USERBASE}"
+	append "changetype: add"
+	append "objectClass: top"
+	append "objectClass: account"
+	append "objectClass: posixAccount"
+	append "objectClass: shadowAccount"
+	append "uid: ${LOGIN}"
+	append "userPassword: ${USERPASSWORD}"
+	append "uidNumber: ${UIDNUMBER}"
+	append "gidNumber: ${GIDNUMBER}"
+	append "cn: ${FULLNAME}"
+	append "gecos: ${COMMENT}"
+	append "homeDirectory: ${HOMEDIRECTORY}"
+	append "loginShell: ${LOGINSHELL}"
+	append "shadowLastChange: ${SHADOWLASTCHANGE}"
+	append "shadowInactive: ${SHADOWINACTIVE}"
+	append "shadowExpire: ${SHADOWEXPIRE}"
+	append "shadowMin: ${SHADOWMIN}"
+	append "shadowMax: ${SHADOWMAX}"
+	append "shadowWarning: ${SHADOWWARNING}"
+	append "shadowFlag: ${SHADOWFLAG}"
+	append "${HOSTS}"
+	append "\n\n"
+
+	if [ -n "${ADDTOGROUPS}" ]; then
+		#DELETEFROMGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+		for POSIXGROUP in ${DELETEFROMGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 		done
-		for POSIXGROUP in $ADDTOGROUPS; do
-			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\nadd: memberUid\nmemberUid: $LOGIN\n"
+		for POSIXGROUP in ${ADDTOGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
 		done
-		echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
 	fi
-	if [ "$CREATEHOMEDIR" = "yes" -a ! -d "$HOMEDIRECTORY" ]; then
-		mkdir $HOMEDIRECTORY
-		cp -a $SKEL/{*,.[^.]*} $HOMEDIRECTORY > /dev/null 2>&1
-		chmod "$HOMEPERM" "$HOMEDIRECTORY"
-		chown -R "$UIDNUMBER":"$GIDNUMBER" "$HOMEDIRECTORY"
+	runmodify
+	if [ "${CREATEHOMEDIR}" = "yes" -a ! -d "${HOMEDIRECTORY}" ]; then
+		mkdir ${HOMEDIRECTORY}
+		cp -a ${SKEL}/{*,.[^.]*} ${HOMEDIRECTORY} > /dev/null 2>&1
+		chmod "${HOMEPERM}" "${HOMEDIRECTORY}"
+		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${HOMEDIRECTORY}"
 	fi
 }
 
@@ -388,256 +405,257 @@ usermod () {
 		exit 2
 	fi
 	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LU" OPTION; do
-		case "$OPTION" in
-			u) UIDNUMBER="$OPTARG";;
+		case "${OPTION}" in
+			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
-			g) GID="$OPTARG";;
-			G) OTHERGROUPS="$OPTARG";;
-			h) HOSTLIST="$OPTARG";;
-			d) HOMEDIRECTORY="$OPTARG";;
-			s) LOGINSHELL="$OPTARG";;
-			c) COMMENT="$OPTARG";;
-			l) NEWLOGIN="$OPTARG";;
+			g) GID="${OPTARG}";;
+			G) OTHERGROUPS="${OPTARG}";;
+			h) HOSTLIST="${OPTARG}";;
+			d) HOMEDIRECTORY="${OPTARG}";;
+			s) LOGINSHELL="${OPTARG}";;
+			c) COMMENT="${OPTARG}";;
+			l) NEWLOGIN="${OPTARG}";;
 			m) MOVEHOMEDIR="yes";;
-			f) SHADOWINACTIVE="$OPTARG";;
-			e) SHADOWEXPIRE="$OPTARG";;
-			p) if [ -n "$LOCKED" ]; then print_usage; exit 2; fi; USERPASSWORD="$2";;
-			L) if [ -n "$LOCKED" -o -n "$USERPASSWORD" ]; then print_usage; exit 2; fi; LOCKED="yes";;
-			U) if [ -n "$LOCKED" -o -n "$USERPASSWORD" ]; then print_usage; exit 2; fi; LOCKED="no";;
+			f) SHADOWINACTIVE="${OPTARG}";;
+			e) SHADOWEXPIRE="${OPTARG}";;
+			p) if [ -n "${LOCKED}" ]; then print_usage; exit 2; fi; USERPASSWORD="${2}";;
+			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="yes";;
+			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="no";;
 			*) exit 1;;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		LOGIN="$1"
+		LOGIN="${1}"
 	fi
-	search_user "uid" "$LOGIN"
+	search_user "uid" "${LOGIN}"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: User \"$LOGIN\" does not exist"
+		echo "${modulename}: User \"${LOGIN}\" does not exist"
 		exit 6
 	fi
-	if [ -n "$UIDNUMBER" ]; then
-		echo "$UIDNUMBER" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${UIDNUMBER}" ]; then
+		echo "${UIDNUMBER}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"$UIDNUMBER\""
+			echo "${modulename}: Invalid numeric argument \"${UIDNUMBER}\""
 			exit 3
 		fi
-		search_user "uidNumber" "$UIDNUMBER"
-		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
-			echo "${modulename}: uid $UIDNUMBER is not unique"
+		search_user "uidNumber" "${UIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: uid ${UIDNUMBER} is not unique"
 			exit 4
 		fi
 	fi
-	if [ -n "$GID" ]; then
-		echo "$GID" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${GID}" ]; then
+		echo "${GID}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -eq 0 ]; then
-			GIDNUMBER="$GID"
+			GIDNUMBER="${GID}"
 		else
-			#GIDNUMBER="$($LDAPSEARCH -b "$GROUPBASE" "cn=$GID" | grep "gidNumber: " | sed "s/gidNumber: //")"
-			GIDNUMBER="$(ldap_search_getattr "$GROUPBASE" "cn=$GID" gidNumber)"
-			if [ -z "$GIDNUMBER" ]; then
-				echo "${modulename}: Unknown group \"$GID\""
+			#GIDNUMBER="$(${LDAPSEARCH} -b "${GROUPBASE}" "cn=${GID}" | grep "gidNumber: " | sed "s/gidNumber: //")"
+			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${GID}" gidNumber)"
+			if [ -z "${GIDNUMBER}" ]; then
+				echo "${modulename}: Unknown group \"${GID}\""
 				exit 6
 			fi
 		fi
-		search_group "gidNumber" "$GIDNUMBER"
+		search_group "gidNumber" "${GIDNUMBER}"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Warning! Group $GIDNUMBER not found. Modifying user anyway."
+			echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Modifying user anyway."
 		fi
 	fi
-	if [ -n "$OTHERGROUPS" ]; then
+	if [ -n "${OTHERGROUPS}" ]; then
 		OTHERGROUPS="${OTHERGROUPS//,/ }"
-		for POSIXGROUP in $OTHERGROUPS; do
-			echo "$POSIXGROUP" | grep -qs "^[[:digit:]]*$"
+		for POSIXGROUP in ${OTHERGROUPS}; do
+			echo "${POSIXGROUP}" | grep -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
-				search_group "gidNumber" "$POSIXGROUP"
+				search_group "gidNumber" "${POSIXGROUP}"
 				if [ "$?" -ne 0 ]; then
-					echo "${modulename}: Unknown other group number \"$POSIXGROUP\""
+					echo "${modulename}: Unknown other group number \"${POSIXGROUP}\""
 					exit 6
 				fi
-				#POSIXGROUP="$($LDAPSEARCH -b "$GROUPBASE" "gidNumber=$POSIXGROUP" |
+				#POSIXGROUP="$(${LDAPSEARCH} -b "${GROUPBASE}" "gidNumber=${POSIXGROUP}" |
 				#	grep "^cn:" |
 				#	sed "s/cn: //")"
-				POSIXGROUP="$(ldap_search_getattr "$GROUPBASE" "gidNumber=$POSIXGROUP" cn)"
-				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+				POSIXGROUP="$(ldap_search_getattr "${GROUPBASE}" "gidNumber=${POSIXGROUP}" cn)"
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
-				search_group "cn" "$POSIXGROUP"
+				search_group "cn" "${POSIXGROUP}"
 				if [ "$?" -ne 0 ]; then
-					echo "${modulename}: Unknown other group \"$POSIXGROUP\""
+					echo "${modulename}: Unknown other group \"${POSIXGROUP}\""
 					exit 6
 				fi
-				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			fi
 		done
 	fi
-	if [ -n "$HOSTLIST" ]; then
+	if [ -n "${HOSTLIST}" ]; then
 		HOSTLIST="${HOSTLIST//,/ }"
-		for HOST in $HOSTLIST; do
-			HOSTS="${HOSTS}host: $HOST\n"
+		for HOST in ${HOSTLIST}; do
+			HOSTS="${HOSTS}host: ${HOST}\n"
 		done
-		HOSTS="$(echo -e "$HOSTS")"
+		HOSTS="$(echo -e "${HOSTS}")"
 	fi
-	if [ -n "$HOMEDIRECTORY" ]; then
-		echo "$HOMEDIRECTORY" | grep -qs "^/"
+	if [ -n "${HOMEDIRECTORY}" ]; then
+		echo "${HOMEDIRECTORY}" | grep -qs "^/"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid home directory \"$HOMEDIRECTORY\""
+			echo "${modulename}: Invalid home directory \"${HOMEDIRECTORY}\""
 			exit 3
 		fi
 	fi
-	if [ -n "$LOGINSHELL" ]; then
-		echo "$LOGINSHELL" | grep -qs "^/"
+	if [ -n "${LOGINSHELL}" ]; then
+		echo "${LOGINSHELL}" | grep -qs "^/"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid shell \"$LOGINSHELL\""
+			echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
 			exit 3
 		fi
 	fi
-	if [ -n "$NEWLOGIN" ]; then
-		echo "$NEWLOGIN" | grep -qs "^[[:alnum:]]*$"
+	if [ -n "${NEWLOGIN}" ]; then
+		echo "${NEWLOGIN}" | grep -qs "^[[:alnum:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid user name \"$NEWLOGIN\""
+			echo "${modulename}: Invalid user name \"${NEWLOGIN}\""
 			exit 3
 		else
-			search_user "uid" "$NEWLOGIN"
+			search_user "uid" "${NEWLOGIN}"
 			if [ "$?" -eq 0 ]; then
-				echo "${modulename}: User \"$NEWLOGIN\" exists"
+				echo "${modulename}: User \"${NEWLOGIN}\" exists"
 				exit 9
 			fi
 		fi
-		if [ -z "$ADDTOGROUPS" ]; then
-			#ADDTOGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
-			ADDTOGROUPS="$(ldap_search_getattr "$GROUPBASE" "memberUid=$LOGIN" cn)"
+		if [ -z "${ADDTOGROUPS}" ]; then
+			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
+			ADDTOGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 		fi
 	fi
-	if [ -n "$HOMEDIRECTORY" -a "$MOVEHOMEDIR" = "yes" ]; then
+	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" = "yes" ]; then
 		if [ "$(whoami)" != "root" ]; then
 			echo "${modulename}: Only root may move home directories"
 			exit 12
 		fi
-		PARENTDIR="$(dirname "$HOMEDIRECTORY")"
-		if [ ! -w "$PARENTDIR" ]; then
-			echo "${modulename}: Cannot create directory \"$HOMEDIRECTORY\""
+		PARENTDIR="$(dirname "${HOMEDIRECTORY}")"
+		if [ ! -w "${PARENTDIR}" ]; then
+			echo "${modulename}: Cannot create directory \"${HOMEDIRECTORY}\""
 			exit 12
 		fi
-		#OLDHOMEDIRECTORY="$($LDAPSEARCH -b "$USERBASE" "uid=$LOGIN" |
+		#OLDHOMEDIRECTORY="$(${LDAPSEARCH} -b "${USERBASE}" "uid=${LOGIN}" |
 		#	grep "^homeDirectory:" |
 		#	sed "s/^homeDirectory: //")"
-		OLDHOMEDIRECTORY="$(ldap_search_getattr "$USERBASE" "uid=$LOGIN" homeDirectory)"
+		OLDHOMEDIRECTORY="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" homeDirectory)"
 	fi
-	if [ -n "$SHADOWINACTIVE" ]; then
-		if [ "$SHADOWINACTIVE" != "-1" ]; then
-			echo "$SHADOWINACTIVE" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${SHADOWINACTIVE}" ]; then
+		if [ "${SHADOWINACTIVE}" != "-1" ]; then
+			echo "${SHADOWINACTIVE}" | grep -qs "^[[:digit:]]*$"
 			if [ "$?" -ne 0 ]; then
-				echo "${modulename}: Invalid numeric argument \"$SHADOWINACTIVE\""
+				echo "${modulename}: Invalid numeric argument \"${SHADOWINACTIVE}\""
 				exit 3
 			fi
 		fi
 	fi
-	if [ -n "$SHADOWEXPIRE" ]; then
-		if [ "$SHADOWEXPIRE" != "-1" ]; then
-			echo "$SHADOWEXPIRE" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+	if [ -n "${SHADOWEXPIRE}" ]; then
+		if [ "${SHADOWEXPIRE}" != "-1" ]; then
+			echo "${SHADOWEXPIRE}" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 			if [ "$?" -ne 0 ]; then
-				echo "${modulename}: Invalid date \"$SHADOWEXPIRE\""
+				echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
 				exit 3
 			else
-				let SHADOWEXPIRE="$(date -d "$SHADOWEXPIRE" +%s) / 86400"
+				let SHADOWEXPIRE="$(date -d "${SHADOWEXPIRE}" +%s) / 86400"
 			fi
 		fi
 	fi
-	if [ -n "$LOCKED" ]; then
-		#OLDPASSWORD="$(ldapsearch $ADMINOPTIONS -b "$USERBASE" "uid=$LOGIN" |
+	if [ -n "${LOCKED}" ]; then
+		#OLDPASSWORD="$(ldapsearch ${ADMINOPTIONS} -b "${USERBASE}" "uid=${LOGIN}" |
 		#	grep "^userPassword::" |
 		#	sed "s/^userPassword:: //")"
-		OLDPASSWORD="$(ldap_search_getattr "$USERBASE" "uid=$LOGIN" userPassword)"
-		if [ "$LOCKED" = "yes" ]; then
-			USERPASSWORD="!$OLDPASSWORD"
-		elif [ "$LOCKED" = "no" ]; then
-			USERPASSWORD="$(echo "$OLDPASSWORD" | sed -re "s/^!//")"
+		OLDPASSWORD="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" userPassword)"
+		if [ "${LOCKED}" = "yes" ]; then
+			USERPASSWORD="!${OLDPASSWORD}"
+		elif [ "${LOCKED}" = "no" ]; then
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | sed -re "s/^!//")"
 		fi
 	fi
-	COMMAND="dn: uid=$LOGIN,$USERBASE\n"
-	[ -n "${UIDNUMBER}" ] && COMMAND="${COMMAND}replace: uidNumber\nuidNumber: ${UIDNUMBER}\n-\n"
-	[ -n "${GIDNUMBER}" ] && COMMAND="${COMMAND}replace: gidNumber\ngidNumber: ${GIDNUMBER}\n-\n"
-	[ -n "${HOSTS}" ] && COMMAND="${COMMAND}replace: host\n${HOSTS}\n-\n"
-	[ -n "${HOMEDIRECTORY}" ] && COMMAND="${COMMAND}replace: homeDirectory\nhomeDirectory: ${HOMEDIRECTORY}\n-\n"
-	[ -n "${LOGINSHELL}" ] && COMMAND="${COMMAND}replace: loginShell\nloginShell: ${LOGINSHELL}\n-\n"
+	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}\n"
+	append "${COMMAND_DN}"
+	[ -n "${UIDNUMBER}" ] && append "replace: uidNumber\nuidNumber: ${UIDNUMBER}\n-\n"
+	[ -n "${GIDNUMBER}" ] && append "replace: gidNumber\ngidNumber: ${GIDNUMBER}\n-\n"
+	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-\n"
+	[ -n "${HOMEDIRECTORY}" ] && append "replace: homeDirectory\nhomeDirectory: ${HOMEDIRECTORY}\n-\n"
+	[ -n "${LOGINSHELL}" ] && append "replace: loginShell\nloginShell: ${LOGINSHELL}\n-\n"
 	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,.*}
-	[ -n "${COMMENT}" ] && COMMAND="${COMMAND}replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
-	[ -n "${SHADOWINACTIVE}" ] && COMMAND="${COMMAND}replace: shadowInactive\nshadowInactive: ${SHADOWINACTIVE}\n-\n"
-	[ -n "${SHADOWEXPIRE}" ] && COMMAND="${COMMAND}replace: shadowExpire\nshadowExpire: ${SHADOWEXPIRE}\n-\n"
-	[ -n "${USERPASSWORD}" ] && COMMAND="${COMMAND}replace: userPassword\nuserPassword: ${USERPASSWORD}\n-\n"
-	[ "${COMMAND}" = "dn: uid=$LOGIN,$USERBASE\n" ] && unset COMMAND
-	[ -n "${NEWLOGIN}" ] && COMMAND="${COMMAND}\ndn: uid=$LOGIN,$USERBASE\nchangetype: modrdn\nnewrdn: uid=$NEWLOGIN\n"
+	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
+	[ -n "${SHADOWINACTIVE}" ] && append "replace: shadowInactive\nshadowInactive: ${SHADOWINACTIVE}\n-\n"
+	[ -n "${SHADOWEXPIRE}" ] && append "replace: shadowExpire\nshadowExpire: ${SHADOWEXPIRE}\n-\n"
+	[ -n "${USERPASSWORD}" ] && append "replace: userPassword\nuserPassword: ${USERPASSWORD}\n-\n"
+	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
 	if [ -n "${ADDTOGROUPS}" ]; then
-		#DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
-		DELETEFROMGROUPS="$(ldap_search_getattr "$GROUPBASE" "memberUid=$LOGIN" cn)"
-		for POSIXGROUP in $DELETEFROMGROUPS; do
-			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\ndelete: memberUid\nmemberUid: $LOGIN\n"
+		#DELETEFROMGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+		for POSIXGROUP in ${DELETEFROMGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 		done
-		[ -n "$NEWLOGIN" ] && LOGIN="$NEWLOGIN"
-		for POSIXGROUP in $ADDTOGROUPS; do
-			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\nadd: memberUid\nmemberUid: $LOGIN\n"
+		[ -n "${NEWLOGIN}" ] && LOGIN="${NEWLOGIN}"
+		for POSIXGROUP in ${ADDTOGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 	fi
-	echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
-	if [ "$MOVEHOMEDIR" = "yes" ]; then
-		mv $OLDHOMEDIRECTORY $HOMEDIRECTORY > /dev/null 2>&1
-		chmod "$HOMEPERM" "$HOMEDIRECTORY"
-		chown -R "$UIDNUMBER":"$GIDNUMBER" "$HOMEDIRECTORY"
+	runmodify
+	if [ "${MOVEHOMEDIR}" = "yes" ]; then
+		mv ${OLDHOMEDIRECTORY} ${HOMEDIRECTORY} > /dev/null 2>&1
+		chmod "${HOMEPERM}" "${HOMEDIRECTORY}"
+		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${HOMEDIRECTORY}"
 	fi
 }
 
 userdel () {
 	[ -z "${modulename}" ] && modulename="userdel"
 	while getopts "r" OPTION; do
-		case "$OPTION" in
+		case "${OPTION}" in
 			r) REMOVEHOMEDIR="yes";;
 			*) exit 1;;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		LOGIN="$1"
+		LOGIN="${1}"
 	fi
-	search_user "uid" "$LOGIN"
+	search_user "uid" "${LOGIN}"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: User \"$LOGIN\" does not exist"
+		echo "${modulename}: User \"${LOGIN}\" does not exist"
 		exit 6
 	fi
-	if [ "$REMOVEHOMEDIR" = "yes" ]; then
+	if [ "${REMOVEHOMEDIR}" = "yes" ]; then
 		if [ "$(whoami)" != "root" ]; then
 			echo "${modulename}: Only root may remove home directories"
 			exit 12
 		fi
-		#HOMEDIRECTORY="$($LDAPSEARCH -b "$USERBASE" "uid=$LOGIN" |
+		#HOMEDIRECTORY="$(${LDAPSEARCH} -b "${USERBASE}" "uid=${LOGIN}" |
 		#	grep "^homeDirectory:" |
 		#	sed "s/^homeDirectory: //")"
-		HOMEDIRECTORY="$(ldap_search_getattr "$USERBASE" "uid=$LOGIN" homeDirectory)"
-		#UIDNUMBER="$($LDAPSEARCH -b "$USERBASE" "uid=$LOGIN" |
+		HOMEDIRECTORY="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" homeDirectory)"
+		#UIDNUMBER="$(${LDAPSEARCH} -b "${USERBASE}" "uid=${LOGIN}" |
 		#	grep "^uidNumber:" |
 		#	sed "s/^uidNumber: //")"
-		UIDNUMBER="$(ldap_search_getattr "$USERBASE" "uid=$LOGIN" uidNumber)"
+		UIDNUMBER="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" uidNumber)"
 	fi
-	COMMAND="dn: uid=$LOGIN,$USERBASE\nchangetype: delete\n"
-	#DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
-	DELETEFROMGROUPS="$(ldap_search_getattr "$GROUPBASE" "memberUid=$LOGIN" cn)"
-	for POSIXGROUP in $DELETEFROMGROUPS; do
-		COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\ndelete: memberUid\nmemberUid: $LOGIN\n"
+	append "dn: uid=${LOGIN},${USERBASE}\nchangetype: delete\n"
+	#DELETEFROMGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
+	DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+	for POSIXGROUP in ${DELETEFROMGROUPS}; do
+		append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 	done
-	echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
-	if [ "$REMOVEHOMEDIR" = "yes" -a -d "$HOMEDIRECTORY" ]; then
-		OWNER_UIDNUMBER="$(stat "$HOMEDIRECTORY" |
+	runmodify
+	if [ "${REMOVEHOMEDIR}" = "yes" -a -d "${HOMEDIRECTORY}" ]; then
+		OWNER_UIDNUMBER="$(stat "${HOMEDIRECTORY}" |
 			grep "Uid:" |
 			sed "s/^.*Uid:.*(\(.*\)\/.*Gid:.*$/\1/" | tr -d " ")"
-		if [ "$UIDNUMBER" -eq "$OWNER_UIDNUMBER" ]; then
-			rm -rf "$HOMEDIRECTORY"
+		if [ "${UIDNUMBER}" -eq "${OWNER_UIDNUMBER}" ]; then
+			rm -rf "${HOMEDIRECTORY}"
 		else
-			echo "${modulename}: $HOMEDIRECTORY not owned by user \"$LOGIN\", not removing"
+			echo "${modulename}: ${HOMEDIRECTORY} not owned by user \"${LOGIN}\", not removing"
 			exit 12
 		fi
 	fi
@@ -646,58 +664,58 @@ userdel () {
 groupadd () {
 	[ -z "${modulename}" ] && modulename="groupadd"
 	while getopts "g:o" OPTION; do
-		case "$OPTION" in
-			g) GIDNUMBER="$OPTARG";;
+		case "${OPTION}" in
+			g) GIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
 			*) exit 1;;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		CN="$1"
+		CN="${1}"
 	fi
-	echo "$CN" | grep -qs "^[[:alnum:]]*$"
+	echo "${CN}" | grep -qs "^[[:alnum:]]*$"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: \"$CN\" is not a valid group name"
+		echo "${modulename}: \"${CN}\" is not a valid group name"
 		exit 3
 	else
-		search_group "cn" "$CN"
+		search_group "cn" "${CN}"
 		if [ "$?" -eq 0 ]; then
-			echo "${modulename}: Group \"$CN\" exists"
+			echo "${modulename}: Group \"${CN}\" exists"
 			exit 9
 		fi
 	fi
-	if [ -n "$GIDNUMBER" ]; then
-		echo "$GIDNUMBER" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${GIDNUMBER}" ]; then
+		echo "${GIDNUMBER}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"$GIDNUMBER\""
+			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
 			exit 2
 		fi
-		search_group "gidNumber" "$GIDNUMBER"
-		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
-			echo "${modulename}: gid $GIDNUMBER is not unique"
+		search_group "gidNumber" "${GIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: gid ${GIDNUMBER} is not unique"
 			exit 4
 		fi
 	else
-		GIDNUMBER="$GIDNUMBERMIN"
-		while [ "$GIDNUMBER" -le "$GIDNUMBERMAX" ]; do
-			search_group "gidNumber" "$GIDNUMBER"
+		GIDNUMBER="${GIDNUMBER}MIN"
+		while [ "${GIDNUMBER}" -le "${GIDNUMBER}MAX" ]; do
+			search_group "gidNumber" "${GIDNUMBER}"
 			[ "$?" -ne 0 ] && break
-			let GIDNUMBER="$GIDNUMBER + 1"
+			let GIDNUMBER="${GIDNUMBER} + 1"
 		done
 	fi
-	(
-	cat << EOF
-dn: cn=$CN,$GROUPBASE
-objectClass: top
-objectClass: posixGroup
-cn: $CN
-gidNumber: $GIDNUMBER
-EOF
-	) | $LDAPADD > /dev/null
+	# setup commands
+	append "dn: cn=${CN},${GROUPBASE}"
+	append "changetype: add"
+	append "objectClass: top"
+	append "objectClass: posixGroup"
+	append "cn: ${CN}"
+	append "gidNumber: ${GIDNUMBER}"
+	append "\n\n"
+	runmodify
 }
 
 groupmod () {
@@ -707,53 +725,53 @@ groupmod () {
 		exit 2
 	fi
 	while getopts "g:on:" OPTION; do
-		case "$OPTION" in
-			g) GIDNUMBER="$OPTARG";;
+		case "${OPTION}" in
+			g) GIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
-			n) NEWCN="$OPTARG";;
+			n) NEWCN="${OPTARG}";;
 			*) exit 1;;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		CN="$1"
+		CN="${1}"
 	fi
-	search_group "cn" "$CN"
+	search_group "cn" "${CN}"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Group \"$CN\" does not exist"
+		echo "${modulename}: Group \"${CN}\" does not exist"
 		exit 6
 	fi
-	if [ -n "$GIDNUMBER" ]; then
-		echo "$GIDNUMBER" | grep -qs "^[[:digit:]]*$"
+	if [ -n "${GIDNUMBER}" ]; then
+		echo "${GIDNUMBER}" | grep -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: Invalid numeric argument \"$GIDNUMBER\""
+			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
 			exit 2
 		fi
-		search_group "gidNumber" "$GIDNUMBER"
-		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
-			echo "${modulename}: gid $GIDNUMBER is not unique"
+		search_group "gidNumber" "${GIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: gid ${GIDNUMBER} is not unique"
 			exit 4
 		fi
 	fi
-	if [ -n "$NEWCN" ]; then
-		echo "$NEWCN" | grep -qs "^[[:alnum:]]*$"
+	if [ -n "${NEWCN}" ]; then
+		echo "${NEWCN}" | grep -qs "^[[:alnum:]]*$"
 		if [ "$?" -ne 0 ]; then
-			echo "${modulename}: \"$NEWCN\" is not a valid group name"
+			echo "${modulename}: \"${NEWCN}\" is not a valid group name"
 			exit 3
 		else
-			search_group "cn" "$NEWCN"
+			search_group "cn" "${NEWCN}"
 			if [ "$?" -eq 0 ]; then
-				echo "${modulename}: \"$NEWCN\" is not a unique name"
+				echo "${modulename}: \"${NEWCN}\" is not a unique name"
 				exit 9
 			fi
 		fi
 	fi
-	[ -n "$GIDNUMBER" ] && COMMAND="dn: cn=$CN,$GROUPBASE\nreplace: gidNumber\ngidNumber: $GIDNUMBER\n"
-	[ -n "$NEWCN" ] && COMMAND="$COMMAND\ndn: cn=$CN,$GROUPBASE\nchangetype: modrdn\nnewrdn: cn=$NEWCN"
-	echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
+	[ -n "${GIDNUMBER}" ] && append "dn: cn=${CN},${GROUPBASE}\nreplace: gidNumber\ngidNumber: ${GIDNUMBER}\n"
+	[ -n "${NEWCN}" ] && append "dn: cn=${CN},${GROUPBASE}\nchangetype: modrdn\nnewrdn: cn=${NEWCN}"
+	runmodify
 }
 
 groupdel () {
@@ -762,14 +780,14 @@ groupdel () {
 		print_usage
 		exit 2
 	else
-		CN="$1"
+		CN="${1}"
 	fi
-	search_group "cn" "$CN"
+	search_group "cn" "${CN}"
 	if [ "$?" -ne 0 ]; then
-		echo "${modulename}: Group \"$CN\" does not exist"
+		echo "${modulename}: Group \"${CN}\" does not exist"
 		exit 6
 	fi
-	$LDAPDELETE "cn=$CN,$GROUPBASE" > /dev/null
+	rundelete "cn=${CN},${GROUPBASE}" 
 }
 
 grabinteractiveinput() {
@@ -778,22 +796,22 @@ grabinteractiveinput() {
 	echo -en "${msg}"
 	read userinput
 	userinput="`echo "${userinput}" | sed -re 's/^[[:space:]]*//g;s/[[:space:]]*$//g;'`"
-	eval $setting="${userinput}"
+	eval ${setting}="${userinput}"
 }
 
 chsh() {
 	[ -z "${modulename}" ] && modulename="chsh"
 	while getopts "s:" OPTION; do
-		case "$OPTION" in
-			s) LOGINSHELL="$OPTARG";;
+		case "${OPTION}" in
+			s) LOGINSHELL="${OPTARG}";;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		LOGIN="$1"
+		LOGIN="${1}"
 	fi
 
 	OLDLOGINSHELL="getoldshell"
@@ -811,21 +829,23 @@ chsh() {
 chfn() {
 	[ -z "${modulename}" ] && modulename="chfn"
 	while getopts "s:" OPTION; do
-		case "$OPTION" in
-			f) FULLNAME="$OPTARG";;
-			h) HOMEPH="$OPTARG";;
-			o) OTHER="$OPTARG";;
-			r) ROOMNO="$OPTARG";;
-			w) WORKPH="$OPTARG";;
+		case "${OPTION}" in
+			f) FULLNAME="${OPTARG}";;
+			h) HOMEPH="${OPTARG}";;
+			o) OTHER="${OPTARG}";;
+			r) ROOMNO="${OPTARG}";;
+			w) WORKPH="${OPTARG}";;
 		esac
 	done
-	shift $(($OPTIND - 1))
+	shift $((${OPTIND} - 1))
 	if [ "$#" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
-		LOGIN="$1"
+		LOGIN="${1}"
 	fi
+
+	[ -n "${HOMEPH}" ] && append "${COMMAND}"
 	
 }
 
@@ -836,7 +856,7 @@ days_to_date() {
 local D="${1}"
 shift
 [ -n "$*" ] && local OPT="+'${*}'"
-date -u -d "Jan $((${D}+1)), 1970" $OPT
+date -u -d "Jan $((${D}+1)), 1970" ${OPT}
 }
 
 # Does the reverse of days_to_date
@@ -846,11 +866,11 @@ date_to_days() {
 date +%s -d "${*}"
 }
 
-case "$1" in
+case "${1}" in
 	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn)
-		ACTION="$1"
+		ACTION="${1}"
 		shift 1
-		$ACTION "$@"
+		${ACTION} "$@"
 		;;
 		# host - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/hosts.htm#seg3b0sara
 		# network - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/networks_NFS.htm#idx232
