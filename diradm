@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.16 2003/10/02 17:37:08 pat Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.17 2003/10/09 11:55:45 pat Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -50,7 +50,7 @@ done
 
 source "${CONFIG}"
 CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
-	DEFAULT_LOGINSHELL DOMAINSID SAMBAPATHPREPEND SAMBAPROFILEPREPEND SAMBADRIVE SAMBALOGONSCRIPT"
+	DEFAULT_LOGINSHELL"
 CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER
 	GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
@@ -173,8 +173,18 @@ ldap_search_getattr() {
 	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | egrep "${regex}" | sed -re "s/${regex}//"
 }
 
+search_smbhost() {
+
+	${LDAPSEARCH} -b "${SAMBAHOSTBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
+	return "$?"
+}
 search_user() {
 	${LDAPSEARCH} -b "${USERBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
+	return "$?"
+}
+
+search_group() {
+	${LDAPSEARCH} -b "${GROUPBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
 	return "$?"
 }
 
@@ -198,12 +208,6 @@ runadd() {
 
 rundelete() {
 [ -n "${*}" ] && ${LDAPDELETE} "${*}" > /dev/null
-}
-
-samba_getdomainsid() {
-	net getlocalsid ${SAMBA_DOMAIN} 2>/dev/null |tail -n1 |cut -d: -f2- |xargs
-}
-samba_nextrid() {
 }
 
 # Convert N days since Jan 1, 1970 to a date
@@ -394,13 +398,13 @@ useradd () {
 	append "dn: uid=${LOGIN},${USERBASE}"
 	append "changetype: add"
 	append "objectClass: top"
-	append "objectClass: account"
+	#append "objectClass: account"
 	append "objectClass: posixAccount"
 	append "objectClass: shadowAccount"
 	append "objectClass: organizationalPerson"
 	append "objectClass: inetOrgperson"
 	append "uid: ${LOGIN}"
-	append "userPassword: ${USERPASSWORD}"
+	append "userPassword: $(mkpasswd.pl -m ${USERPASSWORD})"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
 	append "cn: ${CN}"
@@ -422,28 +426,36 @@ useradd () {
 	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
 	append "gecos: ${COMMENT}"
 
-	if [ "${SAMBA}" = "yes" -a -n ${DOMAINSID} ]; then
+	if [ "${SAMBA}" = "yes" -a -n "${SAMBADOMAINSID}" ]; then
 		append "objectClass: sambaSamAccount"
 
 		let RID="2*${UIDNUMBER}+1000"
-		SID="${DOMAINSID}-${RID}" 
+		SID="${SAMBADOMAINSID}-${RID}" 
 
 		append "sambaSID: ${SID}"
-		append "sambaPrimaryGroupSID: ${DOMAINSID}-${DEFAULT_SAMBAGID}"
+		append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-${DEFAULT_SAMBAGID}"
 		append "sambaAcctFlags: [UX]"
 		append "sambaPwdCanChange: 0"
-		append "sambaNTPassword: $(mkntpasswd.pl -n ${USERPASSWORD})"
-		append "sambaLMPassword: $(mkntpasswd.pl -l ${USERPASSWORD})"
-		append "sambaPwdLastSet: $(date -u +%s -d '${*}')";
-		[ -n ${SAMBADRIVE} ] && append "sambaHomeDrive: ${SAMBADRIVE}"
-		[ -n ${SAMBAPATHPREPEND} ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\${LOGIN}"
-		[ -n ${SAMBAPROFILEPREPEND} ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\${LOGIN}"
-		[ -n ${SAMBALOGONSCRIPT} ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
+		append "sambaNTPassword: $(mkpasswd.pl -n ${USERPASSWORD})"
+		append "sambaLMPassword: $(mkpasswd.pl -l ${USERPASSWORD})"
+		append "sambaPwdLastSet: $(date -u +%s)";
+		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
+		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\${LOGIN}"
+		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\${LOGIN}"
+		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
 	fi
 	if [ "${IRIX}" = "yes" ]; then
 		append "objectClass: irixAccount"
-		append "irixPassword: $(mkirixpasswd.pl ${USERPASSWORD})"
+		append "irixPassword: $(mkpasswd.pl -i ${USERPASSWORD})"
 	fi
+	append "\n\n"
+
+	append "dn: cn=${LOGIN},${AUTOMOUNT_USERBASE}"
+	append "changetype: add"
+	append "objectClass: automount"
+	append "cn: ${LOGIN}"
+	append "automountInformation: ${AUTOMOUNT_OPTIONS} ${AUTOMOUNT_BASE}/${LOGIN}"
+	append "description: ${AUTOMOUNT_USERDESC}";
 	append "\n\n"
 
 	if [ -n "${ADDTOGROUPS}" ]; then
@@ -930,12 +942,83 @@ gpasswd() {
 }
 
 smbhostadd() {
-	# Add a samba host to LDAP
-	local name = $1
+	[ -z "${modulename}" ] && modulename="smbhostadd"
+	while getopts "u:" OPTION; do
+		case "${OPTION}" in
+			r) HOSTRID="${OPTARG}";;
+			*) exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		NAME="${1}"
+	fi
+
+	if [ -n "${HOSTRID}" ]; then
+		echo "${HOSTRID}" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${HOSTRID}\""
+			exit 3
+		fi
+		search_smbhost "sambaSID" "${SAMBADOMAINSID}-${HOSTRID}"
+		if [ "$?" -eq 0 ]; then
+			echo "${modulename}: uid ${HOSTRID} is not unique"
+			exit 4
+		fi
+	else
+		HOSTRID="${SAMBAHOSTRIDMIN}"
+		while [ "${HOSTRID}" -le "${SAMBAHOSTRIDMAX}" ]; do
+			search_smbhost "sambaSID" "${SAMBADOMAINSID}-${HOSTRID}"
+			[ "$?" -ne 0 ] && break
+			let HOSTRID="${HOSTRID} + 1"
+		done
+	fi
+
+	append "dn: uid=${NAME}\$,${SAMBAHOSTBASE}"
+	append "changetype: add"
+	append "objectClass: sambaSidEntry"
+	append "objectClass: sambaSamAccount"
+	append "uid: ${NAME}\$"
+	append "sambaSID: ${SAMBADOMAINSID}-${HOSTRID}"
+	let CANCHANGE="$(date -u +%s)"
+	append "sambaPwdCanChange: ${CANCHANGE}"
+	append "sambaPwdLastSet: ${CANCHANGE}"
+	let MUSTCHANGE="${CANCHANGE} + 1814400"
+	append "sambaPwdMustChange: ${MUSTCHANGE}"
+	append "sambaAcctFlags: [W]"
+	append "sambaLMPassword: $(mkpasswd.pl -l ${NAME}\$)"
+	append "sambaNTPassword: $(mkpasswd.pl -n ${NAME}\$)"
+	append "\n\n"
+
+	runmodify
+}
+
+smbhostdel {
+	[ -z "${modulename}" ] && modulename="smbhostdel"
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		NAME="${1}"
+	fi
+	search_smbhost "uid" "${NAME}\$"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Machine \"${NAME}\" does not exist"
+		exit 6
+	fi
+	fi
+	append "dn: uid=${NAME}\$,${SAMBAHOSTBASE}"
+	append "changetype: delete"
+	append "\n"
+	runmodify
 }
 
 case "${1}" in
-	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd)
+	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel)
 		ACTION="${1}"
 		shift 1
 		${ACTION} "$@"

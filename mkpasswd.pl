@@ -15,7 +15,8 @@ sub generatesalt {
     return sprintf($formatstr, $randstr);
 }
 
-if( $ARGV[0] =~ /-i/ ) { print( crypt( $ARGV[0], generatesalt ) ) }
+if( $ARGV[0] =~ /-m/ ) { print crypt( $ARGV[0], generatesalt( '$1$%.8s$' ) ) }
+elsif( $ARGV[0] =~ /-i/ ) { print crypt( $ARGV[0], generatesalt ) }
 elsif( $ARGV[0] =~ /-n/ ) { print nthash( $ARGV[1] ) }
 elsif( $ARGV[0] =~ /-l/ ) { print lmhash( $ARGV[1] ) }
 
