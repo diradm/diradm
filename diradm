@@ -2,10 +2,10 @@
 #
 ################################################################################
 #
-# diradm:	A tool for managing posix users and groups in a LDAP directory.
+# diradm:	A tool for managing posix-like things in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.21 2004/11/19 02:26:51 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.22 2004/12/09 13:55:21 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -34,7 +34,7 @@ CONFIG="/etc/${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
-VERSION="1.1"
+VERSION='$Id: diradm,v 1.22 2004/12/09 13:55:21 robbat2 Exp $'
 
 if [ ! -r "${CONFIG}" ]; then
 	echo "Unable to open configuration file \"${CONFIG}\"!"
@@ -120,59 +120,134 @@ LDAPADD="ldapadd ${ADMINOPTIONS}"
 LDAPMODIFY="ldapmodify -c ${ADMINOPTIONS}"
 LDAPDELETE="ldapdelete ${ADMINOPTIONS}"
 
+print_usage_sub() {
+	func="$1"
+	case "$func" in
+	useradd)
+	echo " diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
+	echo "                [-d home] [-s shell] [-c comment] [-m [-k template]]"
+	echo "                [-f inactive] [-e expire] [-p passwd] [-E email] name"
+	;;
+	usermod)
+	echo " diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
+	echo "                [-d home [-m]] [-s shell] [-c comment] [-l new_name]"
+	echo "                [-f inactive] [-e expire ] [-p passwd] [-L|-U]"
+	echo "                [-E email] name"
+	;;
+	userdel)
+	echo " diradm userdel [-r] name"
+	;;
+	groupadd)
+	echo " diradm groupadd [-g gid [-o]] group"
+	;;
+	groupmod)
+	echo " diradm groupmod [-g gid [-o]] [-n name] group"
+	;;
+	groupdel)
+	echo " diradm groupdel group"
+	;;
+	chsh)
+	echo " diradm chsh [-s login_shell] name"
+	;;
+	chfn)
+	echo " diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
+	echo "             [-o other] name"
+	;;
+	chage)
+	echo " diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]"
+	echo "              [-E expiredate] [-W warndays] user"
+	echo " diradm chage -l user"
+	;;
+	gpasswd)
+	echo " diradm gpasswd group"
+	echo " diradm gpasswd -a user group"
+	echo " diradm gpasswd -d user group"
+	echo " diradm gpasswd -R group"
+	echo " diradm gpasswd -r group"
+	echo " diradm gpasswd [-A user,...] [-M user,...] group"
+	;;
+	smbhostadd)
+	echo " diradm smbhostadd [-r RID] host"
+	;;
+	smbhostdel)
+	echo " diradm smbhostdel host"
+	;;
+	hostadd)
+	echo " diradm hostadd [-i IP,...] [-e MAC,...] [-a othername,...] host"
+	;;
+	hostmod)
+	echo " diradm hostmod [-i add-IP,...] [-I del-IP,...] [-e add-MAC,...]"
+	echo "                [-E del-MAC,...] [-a add-othername,...]"
+	echo "                [-A del-othername,...] [-n newname] host"
+	;;
+	hostdel)
+	echo " diradm hostdel host"
+	;;
+	_version)
+	echo " diradm version   Print diradm version number, then exit"
+	;;
+	_help)
+	echo " diradm help      Print this help, then exit"
+	;;
+	_)
+	echo
+	;;
+	esac
+}
+
 print_usage () {
-	echo "Usage: diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
-	echo "                      [-d home] [-s shell] [-c comment] [-m [-k template]]"
-	echo "                      [-f inactive] [-e expire] [-p passwd] [-E email] name"
-	echo
-	echo "       diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
-	echo "                      [-d home [-m]] [-s shell] [-c comment] [-l new_name]"
-	echo "                      [-f inactive] [-e expire ] [-p passwd] [-L|-U]"
-	echo "                      [-E email] name"
-	echo
-	echo "       diradm userdel [-r] name"
-	echo
-	echo "       diradm groupadd [-g gid [-o]] group"
-	echo
-	echo "       diradm groupmod [-g gid [-o]] [-n name] group"
-	echo
-	echo "       diradm groupdel group"
-	echo
-	echo "       diradm chsh [-s login_shell] name"
-	echo
-	echo "       diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
-	echo "                   [-o other] name"
-	echo
-	echo "       diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]"
-	echo "	                  [-E expiredate] [-W warndays] user"
-	echo "       diradm chage -l user"
-	echo
-	echo "       diradm gpasswd group"
-	echo "       diradm gpasswd -a user group"
-	echo "       diradm gpasswd -d user group"
-	echo "       diradm gpasswd -R group"
-	echo "       diradm gpasswd -r group"
-	echo "       diradm gpasswd [-A user,...] [-M user,...] group"
-	echo
-	echo "       diradm smbhostadd [-r RID] host"
-	echo "       diradm smbhostdel host"
-	echo
-	echo "       diradm hostadd [-i IP,...] [-e MAC,...] [-a othername,...] host"
-	echo "       diradm hostmod [-i add-IP,...] [-I del-IP,...] [-e add-MAC,...]"
-	echo "                      [-E del-MAC,...] [-a add-othername,...]"
-	echo "                      [-A del-othername,...] [-n newname] host"
-	echo "       diradm hostdel host"
-	echo
-	echo "       diradm --version   Print diradm version number, then exit"
-	echo
-	echo "       diradm --help      Print this help, then exit"
+	list=''
+	[ -n "$1" ] && list="$1"
+	echo "Usage:"
+	[ -z "$list" -o "$list" == "_all" ] && list="useradd _ usermod _ userdel _ groupadd groupmod groupdel _ chsh _ chfn _ chage _ gpasswd _ smbhostadd smbhostdel _ hostadd hostmod hostdel _ _version  _help _"
+	for i in $list; do
+		print_usage_sub ${i}
+	done;
 }
 
 print_version () {
 	echo "diradm ${VERSION}"
 	echo "Copyright (C) 2003 Daniel Himler <dan@hits.at>"
+	echo "Copyright (C) 2003-2004 Robin H. Johnson <robbat2@orbis-terrarum.net>"
+	echo "Copyright (C) 2003-2004 Patrick Lougheed <pat@tfsb.org>"
 	echo "This is free software; see the source for copying conditions.  There is NO"
 	echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+}
+
+# Call me nuts, I just wrote set functions in shell!
+set_union() {
+	a="$1"
+	b="$2"
+	t="$a"
+	for i in $b; do
+		echo "${a}" | grep -wqs "${i}"
+		# if not there, add
+		[ "$?" -ne 0 ] && t="${t} ${i}"
+	done
+	echo "$t"
+}
+
+set_intersection() {
+	a="$1"
+	b="$2"
+	t=''
+	for i in $a; do
+		echo "${b}" | grep -wqs "${i}"
+		# if there, add
+		[ "$?" -eq 0 ] && t="${t} ${i}"
+	done
+	echo "$t"
+}
+set_complement() {
+	a="$1"
+	b="$2"
+	t=''
+	for i in $a; do
+		echo "${b}" | grep -wqs "${i}"
+		# if not there, add
+		[ "$?" -ne 0 ] && t="${t} ${i}"
+	done
+	echo "$t"
 }
 
 # eg: 
@@ -303,7 +378,7 @@ useradd () {
 			p) USERPASSWORD="${OPTARG}";;
 			S) SAMBA="yes";;
 			i) IRIX="yes";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
@@ -570,16 +645,16 @@ usermod () {
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
 			E) EMAIL="${OPTARG}";;
-			p) if [ -n "${LOCKED}" ]; then print_usage; exit 2; fi; USERPASSWORD="${2}";;
-			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="yes";;
-			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="no";;
+			p) if [ -n "${LOCKED}" ]; then print_usage ${modulename} ; exit 1; fi; USERPASSWORD="${2}";;
+			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="yes";;
+			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="no";;
 			S) SAMBA="yes";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
@@ -769,12 +844,12 @@ userdel () {
 	while getopts "r" OPTION; do
 		case "${OPTION}" in
 			r) REMOVEHOMEDIR="yes";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
@@ -817,12 +892,12 @@ groupadd () {
 		case "${OPTION}" in
 			g) GIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		CN="${1}"
@@ -883,12 +958,12 @@ groupmod () {
 			g) GIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
 			n) NEWCN="${OPTARG}";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		CN="${1}"
@@ -931,7 +1006,7 @@ groupmod () {
 groupdel () {
 	[ -z "${modulename}" ] && modulename="groupdel"
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		CN="${1}"
@@ -962,7 +1037,7 @@ chsh() {
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
@@ -980,6 +1055,7 @@ chsh() {
 }
 
 chfn() {
+	# TODO
 	[ -z "${modulename}" ] && modulename="chfn"
 	while getopts "f:h:o:r:w:" OPTION; do
 		case "${OPTION}" in
@@ -992,7 +1068,7 @@ chfn() {
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
@@ -1024,7 +1100,7 @@ chfn() {
 }
 
 chage() {
-
+	# TODO
 	LISTONLY="0"
 	[ -z "${modulename}" ] && modulename="chsh"
 	while getopts "lm:M:W:I:E:d:" OPTION; do
@@ -1040,7 +1116,7 @@ chage() {
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
@@ -1105,10 +1181,93 @@ chage() {
 	exit 99
 }
 
+
 gpasswd() {
 	# TODO
-	echo "Not done yet!"
-	exit 99
+	[ -z "${modulename}" ] && modulename="gpasswd"
+	PASSWD_SET=0
+	MEMBERS_ADD=''
+	MEMBERS_DELETE=''
+	MEMBERS_SET=''
+	while getopts "rRa:d:A:M:" OPTION; do
+		case "${OPTION}" in
+			r) if [ -n "$MODE_PASSWD" ]; then print_usage ${modulename} ; exit 1 ; fi
+				MODE_PASSWD=1 PASSWD_SET=1 PASSWD='' ; echo TODO! ; exit 99 ;;
+			R) if [ -n "$MODE_PASSWD" ]; then print_usage ${modulename} ; exit 1 ; fi
+				MODE_PASSWD=1 PASSWD_SET=1 PASSWD="!" ; echo TODO! ; exit 99 ;;
+			a) MODE_MEMBER=1 MEMBERS_ADD="${OPTARG//,/ }";;
+			d) MODE_MEMBER=1 MEMBERS_DELETE="${OPTARG//,/ }";;
+			M) MODE_MEMBER=1 MEMBERS_SET="${OPTARG//,/ }";;
+			A) MODE_MEMBER=1 ADMINS="${OPTARG//,/ }" ; gpasswd_admin_error ; exit 99 ;;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		GROUP="${1}"
+	fi
+	# cannot set and add/delete together
+	if [ -n "$MEMBERS_SET" ]; then
+		if [ -n "$MEMBERS_ADD" -o -n "$MEMBERS_DELETE" ]; then 
+			print_usage ${modulename} 
+			exit 2
+		fi
+	fi
+	
+	
+	COMMAND_DN="dn: cn=${GROUP},${GROUPBASE}"
+	append "${COMMAND_DN}"
+	append "changetype: modify"
+
+	# TODO: -R/-r/passwd/ADMIN
+
+	MEMBERS_CURRENT="$(ldap_search_getattr ${GROUPBASE} "cn=${GROUP}" memberUid)"
+	#echo MC:$MEMBERS_CURRENT
+	#echo MS:$MEMBERS_SET
+	# if we are doing SET mode, then we do it differently
+	if [ -n "${MEMBERS_SET}" ]; then
+		# MEMBERS_DELETE = MEMBERS_CURRENT - MEMBERS_SET
+		MEMBERS_DELETE="$(set_complement "${MEMBERS_CURRENT}" "${MEMBERS_SET}")"
+		# MEMBERS_ADD = MEMBERS_SET - MEMBERS_CURRENT
+		MEMBERS_ADD="$(set_complement "${MEMBERS_SET}" "${MEMBERS_CURRENT}")"
+	else
+		# select members to add that aren't already there only to avoid LDAP errors
+		# remove all new members that we would delete as well
+		MEMBERS_ADD="$(set_complement "${MEMBERS_ADD}" "${MEMBERS_CURRENT} ${MEMBERS_DELETE}")"
+		# select members to delete so we don't get LDAP errors
+		MEMBERS_DELETE="$(set_intersection "${MEMBERS_CURRENT}" "${MEMBERS_DELETE}")"
+	fi
+	#echo MD:$MEMBERS_DELETE
+	#echo MA:$MEMBERS_ADD
+		
+	if [ -n "${MEMBERS_ADD}" ]; then
+		for i in ${MEMBERS_ADD}; do
+			append "add: memberUid"
+			append "memberUid: ${i}"
+			append "-"
+		done
+	fi
+	if [ -n "${MEMBERS_DELETE}" ]; then
+		for i in ${MEMBERS_DELETE}; do
+			append "delete: memberUid"
+			append "memberUid: ${i}"
+			append "-"
+		done
+	fi
+
+	# check if we should do anything
+	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+}
+
+gpasswd_admin_error() {
+	echo "So you want to set a group administrator..."
+	echo "Unfortuntely you won't be able to do that"
+	echo "As there is NO place for it in any schema"
+	echo "Please contact me (Robin) if you do have a"
+	echo "public schema that supports it."
 }
 
 smbhostadd() {
@@ -1116,12 +1275,12 @@ smbhostadd() {
 	while getopts "u:" OPTION; do
 		case "${OPTION}" in
 			r) HOSTRID="${OPTARG}";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename} 
 		exit 2
 	else
 		NAME="${1}"
@@ -1170,7 +1329,7 @@ smbhostdel () {
 	[ -z "${modulename}" ] && modulename="smbhostdel"
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		NAME="${1}"
@@ -1193,12 +1352,12 @@ hostadd () {
 			e) ETHERS="${OPTARG}";;
 			i) IPS="${OPTARG}";;
 			a) ALIASES="${OPTARG}";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		NAME="${1}"
@@ -1246,7 +1405,7 @@ hostdel () {
 	[ -z "${modulename}" ] && modulename="hostdel"
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		NAME="${1}"
@@ -1278,12 +1437,12 @@ hostmod () {
 			a) ADDALIASES="${OPTARG} ${ADDALIASES}";;
 			A) DELALIASES="${OPTARG} ${DELALIASES}";;
 			n) NEWNAME="${OPTARG}";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		NAME="${1}"
@@ -1304,12 +1463,14 @@ hostmod () {
 			append "objectClass: ieee802device"
 			append "-"
 		fi
+		# TODO: use correct set of ethers to avoid ldap error
 		for i in ${ADDETHERS}; do
 			append "add: macAddress"
 			append "macAddress: ${i}"
 			append "-"
 		done
 	fi
+	# TODO: use correct set of ethers to avoid ldap error
 	if [ -n "${DELETHERS}" ]; then
 		DELETHERS="${DELETHERS//,/ }"
 		for i in ${DELETHERS}; do
@@ -1326,12 +1487,14 @@ hostmod () {
 			append "objectClass: ipHost"
 			append "-"
 		fi
+		# TODO: use correct set of ip to avoid ldap error
 		for i in ${ADDIPS}; do
 			append "add: ipHostNumber"
 			append "ipHostNumber: ${i}"
 			append "-"
 		done
 	fi
+	# TODO: use correct set of ip to avoid ldap error
 	if [ -n "${DELIPS}" ]; then
 		DELIPS="${DELIPS//,/ }"
 		for i in ${DELIPS}; do
@@ -1340,6 +1503,7 @@ hostmod () {
 			append "-"
 		done
 	fi
+	# TODO: use correct set of aliases to avoid ldap error
 	if [ -n "${ADDALIASES}" ]; then
 		ADDALIASES="${ADDALIASES//,/ }"
 		for i in ${ADDALIASES}; do
@@ -1348,6 +1512,7 @@ hostmod () {
 			append "-"
 		done
 	fi
+	# TODO: use correct set of aliases to avoid ldap error
 	if [ -n "${DELALIASES}" ]; then
 		DELALIASES="${DELALIASES//,/ }"
 		for i in ${DELALIASES}; do
@@ -1364,16 +1529,17 @@ hostmod () {
 }
 
 cvsadd() {
+	# TODO
 	[ -z "${modulename}" ] && modulename="hostadd"
 	while getopts "m:" OPTION; do
 		case "${OPTION}" in
 			m) MEMBERS="${OPTARG}";;
-			*) exit 1;;
+			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage 
 		exit 2
 	else
 		NAME="${1}"
@@ -1417,16 +1583,16 @@ case "${1}" in
 		# automount
 		# aliases - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/aliases.htm#idx12
 	
-	--version)
+	version|--version)
 		print_version
 		exit 0
 		;;
-	--help)
-		print_usage
+	help|--help)
+		print_usage _all
 		exit 0
 		;;
 	*)
-		print_usage
+		print_usage _all
 		exit 1
 		;;
 esac
