@@ -1,3 +1,8 @@
 Makefile
 autom4te.cache
 configure
+.in
+config.h
+config.log
+config.status
+stamp-h1

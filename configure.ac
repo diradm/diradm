@@ -21,6 +21,7 @@ AC_CONFIG_FILES([
    README
    doc/Makefile
    src/Makefile
+   m4/Makefile
 ])
 
 AC_OUTPUT
