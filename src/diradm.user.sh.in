@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.4 2005/01/09 12:17:52 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.5 2005/01/09 13:31:17 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -201,7 +201,20 @@ useradd() {
 	append "objectClass: organizationalPerson"
 	append "objectClass: inetOrgperson"
 	append "uid: ${LOGIN}"
-	userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
+	# impossible passwords
+	userPasswordCrypt='$1$i4iLNNDN$2hEIZ6f5qgBBQfTuxtI4P1' 
+	sambaNTPassword='00000000000000000000000000000000'
+	sambaLMPassword='00000000000000000000000000000000'
+	irixPassword='KeZ0hbbaVDnSU'
+	# now set the real password
+	if [ -n "${USERPASSWORD}" ]; then
+		userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
+		irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
+		if [ "x${SAMBA}" = "xyes" ]; then
+			sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
+			sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
+		fi
+	fi
 	append "userPassword: {CRYPT}${userPasswordCrypt}"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
@@ -232,9 +245,7 @@ useradd() {
 	fi
 	append "gecos: ${COMMENT}"
 
-	if [ "${SAMBA}" = "yes" -a -n "${SAMBADOMAINSID}" ]; then
-		sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
-		sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
+	if [ "x${SAMBA}" = "xyes" -a -n "${SAMBADOMAINSID}" ]; then
 		append "objectClass: sambaSamAccount"
 
 		let RID="2*${UIDNUMBER}+1000"
@@ -254,7 +265,6 @@ useradd() {
 	fi
 	# todo: config var for this
 	if [ "${IRIX}" = "yes" ]; then
-		irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
 		# this is a custom objectclass!
 		append "objectClass: irixAccount"
 		append "irixPassword: {CRYPT}${irixPassword}"
