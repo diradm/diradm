@@ -1,4 +1,4 @@
-# Copyright (C) 2004 Robin Hugh Johnson <robbat2@orbis-terrarum.net>
+# Copyright (C) 2004-2005 Robin Hugh Johnson <robbat2@orbis-terrarum.net>
 #  
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without 
