@@ -1,5 +1,5 @@
 # Begin /etc/diradm.conf
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.4 2004/12/23 22:23:39 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.5 2005/01/09 03:00:11 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # @PACKAGE@ @VERSION@
 
@@ -37,7 +37,7 @@ GIDNUMBERMIN="500"
 GIDNUMBERMAX="60000"
 # for groups that have a shared home-directory
 # see also the automount group stuff...
-GROUPBASE="/home/projects"
+GROUPHOMEBASE="/home/projects"
 
 # LDAP specific help functions
 # ----------------------------
@@ -118,7 +118,7 @@ AUTOMOUNT_GROUPDESC="projects"
 AUTOMOUNT_USERMAP="home.users"
 AUTOMOUNT_GROUPMAP="home.projects"
 AUTOMOUNT_USERBASE="ou=${AUTOMOUNT_USERMAP},${AUTOMOUNT_BASEDN}"
-AUTOMOUNT_USERBASE="ou=${AUTOMOUNT_GROUPMAP},${AUTOMOUNT_BASEDN}"
+AUTOMOUNT_GROUPBASE="ou=${AUTOMOUNT_GROUPMAP},${AUTOMOUNT_BASEDN}"
 # noatime provides a large performance boost
 # nolock,soft is safe with NFSv3 over TCP
 # see nfs(5) for more defaults on some of these settings
