@@ -1,3 +1,36 @@
+2005-01-09 03:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.11), "Exp", lines: +7 -1
+
+	add new commands, bump version.
+
+2005-01-09 03:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.in (1.7), "Exp", lines: +139 -130
+
+	fix variable conflicts with DATE. Configurize DATE, CUT, UNIQ.
+	Update config testing. Make config and self testing available to
+	user. Config test not run by default anymore. Update copyright year
+	for my edits. Force -R in date format to ensure correct locale
+	output for date_to_days. Remove cvsadd function. Abstract command
+	list.
+
+2005-01-09 03:00  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.5), "Exp", lines: +3 -3
+
+	fix typos with groupbase
+
+2004-12-23 22:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.4), "Exp", lines: +2 -0
+
+	add news.
+
 2004-12-23 22:23  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
