@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	1.1
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.2 2003/07/12 10:52:56 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -109,7 +109,7 @@ if [ -n "$BINDPASS" ]; then
 else
 	ADMINOPTIONS="$OPTIONS -D $BINDDN -W"
 fi
-LDAPSEARCH="ldapsearch $OPTIONS"
+LDAPSEARCH="ldapsearch $ADMINOPTIONS"
 LDAPADD="ldapadd $ADMINOPTIONS"
 LDAPMODIFY="ldapmodify $ADMINOPTIONS"
 LDAPDELETE="ldapdelete $ADMINOPTIONS"
@@ -228,7 +228,7 @@ useradd () {
 		echo "useradd: Warning! Group $GIDNUMBER not found. Adding user anyway."
 	fi
 	if [ -n "$OTHERGROUPS" ]; then
-		OTHERGROUPS="$(echo "$OTHERGROUPS" | sed "s/,/ /")"
+		OTHERGROUPS="${OTHERGROUPS//,/ }"
 		for POSIXGROUP in $OTHERGROUPS; do
 			echo "$POSIXGROUP" | grep -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
@@ -252,7 +252,7 @@ useradd () {
 		done
 	fi
 	if [ -n "$HOSTLIST" ]; then
-		HOSTLIST="$(echo "$HOSTLIST" | sed "s/,/ /")"
+		HOSTLIST="${HOSTLIST//,/ }"
 		for HOST in $HOSTLIST; do
 			HOSTS="${HOSTS}host: $HOST\n"
 		done
@@ -408,13 +408,13 @@ usermod () {
 		fi
 	fi
 	if [ -n "$OTHERGROUPS" ]; then
-		OTHERGROUPS="$(echo "$OTHERGROUPS" | sed "s/,/ /")"
+		OTHERGROUPS="${OTHERGROUPS//,/ }"
 		for POSIXGROUP in $OTHERGROUPS; do
 			echo "$POSIXGROUP" | grep -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
 				search_group "gidNumber" "$POSIXGROUP"
 				if [ "$?" -ne 0 ]; then
-					echo "usermod: Unknown group \"$POSIXGROUP\""
+					echo "usermod: Unknown other group number \"$POSIXGROUP\""
 					exit 6
 				fi
 				POSIXGROUP="$($LDAPSEARCH -b "$GROUPBASE" "gidNumber=$POSIXGROUP" |
@@ -424,7 +424,7 @@ usermod () {
 			else
 				search_group "cn" "$POSIXGROUP"
 				if [ "$?" -ne 0 ]; then
-					echo "usermod: Unknown group \"$POSIXGROUP\""
+					echo "usermod: Unknown other group \"$POSIXGROUP\""
 					exit 6
 				fi
 				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
@@ -432,7 +432,7 @@ usermod () {
 		done
 	fi
 	if [ -n "$HOSTLIST" ]; then
-		HOSTLIST="$(echo "$HOSTLIST" | sed "s/,/ /")"
+		HOSTLIST="${HOSTLIST//,/ }"
 		for HOST in $HOSTLIST; do
 			HOSTS="${HOSTS}host: $HOST\n"
 		done
@@ -509,7 +509,7 @@ usermod () {
 		if [ "$LOCKED" = "yes" ]; then
 			USERPASSWORD="!$OLDPASSWORD"
 		elif [ "$LOCKED" = "no" ]; then
-			USERPASSWORD="$(echo "$OLDPASSWORD" | sed "s/!//")"
+			USERPASSWORD="$(echo "$OLDPASSWORD" | sed -re "s/^!//")"
 		fi
 	fi
 	COMMAND="dn: uid=$LOGIN,$USERBASE\n"
