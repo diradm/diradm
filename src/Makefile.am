@@ -8,19 +8,3 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-AC_INIT([diradm],
-        [0.0.1],
-        [Robin Hugh Johnson robbat2@orbis-terrarum.net],
-        [diradm])
-AC_CONFIG_AUX_DIR(config)
-AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE([dist-bzip2])
-
-AC_CONFIG_FILES([
-   Makefile
-   README
-   doc/Makefile
-   src/Makefile
-])
-
-AC_OUTPUT

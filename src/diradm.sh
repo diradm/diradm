@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix-like things in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.25 2004/12/10 01:46:49 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/src/Attic/diradm.sh,v 1.1 2004/12/10 03:46:37 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -29,14 +29,21 @@
 
 CONFIG_FILENAME="diradm.conf"
 CONFIG="/etc/${CONFIG_FILENAME}"
+if [ "${1}" == "-c" ]; then
+	CONFIG="${2}"
+	shift 2
+fi
 [ ! -f "${CONFIG}" ] && CONFIG="`dirname ${0}`/${CONFIG_FILENAME}"
 [ ! -f "${CONFIG}" ] && CONFIG="~/.${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
-REVISION='$Revision: 1.25 $'
-DATE='$Date: 2004/12/10 01:46:49 $'
-VERSION='${REVISION} ${DATE}'
+REVISION='$Revision: 1.1 $'
+DATE='$Date: 2004/12/10 03:46:37 $'
+VERSION="${REVISION} ${DATE}"
+# get the stripped versions
+REVISION="${REVISION% *}" ; REVISION="${REVISION/* }"
+DATE="${DATE#* }" ; DATE="${DATE% *}"
 
 if [ ! -r "${CONFIG}" ]; then
 	echo "Unable to open configuration file \"${CONFIG}\"!"
@@ -44,12 +51,17 @@ if [ ! -r "${CONFIG}" ]; then
 fi
 
 DEPENDENCIES="grep ldapsearch ldapadd ldapmodify ldapdelete sed stat perl"
-for i in {/,/usr}/{libexec,bin,sbin}; do
-	f=${i}/${MKPASSWD}
-	if [ -x "${f}" ]; then
-		MKPASSWD="${f}"
-	fi
-done
+
+mkpasswd_resolve() {
+	b=`basename ${MKPASSWD}`
+	d=`dirname ${MKPASSWD}`
+	for i in ${d} {/,/usr}/{libexec,bin,sbin}; do
+		f=${i}/${b}
+		if [ -x "${f}" ]; then
+			MKPASSWD="${f}"
+		fi
+	done
+}
 
 selftest() {
 	for DEPENDENCY in ${DEPENDENCIES}; do
@@ -59,7 +71,40 @@ selftest() {
 			exit 1
 		fi
 	done
-	${MKPASSWD}
+	${MKPASSWD} 1>/dev/null
+	if [ $? -ne 1 ]; then
+		echo "${MKPASSWD} failed!"
+		exit 1
+	fi
+	# note specification of salt in test!
+	test_m="$(${MKPASSWD} -m foo '$1$bJZFRnEN')"
+	corr_m='$1$bJZFRnEN$O8Ms1y4YqCDDqbbt8bVFe0'
+	test_i="$(${MKPASSWD} -i foo 'Eo')"
+	corr_i='Eo5MXp8EqPaqE'
+	test_l="$(${MKPASSWD} -l foo)"
+	corr_l='5BFAFBEBFB6A0942AAD3B435B51404EE'
+	test_n="$(${MKPASSWD} -n foo)"
+	corr_n='AC8E657F83DF82BEEA5D43BDAF7800CC'
+	t="${test_m}" c="${corr_m}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	t="${test_i}" c="${corr_i}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	t="${test_l}" c="${corr_l}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	t="${test_n}" c="${corr_n}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
 }
 
 source "${CONFIG}"
@@ -1578,9 +1623,10 @@ cvsadd() {
 }
 
 case "${1}" in
-	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel|hostadd|hostdel|hostmod)
+	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel|hostadd|hostdel|hostmod|selftest)
 		ACTION="${1}"
 		shift 1
+		mkpasswd_resolve
 		${ACTION} "$@"
 		exit 0
 		;;
@@ -1595,8 +1641,12 @@ case "${1}" in
 		# bootparam - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/bootparams.htm#idx32
 		# automount
 		# aliases - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/aliases.htm#idx12
-	revision)
-		echo $REVISION | awk '{print $2}'
+	_revision)
+		echo ${REVISION}
+		exit 0
+		;;
+	_date)
+		echo ${DATE}
 		exit 0
 		;;
 	version|--version)

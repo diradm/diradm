@@ -8,19 +8,13 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-AC_INIT([diradm],
-        [0.0.1],
-        [Robin Hugh Johnson robbat2@orbis-terrarum.net],
-        [diradm])
-AC_CONFIG_AUX_DIR(config)
-AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE([dist-bzip2])
+# Install m4 macros in this directory
+m4datadir = $(datadir)/aclocal
 
-AC_CONFIG_FILES([
-   Makefile
-   README
-   doc/Makefile
-   src/Makefile
-])
+# List your m4 macros here
+m4macros = 
 
-AC_OUTPUT
+# The following is boilerplate
+m4data_DATA = $(m4macros) 
+EXTRA_DIST = $(m4data_DATA) 
+
