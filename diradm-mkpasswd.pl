@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Header: /code/convert/cvsroot/infrastructure/diradm/Attic/mkpasswd.pl,v 1.4 2004/12/09 14:01:34 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm-mkpasswd.pl,v 1.1 2004/12/10 01:12:11 robbat2 Exp $
 use Crypt::SmbHash qw(lmhash nthash ntlmgen);
 #use warnings;
 use strict;
