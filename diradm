@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix-like things in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.24 2004/12/09 13:57:13 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.25 2004/12/10 01:46:49 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -34,7 +34,9 @@ CONFIG="/etc/${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
-VERSION='$Revision: 1.24 $ $Date: 2004/12/09 13:57:13 $'
+REVISION='$Revision: 1.25 $'
+DATE='$Date: 2004/12/10 01:46:49 $'
+VERSION='${REVISION} ${DATE}'
 
 if [ ! -r "${CONFIG}" ]; then
 	echo "Unable to open configuration file \"${CONFIG}\"!"
@@ -42,13 +44,23 @@ if [ ! -r "${CONFIG}" ]; then
 fi
 
 DEPENDENCIES="grep ldapsearch ldapadd ldapmodify ldapdelete sed stat perl"
-for DEPENDENCY in ${DEPENDENCIES}; do
-	EXECUTABLE="$(which "${DEPENDENCY}" 2> /dev/null)"
-	if [ ! -x "${EXECUTABLE}" ]; then
-		echo "Cannot find \"${DEPENDENCY}\"!"
-		exit 1
+for i in {/,/usr}/{libexec,bin,sbin}; do
+	f=${i}/${MKPASSWD}
+	if [ -x "${f}" ]; then
+		MKPASSWD="${f}"
 	fi
 done
+
+selftest() {
+	for DEPENDENCY in ${DEPENDENCIES}; do
+		EXECUTABLE="$(which "${DEPENDENCY}" 2> /dev/null)"
+		if [ ! -x "${EXECUTABLE}" ]; then
+			echo "Cannot find \"${DEPENDENCY}\"!"
+			exit 1
+		fi
+	done
+	${MKPASSWD}
+}
 
 source "${CONFIG}"
 CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
@@ -535,10 +547,10 @@ useradd () {
 	append "objectClass: inetOrgperson"
 	append "objectClass: userInformation"
 	append "uid: ${LOGIN}"
-	userPasswordCrypt="$(mkpasswd.pl -m ${USERPASSWORD})"
-	sambaNTPassword="$(mkpasswd.pl -n ${USERPASSWORD})"
-	sambaLMPassword="$(mkpasswd.pl -l ${USERPASSWORD})"
-	irixPassword="$(mkpasswd.pl -i ${USERPASSWORD})"
+	userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
+	sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
+	sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
+	irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
 	append "userPassword: {CRYPT}${userPasswordCrypt}"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
@@ -1318,8 +1330,8 @@ smbhostadd() {
 	let MUSTCHANGE="${CANCHANGE} + 1814400"
 	append "sambaPwdMustChange: ${MUSTCHANGE}"
 	append "sambaAcctFlags: [W          ]"
-	append "sambaLMPassword: $(mkpasswd.pl -l ${NAME}\$)"
-	append "sambaNTPassword: $(mkpasswd.pl -n ${NAME}\$)"
+	append "sambaLMPassword: $(${MKPASSWD} -l ${NAME}\$)"
+	append "sambaNTPassword: $(${MKPASSWD} -n ${NAME}\$)"
 	append "\n\n"
 
 	runmodify
@@ -1570,6 +1582,7 @@ case "${1}" in
 		ACTION="${1}"
 		shift 1
 		${ACTION} "$@"
+		exit 0
 		;;
 		# host - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/hosts.htm#seg3b0sara
 		# network - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/networks_NFS.htm#idx232
@@ -1582,7 +1595,10 @@ case "${1}" in
 		# bootparam - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/bootparams.htm#idx32
 		# automount
 		# aliases - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/aliases.htm#idx12
-	
+	revision)
+		echo $REVISION | awk '{print $2}'
+		exit 0
+		;;
 	version|--version)
 		print_version
 		exit 0
