@@ -1,3 +1,11 @@
+2004-12-23 22:23  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.4), "Exp", lines: +4 -4
+		src/diradm.in (1.6), "Exp", lines: +5 -5
+
+	variable fixes.
+
 2004-12-23 21:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
