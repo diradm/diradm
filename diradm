@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.8 2003/07/14 10:55:19 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.9 2003/07/14 10:56:46 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -245,7 +245,7 @@ useradd () {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -441,7 +441,7 @@ useradd () {
 
 usermod () {
 	[ -z "${modulename}" ] && modulename="usermod"
-	if [ "$#" -le 1 ]; then
+	if [ "${#}" -le 1 ]; then
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
@@ -466,7 +466,7 @@ usermod () {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -657,7 +657,7 @@ userdel () {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -712,7 +712,7 @@ groupadd () {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -761,7 +761,7 @@ groupadd () {
 
 groupmod () {
 	[ -z "${modulename}" ] && modulename="groupmod"
-	if [ "$#" -le 1 ]; then
+	if [ "${#}" -le 1 ]; then
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
@@ -774,7 +774,7 @@ groupmod () {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -817,7 +817,7 @@ groupmod () {
 
 groupdel () {
 	[ -z "${modulename}" ] && modulename="groupdel"
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -848,7 +848,7 @@ chsh() {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
@@ -879,7 +879,7 @@ chfn() {
 		esac
 	done
 	shift $((${OPTIND} - 1))
-	if [ "$#" -ne 1 ]; then
+	if [ "${#}" -ne 1 ]; then
 		print_usage
 		exit 2
 	else
