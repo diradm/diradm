@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.13 2003/07/29 23:43:07 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.14 2003/07/31 15:32:27 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -178,11 +178,6 @@ search_user() {
 	return "$?"
 }
 
-search_group() {
-	${LDAPSEARCH} -b "${GROUPBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
-	return "$?"
-}
-
 append() {
 [ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
 }
@@ -210,8 +205,6 @@ samba_getdomainsid() {
 }
 samba_nextrid() {
 }
-
-Save some animals, eat a vegetarian
 
 # Convert N days since Jan 1, 1970 to a date
 # first paramater is the days
@@ -843,8 +836,7 @@ chsh() {
 	else
 		LOGIN="${1}"
 	fi
-	# TODO - FIXME!
-	OLDLOGINSHELL="getoldshell"
+	OLDLOGINSHELL="`ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" "loginShell"`"
 	if [ -z "${LOGINSHELL}" ]; then
 		msg="Changing the login shell for ${LOGIN}\nEnter the new value, or press return for the default\n\tLogin Shell [${OLDLOGINSHELL}]: "
 		grabinteractiveinput "${msg}" LOGINSHELL
