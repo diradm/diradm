@@ -18,5 +18,5 @@ noinst_m4macros = autoconf-path_progs_error.m4  autoconf-prog_perl_modules.m4
 # The following is boilerplate
 #m4data_DATA = $(m4macros) 
 noinst_DATA = $(noinst_m4macros) 
-EXTRA_DIST = $(m4data_DATA) $(noinst_DATA)
+EXTRA_DIST = $(noinst_DATA)
 
