@@ -1,3 +1,17 @@
+2005-01-09 12:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.15), "Exp", lines: +1 -1
+
+	bump version.
+
+2005-01-09 12:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.6), "Exp", lines: +13 -6
+
+	new news.
+
 2005-01-09 12:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
