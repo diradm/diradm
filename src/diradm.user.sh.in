@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.5 2005/01/09 13:31:17 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.6 2005/01/14 02:34:30 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -30,7 +30,7 @@ useradd() {
 	done
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
-		print_usage
+		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
@@ -286,31 +286,29 @@ useradd() {
 		done
 	fi
 
-	# TODO: abstract this to a new automount function
-	# automounted homedirs etc.
-	append "dn: cn=${LOGIN},${AUTOMOUNT_USERBASE}"
-	append "changetype: add"
-	append "objectClass: automount"
-	append "cn: ${LOGIN}"
-	# build correct string
-	val="${LOGIN}"
-	AUTOMOUNT_APPEND="`eval echo "${AUTOMOUNT_HASHING}"`"
-	append "automountInformation: ${AUTOMOUNT_OPTIONS} ${AUTOMOUNT_BASE}/${AUTOMOUNT_APPEND}"
-	append "description: ${AUTOMOUNT_USERDESC}";
-	append "\n\n"
 
+	# add user
 	#echo -e "${COMMAND}"
 	runmodify
+	
 
-	# Create Homedir
-	targetdir="${AUTOMOUNT_BASE}/${AUTOMOUNT_APPEND}"
-	# strip NFS host and assume local
-	targetdir="${targetdir/*:}"
-	if [ "${CREATEHOMEDIR}" = "yes" -a ! -d "${HOMEDIRECTORY}" -a ! -d "${targetdir}" ]; then
-		echo Making Homedir stored in $targetdir, available as $HOMEDIRECTORY
-		cp -ra "${SKEL}" "${targetdir}" >/dev/null
-		chmod "${HOMEPERM}" "${targetdir}"
-		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${targetdir}"
+	if [ "${CREATEHOMEDIR}" = "yes" ]; then
+		if [ "${USER_AUTOMOUNTHOME}" = "yes" ]; then
+			# add automount entry first
+			automountadd -d "${AUTOMOUNT_USERDESC}" "${AUTOMOUNT_USERMAP}" "${LOGIN}" "${AUTOMOUNT_USERDIRBASE}"
+		fi
+		# Create Homedir
+		targetdir="$(automount_hash "${AUTOMOUNT_USERDIRBASE}" "${LOGIN}")"
+		# strip NFS host to make local path
+		targetdir_no_nfs="${targetdir/*:}"
+		if [ ! -d "${HOMEDIRECTORY}" -a ! -d "${targetdir_no_nfs}" ]; then
+			echo "Making Homedir stored in ${targetdir}, available as ${HOMEDIRECTORY}"
+			cp -ra "${SKEL}" "${targetdir_no_nfs}" >/dev/null
+			chmod "${HOMEPERM}" "${targetdir_nfs}"
+			chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${targetdir_no_nfs}"
+		else
+			echo "Homedir of ${HOMEDIRECTORY} already exists from ${targetdir}"
+		fi
 	fi
 }
 

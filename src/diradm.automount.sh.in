@@ -1,0 +1,52 @@
+#!@FALSE@
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.automount.sh.in,v 1.1 2005/01/14 02:34:30 robbat2 Exp $
+# vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
+
+# This contains all of the functions specific to the automount sub-system.
+
+automount_hash() {
+	basedir="${1}"
+	key="${2}"
+	# build correct string
+	evalkey="`eval echo "${AUTOMOUNT_HASHING}"`"
+	echo "${basedir}/${evalkey}"
+}
+
+automountaddraw() {
+	mapbasedn="$1"
+	key="$2"
+	opt="$3"
+	src="$4"
+	desc="$5"
+
+	append "dn: cn=${key},${mapbasedn}"
+	append "changetype: add"
+	append "objectClass: automount"
+	append "cn: ${key}"
+	append "automountInformation: ${opt} ${src}"
+	[ -n "${desc}" ] && append "description: ${desc}";
+	append "\n\n"
+	runmodify
+}
+
+automountadd() {
+	[ -z "${modulename}" ] && modulename="automountadd"
+	while getopts "d:" OPTION; do
+		case "${OPTION}" in
+		d) DESCRIPTION="${OPTARG}" ;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 3 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		map="$1"
+		key="$2"
+		dirbase="$3"
+		src="$(automount_hash "${dirbase}" "${key}")"
+	fi
+	mapbasedn="ou=${1},${AUTOMOUNT_BASEDN}"
+
+	automountaddraw "${mapbasedn}" "${key}" "${AUTOMOUNT_OPTIONS}" "${src}" "${DESCRIPTION}"
+}

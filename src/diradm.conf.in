@@ -1,5 +1,5 @@
 # Begin /etc/diradm.conf
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.8 2005/01/09 07:01:49 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.9 2005/01/14 02:34:30 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # @PACKAGE@ @VERSION@
 
@@ -111,24 +111,34 @@ SAMBAHOSTRIDMAX="999999"
 
 # Automount Info
 # --------------
+# set USER_AUTOMOUNTHOME to yes if have want to use LDAP maps for automount
+# you must be using the autofs.schema in slapd.conf!
+# in auto.master, you'd need to use something like this:
+# /home/users     ldap:209.87.56.238:ou=home.users,ou=AutoFS,dc=iat,dc=sfu,dc=ca
+# general form:
+# ${HOMEBASE}     ldap:SERVER:ou=${AUTOMOUNT_USERMAP},${AUTOMOUNT_BASEDN}
+USER_AUTOMOUNTHOME="no"
 # nss_ldap doesn't support automount...
 AUTOMOUNT_BASEDN="ou=AutoFS,${BASEDN}"
-AUTOMOUNT_USERDESC="users"
-AUTOMOUNT_GROUPDESC="projects"
+# map names
 AUTOMOUNT_USERMAP="home.users"
 AUTOMOUNT_GROUPMAP="home.projects"
-AUTOMOUNT_USERBASE="ou=${AUTOMOUNT_USERMAP},${AUTOMOUNT_BASEDN}"
-AUTOMOUNT_GROUPBASE="ou=${AUTOMOUNT_GROUPMAP},${AUTOMOUNT_BASEDN}"
-# noatime provides a large performance boost
-# nolock,soft is safe with NFSv3 over TCP
+# default descriptions
+AUTOMOUNT_USERDESC="users"
+AUTOMOUNT_GROUPDESC="projects"
+# async,noatime provides a large performance boost
+# intr,nolock,soft is safe with NFSv3 over TCP
+# nosuid,nodev is for security
 # see nfs(5) for more defaults on some of these settings
-AUTOMOUNT_OPTIONS="-rw,noatime,nosuid,nodev,nolock,rsize=32768,wsize=32768,soft,tcp,nfsvers=3,vers=3,retry=1,acregmin=15,acregmax=120,acdirmin=60,acdirmax=120"
+AUTOMOUNT_OPTIONS="-rw,async,noatime,nosuid,nodev,intr,nolock,soft,tcp,rsize=32768,wsize=32768,nfsvers=3,vers=3,retry=1,acregmin=15,acregmax=120,acdirmin=60,acdirmax=120"
 # This is the common base directory that the user-specific string is appended onto
-AUTOMOUNT_BASE="209.87.56.240:/export/users/0"
+AUTOMOUNT_USERDIRBASE="209.87.56.240:/export/users/0"
+# This is the common base directory that the group-specific string is appended onto
+AUTOMOUNT_GROUPDIRBASE="209.87.56.240:/export/projects/0"
 
 # single quotes are important here, as we evaluate this later...
-#AUTOMOUNT_HASHING='${val}' # no hashing - 'robbat2'
-AUTOMOUNT_HASHING='${val:0:1}/${val}' # first level hashing - 'r/robbat2'
-#AUTOMOUNT_HASHING='${val:0:1}/${val:0:2}/${val}' # second level hashing - 'r/ro/robbat2'
+#AUTOMOUNT_HASHING='${key}' # no hashing - 'robbat2'
+AUTOMOUNT_HASHING='${key:0:1}/${key}' # first level hashing - 'r/robbat2'
+#AUTOMOUNT_HASHING='${key:0:1}/${key:0:2}/${key}' # second level hashing - 'r/ro/robbat2'
 
 # End /etc/diradm.conf
