@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.18 2004/07/12 03:32:30 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.19 2004/09/09 20:36:04 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -503,7 +503,10 @@ useradd () {
 	append "changetype: add"
 	append "objectClass: automount"
 	append "cn: ${LOGIN}"
-	append "automountInformation: ${AUTOMOUNT_OPTIONS} ${AUTOMOUNT_BASE}/${LOGIN}"
+	# build correct string
+	val="${LOGIN}"
+	AUTOMOUNT_APPEND="`eval echo "${AUTOMOUNT_HASHING}"`"
+	append "automountInformation: ${AUTOMOUNT_OPTIONS} ${AUTOMOUNT_BASE}/${AUTOMOUNT_APPEND}"
 	append "description: ${AUTOMOUNT_USERDESC}";
 	append "\n\n"
 
