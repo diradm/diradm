@@ -12,7 +12,7 @@
 #m4datadir = $(datadir)/aclocal
 
 # List your m4 macros here
-m4macros = 
+#m4macros = 
 noinst_m4macros = autoconf-path_progs_error.m4  autoconf-prog_perl_modules.m4
 
 # The following is boilerplate
