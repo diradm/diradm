@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.11 2003/07/14 11:04:09 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.12 2003/07/25 13:13:45 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -185,6 +185,11 @@ search_group() {
 
 append() {
 [ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
+}
+append_attribute() {
+	local attrib="$1"
+	shift
+	append "replace: ${attrib}\n${attrib}: ${*}"
 }
 
 runmodify() {
@@ -864,14 +869,26 @@ chfn() {
 	fi
 
 	[ -n "${HOMEPH}" ] && append ""
-	# TODO
 	#FULLNAME="$(echo ${COMMENT} | cut -d, -f1)"
 	#ROOMNUMBER="$(echo ${COMMENT} | cut -d, -f2)"
 	#WORKPHONE="$(echo ${COMMENT} | cut -d, -f3)"
 	#HOMEPHONE="$(echo ${COMMENT} | cut -d, -f4)"
-	#FIRSTNAME="${FULLNAME// *}"
-	#SURNAME="${FULLNAME##* }"
-	#CN="${FIRSTNAME}"
+	
+	if [ -n "${FULLNAME}" ]; then
+		FIRSTNAME="${FULLNAME// *}"
+		SURNAME="${FULLNAME##* }"
+		CN="${FIRSTNAME}"
+
+	fi
+	[ -n "${SURNAME}" ] && append "replace: sn\nsn: ${SURNAME}"
+	[ -n "${FIRSTNAME}" ] && append "givenName: ${FIRSTNAME}"
+	[ -n "${FULLNAME}" ] && append "displayName: ${FULLNAME}"
+	[ -n "${ROOMNUMBER}" ] && append "roomNumber: ${ROOMNUMBER}"
+	[ -n "${HOMEPHONE}" ] && append "homePhone: ${HOMEPHONE}"
+	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
+	append "gecos: ${COMMENT}"
+	append "\n\n"
+
 	echo "Not done yet!"
 	exit 99
 }
