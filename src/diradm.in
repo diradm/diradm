@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.7 2005/01/09 03:03:43 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.8 2005/01/09 03:24:41 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -26,6 +26,19 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 ################################################################################
+		
+# Misc docs used to write this
+# host - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/hosts.htm#seg3b0sara
+# network - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/networks_NFS.htm#idx232
+# protocol - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/protocols.htm#idx546
+# service - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/services.htm#idx574
+# rpc - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/rpc.htm#idx286
+# ether - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/ethers.htm#idx111
+# netmask - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/netmasks.htm#idx226
+# netgroup - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/netgroup.htm#xqr310mart
+# bootparam - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/bootparams.htm#idx32
+# automount
+# aliases - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/aliases.htm#idx12
 
 # populated by configure...
 prefix="@prefix@"
@@ -80,8 +93,9 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-CVS_REVISION='$Revision: 1.7 $'
-CVS_DATE='$Date: 2005/01/09 03:03:43 $'
+CVS_REVISION='$Revision: 1.8 $'
+CVS_DATE='$Date: 2005/01/09 03:24:41 $'
+CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.8 2005/01/09 03:24:41 robbat2 Exp $'
 # get the stripped versions
 CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
 CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
@@ -113,7 +127,7 @@ SAMBA_NET="@SAMBA_NET@"
 
 DEPENDENCIES="${GREP} ${LDAPSEARCH} ${LDAPADD} ${LDAPMODIFY} ${LDAPDELETE} ${SED} ${STAT} ${PERL} ${AWK} ${EGREP} ${FGREP} ${HEAD} ${TAIL} ${BASHSH} ${DATE} ${CUT} ${UNIQ}"
 if [ "x$ENABLE_SAMBA" = "xyes" ]; then
-	DEPENDENCIES="${DEPENDENCIES} @SAMBA_NET@"
+	DEPENDENCIES="${DEPENDENCIES} ${SAMBA_NET}"
 fi
 
 check_self() {
@@ -164,7 +178,7 @@ check_self() {
 
 . "${CONFIG}"
 # Up to date as of 2.2
-CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPHOMEBASE HOMEBASE SKEL DEFAULT_LOGINSHELL USERGROUPS BASEDN LDAPURI BINDPASS USERBASE GROUPBASE HOSTBASE SAMBAHOSTBASE ENABLE_SAMBA SAMBADOMAIN SAMBADOMAINSID SAMBAPATHPREPEND SAMBADRIVEi AUTOMOUNT_BASEDN AUTOMOUNT_USERDESC AUTOMOUNT_GROUPDESC AUTOMOUNT_USERMAP AUTOMOUNT_GROUPMAP AUTOMOUNT_USERBASE AUTOMOUNT_GROUPBASE AUTOMOUNT_OPTIONS AUTOMOUNT_BASE AUTOMOUNT_HASHING"
+CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPHOMEBASE HOMEBASE SKEL DEFAULT_LOGINSHELL USERGROUPS BASEDN LDAPURI BINDPASS USERBASE GROUPBASE HOSTBASE SAMBAHOSTBASE ENABLE_SAMBA SAMBADOMAIN SAMBADOMAINSID SAMBAPATHPREPEND SAMBADRIVE AUTOMOUNT_BASEDN AUTOMOUNT_USERDESC AUTOMOUNT_GROUPDESC AUTOMOUNT_USERMAP AUTOMOUNT_GROUPMAP AUTOMOUNT_USERBASE AUTOMOUNT_GROUPBASE AUTOMOUNT_OPTIONS AUTOMOUNT_BASE AUTOMOUNT_HASHING"
 CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID SAMBAHOSTRIDMIN SAMBAHOSTRIDMAX"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
 CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
@@ -251,6 +265,7 @@ print_usage_sub() {
 	;;
 	_check)
 	echo " diradm check [self|config]   Run tests for: ALL/self/config"
+	;;
 	_version)
 	echo " diradm version   Print diradm version number, then exit"
 	;;
@@ -1713,10 +1728,6 @@ hostmod () {
 
 check() {
 	[ -z "${modulename}" ] && modulename="check"
-	if [ "${#}" -le 1 ]; then
-		echo "${modulename}: No arguments given"
-		exit 2
-	fi
 	args="$@"
 	[ -z "${args}" ] && args="all"
 	[ "${args/all}" != "${args}" ] && args="${args//all/self config}"
@@ -1750,46 +1761,44 @@ help() {
 	exit 0
 }
 
+_revision() {
+	echo ${CVS_REVISION}
+	exit 0
+}
+_date() {
+	echo ${CVS_DATE}
+	exit 0
+}
+_header() {
+	echo ${CVS_HEADER}
+	exit 0
+}
+
 commands_user="useradd usermod userdel"
 commands_group="groupadd groupmod groupdel gpasswd"
 commands_change="chsh chfn chage"
 commands_samba="smbhostadd smbhostdel"
 commands_host="hostadd hostdel hostmod"
-commands_misc="help version check"
+commands_misc="help version check _revision _date _header"
 valid_commands="${commands_user} ${commands_group} ${commands_change} ${commands_host} ${commands_misc}"
 [ "$ENABLE_SAMBA" = "yes" ] && valid_commands="${valid_commands} ${commands_samba}"
 
-case "${1}" in
-	${valid_commands// /|})
-		ACTION="${1}"
-		shift 1
-		${ACTION} "$@"
-		exit 0
-		;;
-		# host - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/hosts.htm#seg3b0sara
-		# network - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/networks_NFS.htm#idx232
-		# protocol - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/protocols.htm#idx546
-		# service - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/services.htm#idx574
-		# rpc - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/rpc.htm#idx286
-		# ether - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/ethers.htm#idx111
-		# netmask - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/netmasks.htm#idx226
-		# netgroup - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/netgroup.htm#xqr310mart
-		# bootparam - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/bootparams.htm#idx32
-		# automount
-		# aliases - http://publib16.boulder.ibm.com/pseries/en_US/files/aixfiles/aliases.htm#idx12
-	_revision)
-		echo ${CVS_REVISION}
-		exit 0
-		;;
-	_date)
-		echo ${CVS_DATE}
-		exit 0
-		;;
-	*)
-		help
-		exit 1
-		;;
-esac
+ACTION=""
+for vc in ${valid_commands}; do
+	if [ "x${vc}" == "x${1}" ]; then
+		ACTION="${vc}"
+		break
+	fi
+done
+if [ -n "${ACTION}" ]; then
+	shift 1
+	${ACTION} "$@"
+	exit 0
+else
+	help
+	exit 1
 
-exit 0
+fi
 
+# should not ever reach this point
+exit 3
