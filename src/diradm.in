@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.4 2004/12/12 08:31:31 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.5 2004/12/23 21:16:22 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -80,8 +80,8 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-REVISION='$Revision: 1.4 $'
-DATE='$Date: 2004/12/12 08:31:31 $'
+REVISION='$Revision: 1.5 $'
+DATE='$Date: 2004/12/23 21:16:22 $'
 # get the stripped versions
 REVISION="${REVISION% *}" ; REVISION="${REVISION/* }"
 DATE="${DATE#* }" ; DATE="${DATE% *}"
@@ -91,7 +91,24 @@ if [ ! -r "${CONFIG}" ]; then
 	exit 1
 fi
 
-DEPENDENCIES="@GREP@ @LDAPSEARCH@ @LDAPADD@ @LDAPMODIFY@ @LDAPDELETE@ @SED@ @STAT@ @PERL@ @AWK@ @EGREP@ @FGREP@ @HEAD@ @TAIL@ @BASHSH@"
+# filled by configure
+GREP="@GREP@"
+LDAPSEARCH="@LDAPSEARCH@"
+LDAPADD="@LDAPADD@"
+LDAPMODIFY="@LDAPMODIFY@"
+LDAPDELETE="@LDAPDELETE@"
+SED="@SED@"
+STAT="@STAT@"
+PERL="@PERL@"
+AWK="@AWK@"
+EGREP="@EGREP@"
+FGREP="@FGREP@"
+HEAD="@HEAD@"
+TAIL="@TAIL@"
+BASHSH="@BASHSH@"
+SAMBA_NET="@SAMBA_NET@"
+
+DEPENDENCIES="${GREP} ${LDAPSEARCH} ${LDAPADD} ${LDAPMODIFY} ${LDAPDELETE} ${SED} ${STAT} ${PERL} ${AWK} ${EGREP} ${FGREP} ${HEAD} ${TAIL} ${BASHSH}"
 if [ "x$ENABLE_SAMBA" = "xyes" ]; then
 	DEPENDENCIES="${DEPENDENCIES} @SAMBA_NET@"
 fi
@@ -163,7 +180,7 @@ for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT}; do
 		echo "Configuration error: ${CONFIGOPTION} not defined!"
 		exit 1
 	else
-		echo "${VALUE}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
 			exit 1
@@ -177,7 +194,7 @@ for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT_DISABLE}; do
 		exit 1
 	else
 		if [ "${VALUE}" != "-1" ]; then
-			echo "${VALUE}" | @GREP@ -qs "^[[:digit:]]*$"
+			echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
 			if [ "$?" -ne 0 ]; then
 				echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
 				exit 1
@@ -192,7 +209,7 @@ for CONFIGOPTION in ${CONFIGOPTIONS_DATE_DISABLE}; do
 		exit 1
 	else
 		if [ "${VALUE}" != "-1" ]; then
-			echo "${VALUE}" | @GREP@ -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+			echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 			if [ "$?" -ne 0 ]; then
 				echo "Configuration error: ${CONFIGOPTION} has invalid date value \"${VALUE}\"!"
 				exit 1
@@ -212,10 +229,10 @@ else
 	ADMINOPTIONS="${ADMINOPTIONS} -W"
 fi
 #echo $ADMINOPTIONS
-LDAPSEARCH="@LDAPSEARCH@ ${ADMINOPTIONS}"
-LDAPADD="@LDAPADD@ ${ADMINOPTIONS}"
-LDAPMODIFY="@LDAPMODIFY@ -c ${ADMINOPTIONS}"
-LDAPDELETE="@LDAPDELETE@ ${ADMINOPTIONS}"
+LDAPSEARCH="${LDAPSEARCH} ${ADMINOPTIONS}"
+LDAPADD="${LDAPADD} ${ADMINOPTIONS}"
+LDAPMODIFY="${LDAPMODIFY} -c ${ADMINOPTIONS}"
+LDAPDELETE="${LDAPDELETE} ${ADMINOPTIONS}"
 
 print_usage_sub() {
 	func="$1"
@@ -320,7 +337,7 @@ grabinteractiveinput() {
 	setting="${2}"
 	echo -en "${msg}"
 	read userinput
-	userinput="`echo "${userinput}" | @SED@ -re 's/^[[:space:]]*//g;s/[[:space:]]*$//g;'`"
+	userinput="`echo "${userinput}" | ${SED} -re 's/^[[:space:]]*//g;s/[[:space:]]*$//g;'`"
 	eval ${setting}="${userinput}"
 }
 
@@ -332,7 +349,7 @@ set_union() {
 	b="$2"
 	t="$a"
 	for i in $b; do
-		echo "${a}" | @GREP@ -wqs "${i}"
+		echo "${a}" | ${GREP} -wqs "${i}"
 		# if not there, add
 		[ "$?" -ne 0 ] && t="${t} ${i}"
 	done
@@ -343,22 +360,34 @@ set_intersection() {
 	a="$1"
 	b="$2"
 	t=''
-	for i in $a; do
-		echo "${b}" | @GREP@ -wqs "${i}"
-		# if there, add
-		[ "$?" -eq 0 ] && t="${t} ${i}"
-	done
+	if [ -z "$a" -o -z "$b" ]; then
+		t=''
+	else
+		for i in $a; do
+			echo "${b}" | /bin/grep -wqs "${i}"
+			# if there, add
+			[ "$?" -eq 0 ] && t="${t} ${i}"
+		done
+	fi
 	echo "$t"
 }
 set_complement() {
 	a="$1"
 	b="$2"
 	t=''
-	for i in $a; do
-		echo "${b}" | @GREP@ -wqs "${i}"
-		# if not there, add
-		[ "$?" -ne 0 ] && t="${t} ${i}"
-	done
+	# check for special cases
+	if [ -z "$a" ]; then
+		t="$b"
+	elif [ -z "$b" ]; then
+		t=''
+	# base case
+	else
+		for i in $a; do
+			echo "${b}" | /bin/grep -wqs "${i}"
+			# if not there, add
+			[ "$?" -ne 0 ] && t="${t} ${i}"
+		done
+	fi
 	echo "$t"
 }
 
@@ -371,16 +400,16 @@ ldap_search_getattr() {
 	attr="${3}"
 	regex="^${attr}:{1,2} "
 	[ -n "$DEBUG" ] && echo ${LDAPSEARCH} -b "${basedn}" "${search}" ${attr}
-	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | @EGREP@ "${regex}" | @SED@ -re "s/${regex}//"
+	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | ${EGREP} "${regex}" | ${SED} -re "s/${regex}//"
 }
 
 ldap_base64_decode() {
-	echo "$*" | @PERL@ -MMIME::Base64 -e 'print(decode_base64(<STDIN>));'
+	echo "$*" | ${PERL} -MMIME::Base64 -e 'print(decode_base64(<STDIN>));'
 }
 
 search_attr() {
 	[ -n "$DEBUG" ] && echo ${LDAPSEARCH} -b "${1}" "${2}"
-	${LDAPSEARCH} -b "${1}" "${2}" | @GREP@ -qs "^${3}$"
+	${LDAPSEARCH} -b "${1}" "${2}" | ${GREP} -qs "^${3}$"
 	return "$?"
 }
 
@@ -488,7 +517,7 @@ groupadd () {
 	else
 		CN="${1}"
 	fi
-	echo "${CN}" | @GREP@ -qs "^[[:alnum:]]*$"
+	echo "${CN}" | ${GREP} -qs "^[[:alnum:]]*$"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: \"${CN}\" is not a valid group name"
 		exit 3
@@ -500,7 +529,7 @@ groupadd () {
 		fi
 	fi
 	if [ -n "${GIDNUMBER}" ]; then
-		echo "${GIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${GIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
 			exit 2
@@ -560,7 +589,7 @@ groupmod () {
 		exit 6
 	fi
 	if [ -n "${GIDNUMBER}" ]; then
-		echo "${GIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${GIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid numeric argument \"${GIDNUMBER}\""
 			exit 2
@@ -572,7 +601,7 @@ groupmod () {
 		fi
 	fi
 	if [ -n "${NEWCN}" ]; then
-		echo "${NEWCN}" | @GREP@ -qs "^[[:alnum:]]*$"
+		echo "${NEWCN}" | ${GREP} -qs "^[[:alnum:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: \"${NEWCN}\" is not a valid group name"
 			exit 3
@@ -638,7 +667,7 @@ useradd () {
 	else
 		LOGIN="${1}"
 	fi
-	echo "${LOGIN}" | @GREP@ -qs "^[[:alnum:]\.]*$"
+	echo "${LOGIN}" | ${GREP} -qs "^[[:alnum:]\.]*$"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Invalid user name \"${LOGIN}\""
 		exit 3
@@ -650,7 +679,7 @@ useradd () {
 		fi
 	fi
 	if [ -n "${UIDNUMBER}" ]; then
-		echo "${UIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${UIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid numeric argument \"${UIDNUMBER}\""
 			exit 3
@@ -673,7 +702,7 @@ useradd () {
 		fi
 	fi
 	if [ -n "${GID}" ]; then
-		echo "${GID}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${GID}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -eq 0 ]; then
 			GIDNUMBER="${GID}"
 		else
@@ -712,7 +741,7 @@ useradd () {
 	if [ -n "${OTHERGROUPS}" ]; then
 		OTHERGROUPS="${OTHERGROUPS//,/ }"
 		for POSIXGROUP in ${OTHERGROUPS}; do
-			echo "${POSIXGROUP}" | @GREP@ -qs "^[[:digit:]]*$"
+			echo "${POSIXGROUP}" | ${GREP} -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
 				search_group "gidNumber" "${POSIXGROUP}"
 				if [ "$?" -ne 0 ]; then
@@ -739,13 +768,13 @@ useradd () {
 		HOSTS="$(echo -e "${HOSTS}")"
 	fi
 	[ -z "${HOMEDIRECTORY}" ] && HOMEDIRECTORY="${HOMEBASE}/${LOGIN}"
-	echo "${HOMEDIRECTORY}" | @GREP@ -qs "^/"
+	echo "${HOMEDIRECTORY}" | ${GREP} -qs "^/"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Invalid home directory \"${HOMEDIRECTORY}\""
 		exit 3
 	fi
 	[ -z "${LOGINSHELL}" ] && LOGINSHELL="${DEFAULT_LOGINSHELL}"
-	echo "${LOGINSHELL}" | @GREP@ -qs "^/"
+	echo "${LOGINSHELL}" | ${GREP} -qs "^/"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
 		exit 3
@@ -764,7 +793,7 @@ useradd () {
 	fi
 	[ -z "${SHADOWINACTIVE}" ] && SHADOWINACTIVE="${DEFAULT_SHADOWINACTIVE}"
 	if [ "${SHADOWINACTIVE}" != "-1" ]; then
-		echo "${SHADOWINACTIVE}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${SHADOWINACTIVE}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid numeric argument \"${SHADOWINACTIVE}\""
 			exit 3
@@ -772,7 +801,7 @@ useradd () {
 	fi
 	[ -z "${SHADOWEXPIRE}" ] && SHADOWEXPIRE="${DEFAULT_SHADOWEXPIRE}"
 	if [ "${SHADOWEXPIRE}" != "-1" ]; then
-		echo "${SHADOWEXPIRE}" | @GREP@ -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+		echo "${SHADOWEXPIRE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
 			exit 3
@@ -935,7 +964,7 @@ usermod () {
 		exit 6
 	fi
 	if [ -n "${UIDNUMBER}" ]; then
-		echo "${UIDNUMBER}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${UIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid numeric argument \"${UIDNUMBER}\""
 			exit 3
@@ -947,7 +976,7 @@ usermod () {
 		fi
 	fi
 	if [ -n "${GID}" ]; then
-		echo "${GID}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${GID}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -eq 0 ]; then
 			GIDNUMBER="${GID}"
 		else
@@ -965,7 +994,7 @@ usermod () {
 	if [ -n "${OTHERGROUPS}" ]; then
 		OTHERGROUPS="${OTHERGROUPS//,/ }"
 		for POSIXGROUP in ${OTHERGROUPS}; do
-			echo "${POSIXGROUP}" | @GREP@ -qs "^[[:digit:]]*$"
+			echo "${POSIXGROUP}" | ${GREP} -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
 				search_group "gidNumber" "${POSIXGROUP}"
 				if [ "$?" -ne 0 ]; then
@@ -992,21 +1021,21 @@ usermod () {
 		HOSTS="$(echo -e "${HOSTS}")"
 	fi
 	if [ -n "${HOMEDIRECTORY}" ]; then
-		echo "${HOMEDIRECTORY}" | @GREP@ -qs "^/"
+		echo "${HOMEDIRECTORY}" | ${GREP} -qs "^/"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid home directory \"${HOMEDIRECTORY}\""
 			exit 3
 		fi
 	fi
 	if [ -n "${LOGINSHELL}" ]; then
-		echo "${LOGINSHELL}" | @GREP@ -qs "^/"
+		echo "${LOGINSHELL}" | ${GREP} -qs "^/"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
 			exit 3
 		fi
 	fi
 	if [ -n "${NEWLOGIN}" ]; then
-		echo "${NEWLOGIN}" | @GREP@ -qs "^[[:alnum:]]*$"
+		echo "${NEWLOGIN}" | ${GREP} -qs "^[[:alnum:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid user name \"${NEWLOGIN}\""
 			exit 3
@@ -1018,7 +1047,7 @@ usermod () {
 			fi
 		fi
 		if [ -z "${ADDTOGROUPS}" ]; then
-			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | @GREP@ "^cn:" | @SED@ "s/^cn: //")"
+			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | ${GREP} "^cn:" | ${SED} "s/^cn: //")"
 			ADDTOGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 		fi
 	fi
@@ -1036,7 +1065,7 @@ usermod () {
 	fi
 	if [ -n "${SHADOWINACTIVE}" ]; then
 		if [ "${SHADOWINACTIVE}" != "-1" ]; then
-			echo "${SHADOWINACTIVE}" | @GREP@ -qs "^[[:digit:]]*$"
+			echo "${SHADOWINACTIVE}" | ${GREP} -qs "^[[:digit:]]*$"
 			if [ "$?" -ne 0 ]; then
 				echo "${modulename}: Invalid numeric argument \"${SHADOWINACTIVE}\""
 				exit 3
@@ -1045,7 +1074,7 @@ usermod () {
 	fi
 	if [ -n "${SHADOWEXPIRE}" ]; then
 		if [ "${SHADOWEXPIRE}" != "-1" ]; then
-			echo "${SHADOWEXPIRE}" | @GREP@ -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+			echo "${SHADOWEXPIRE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 			if [ "$?" -ne 0 ]; then
 				echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
 				exit 3
@@ -1061,15 +1090,15 @@ usermod () {
 		sambaLMPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" sambaLMPassword)"
 		irixPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" irixPassword)"
 		if [ "${LOCKED}" = "yes" ]; then
-			USERPASSWORD="$(echo "${OLDPASSWORD}" | @SED@ -re 's/}[!]?/}!/')"
-			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | @SED@ -re 's/^[!]?/!/')"
-			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | @SED@ -re 's/^[!]?/!/')"
-			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | @SED@ -re 's/}[!]?/}!/')"
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}[!]?/}!/')"
+			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]?/!/')"
+			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SED} -re 's/^[!]?/!/')"
+			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}[!]?/}!/')"
 		elif [ "${LOCKED}" = "no" ]; then
-			USERPASSWORD="$(echo "${OLDPASSWORD}" | @SED@ -re 's/}!/}/')"
-			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | @SED@ -re 's/^[!]//')"
-			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | @SED@ -re 's/^[!]//')"
-			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | @SED@ -re 's/}!/}/')"
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}!/}/')"
+			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]//')"
+			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SED} -re 's/^[!]//')"
+			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}!/}/')"
 		fi
 	fi
 	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}"
@@ -1144,9 +1173,9 @@ userdel () {
 	done
 	runmodify
 	if [ "${REMOVEHOMEDIR}" = "yes" -a -d "${HOMEDIRECTORY}" ]; then
-		OWNER_UIDNUMBER="$(@STAT@ "${HOMEDIRECTORY}" |
-			@GREP@ "Uid:" |
-			@SED@ "s/^.*Uid:.*(\(.*\)\/.*Gid:.*$/\1/" | tr -d " ")"
+		OWNER_UIDNUMBER="$(${STAT} "${HOMEDIRECTORY}" |
+			${GREP} "Uid:" |
+			${SED} "s/^.*Uid:.*(\(.*\)\/.*Gid:.*$/\1/" | tr -d " ")"
 		if [ "${UIDNUMBER}" -eq "${OWNER_UIDNUMBER}" ]; then
 			rm -rf "${HOMEDIRECTORY}"
 		else
@@ -1389,6 +1418,7 @@ gpasswd() {
 
 	# check if we should do anything
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+	runmodify
 }
 
 gpasswd_admin_error() {
@@ -1416,7 +1446,7 @@ smbhostadd() {
 	fi
 
 	if [ -n "${HOSTRID}" ]; then
-		echo "${HOSTRID}" | @GREP@ -qs "^[[:digit:]]*$"
+		echo "${HOSTRID}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid numeric argument \"${HOSTRID}\""
 			exit 3
@@ -1441,14 +1471,27 @@ smbhostadd() {
 	append "objectClass: sambaSamAccount"
 	append "uid: ${NAME}\$"
 	append "sambaSID: ${SAMBADOMAINSID}-${HOSTRID}"
-	let CANCHANGE="$(date -u +%s)"
-	append "sambaPwdCanChange: ${CANCHANGE}"
-	append "sambaPwdLastSet: ${CANCHANGE}"
-	let MUSTCHANGE="${CANCHANGE} + 1814400"
-	append "sambaPwdMustChange: ${MUSTCHANGE}"
 	append "sambaAcctFlags: [W          ]"
-	append "sambaLMPassword: $(${MKPASSWD} -l ${NAME}\$)"
-	append "sambaNTPassword: $(${MKPASSWD} -n ${NAME}\$)"
+	let LMPASS="$(${MKPASSWD} -l ${NAME}\$)"
+	let NTPASS="$(${MKPASSWD} -n ${NAME}\$)"
+	append "sambaLMPassword: ${LMPASS}"
+	append "sambaNTPassword: ${NTPASS}"
+
+	# from IDEALX scripts
+	append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-0"
+	append "sambaBadPasswordCount: 0"
+	append "sambaBadPasswordTime: 0"
+
+	let CANCHANGE="$(date -u +%s)"
+	let MUSTCHANGE="${CANCHANGE} + 1814400"
+	# leave password rotation alone for now
+	# all of the following are timestamps
+	append "sambaPwdCanChange: 0"
+	append "sambaPwdMustChange: 0"
+	append "sambaPwdLastSet: 0"
+	append "sambaLogonTime: 0"
+	append "sambaLogoffTime: 2147483647"
+	append "sambaKickoffTime: 2147483647"
 	append "\n\n"
 
 	runmodify
