@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT([diradm],
-        [2.1],
+        [2.2],
         [Robin Hugh Johnson robbat2@orbis-terrarum.net],
         [diradm])
 AC_CONFIG_AUX_DIR(config)
@@ -32,12 +32,18 @@ AC_PATH_PROGS_ERROR(HEAD, head)
 AC_PATH_PROGS_ERROR(GREP, grep)
 AC_PATH_PROGS_ERROR(BASHSH, bash sh)
 AC_PATH_PROGS_ERROR(SED, sed)
+AC_PATH_PROGS_ERROR(CUT, cut)
 AC_PATH_PROGS_ERROR(PERL, perl)
 AC_PATH_PROGS_ERROR(STAT, stat)
+AC_PATH_PROGS_ERROR(DATE, date)
+AC_PATH_PROGS_ERROR(UNIQ, uniq)
+dnl ldap stuff now
 AC_PATH_PROGS_ERROR(LDAPSEARCH, ldapsearch)
 AC_PATH_PROGS_ERROR(LDAPADD, ldapadd)
 AC_PATH_PROGS_ERROR(LDAPMODIFY, ldapmodify)
 AC_PATH_PROGS_ERROR(LDAPDELETE, ldapdelete)
+
+
 AC_ENABLE(samba, ENABLE_SAMBA=yes, ENABLE_SAMBA=no)
 AC_SUBST(ENABLE_SAMBA)
 AC_PROG_PERL_MODULES(	[MIME::Base64], ,
