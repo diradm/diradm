@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.8 2005/01/09 03:24:41 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.9 2005/01/09 06:00:25 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -93,9 +93,9 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-CVS_REVISION='$Revision: 1.8 $'
-CVS_DATE='$Date: 2005/01/09 03:24:41 $'
-CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.8 2005/01/09 03:24:41 robbat2 Exp $'
+CVS_REVISION='$Revision: 1.9 $'
+CVS_DATE='$Date: 2005/01/09 06:00:25 $'
+CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.9 2005/01/09 06:00:25 robbat2 Exp $'
 # get the stripped versions
 CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
 CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
@@ -178,7 +178,7 @@ check_self() {
 
 . "${CONFIG}"
 # Up to date as of 2.2
-CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPHOMEBASE HOMEBASE SKEL DEFAULT_LOGINSHELL USERGROUPS BASEDN LDAPURI BINDPASS USERBASE GROUPBASE HOSTBASE SAMBAHOSTBASE ENABLE_SAMBA SAMBADOMAIN SAMBADOMAINSID SAMBAPATHPREPEND SAMBADRIVE AUTOMOUNT_BASEDN AUTOMOUNT_USERDESC AUTOMOUNT_GROUPDESC AUTOMOUNT_USERMAP AUTOMOUNT_GROUPMAP AUTOMOUNT_USERBASE AUTOMOUNT_GROUPBASE AUTOMOUNT_OPTIONS AUTOMOUNT_BASE AUTOMOUNT_HASHING"
+CONFIGOPTIONS_STRING="LDAPURI BINDDN USER_BASEDN GROUPHOMEBASE HOMEBASE SKEL DEFAULT_LOGINSHELL USERGROUPS BASEDN LDAPURI BINDPASS GROUP_BASEDN HOST_BASEDN SAMBAHOST_BASEDN ENABLE_SAMBA SAMBADOMAIN SAMBADOMAINSID SAMBAPATHPREPEND SAMBADRIVE AUTOMOUNT_BASEDN AUTOMOUNT_USERDESC AUTOMOUNT_GROUPDESC AUTOMOUNT_USERMAP AUTOMOUNT_GROUPMAP AUTOMOUNT_USERBASE AUTOMOUNT_GROUPBASE AUTOMOUNT_OPTIONS AUTOMOUNT_BASE AUTOMOUNT_HASHING"
 CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID SAMBAHOSTRIDMIN SAMBAHOSTRIDMAX"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
 CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
@@ -263,13 +263,13 @@ print_usage_sub() {
 	hostdel)
 	echo " diradm hostdel host"
 	;;
-	_check)
+	check)
 	echo " diradm check [self|config]   Run tests for: ALL/self/config"
 	;;
-	_version)
+	version)
 	echo " diradm version   Print diradm version number, then exit"
 	;;
-	_help)
+	help)
 	echo " diradm help [command1]...    Print help, then exit"
 	;;
 	_)
@@ -280,12 +280,12 @@ print_usage_sub() {
 
 print_usage () {
 	list=''
-	[ -n "$1" ] && list="$1"
+	[ -n "$*" ] && list="$@"
 	echo "Usage:"
 	if [ -z "$list" -o "$list" == "_all" ]; then
 		list="useradd _ usermod _ userdel _ groupadd groupmod groupdel _ chsh _ chfn _ chage _ gpasswd _ hostadd hostmod hostdel"
 		[ "$ENABLE_SAMBA" = "yes" ] && list="${list} _ smbhostadd smbhostdel"
-		list="${list} _ _check _version _help _"
+		list="${list} _ check version help _"
 	fi
 	for i in $list; do
 		print_usage_sub ${i}
@@ -414,7 +414,7 @@ set_complement() {
 }
 
 # eg: 
-# ldap_search_getattr "${GROUPBASE}" "gidNumber=100" cn
+# ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=100" cn
 # (returns 'users' on systems with that initial data in LDAP)
 ldap_search_getattr() {
 	basedn="${1}"
@@ -436,21 +436,21 @@ search_attr() {
 }
 
 search_smbhost() {
-	search_attr "${SAMBAHOSTBASE}" "${1}=${2}" "${1}: ${2}"
+	search_attr "${SAMBAHOST_BASEDN}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 
 search_host() {
-	search_attr "${HOSTBASE}" "${1}=${2}" "${1}: ${2}"
+	search_attr "${HOST_BASEDN}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 search_user() {
-	search_attr "${USERBASE}" "${1}=${2}" "${1}: ${2}"
+	search_attr "${USER_BASEDN}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 
 search_group() {
-	search_attr "${GROUPBASE}" "${1}=${2}" "${1}: ${2}"
+	search_attr "${GROUP_BASEDN}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 
@@ -574,7 +574,7 @@ groupadd () {
 		fi
 	fi
 	# setup commands
-	append "dn: cn=${CN},${GROUPBASE}"
+	append "dn: cn=${CN},${GROUP_BASEDN}"
 	append "changetype: add"
 	append "objectClass: top"
 	append "objectClass: posixGroup"
@@ -635,8 +635,8 @@ groupmod () {
 			fi
 		fi
 	fi
-	[ -n "${GIDNUMBER}" ] && append "dn: cn=${CN},${GROUPBASE}\nreplace: gidNumber\ngidNumber: ${GIDNUMBER}\n"
-	[ -n "${NEWCN}" ] && append "dn: cn=${CN},${GROUPBASE}\nchangetype: modrdn\nnewrdn: cn=${NEWCN}"
+	[ -n "${GIDNUMBER}" ] && append "dn: cn=${CN},${GROUP_BASEDN}\nreplace: gidNumber\ngidNumber: ${GIDNUMBER}\n"
+	[ -n "${NEWCN}" ] && append "dn: cn=${CN},${GROUP_BASEDN}\nchangetype: modrdn\nnewrdn: cn=${NEWCN}"
 	runmodify
 }
 
@@ -653,7 +653,7 @@ groupdel () {
 		echo "${modulename}: Group \"${CN}\" does not exist"
 		exit 6
 	fi
-	rundelete "cn=${CN},${GROUPBASE}" 
+	rundelete "cn=${CN},${GROUP_BASEDN}" 
 }
 
 
@@ -728,7 +728,7 @@ useradd() {
 		if [ "$?" -eq 0 ]; then
 			GIDNUMBER="${GID}"
 		else
-			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${GID}" gidNumber)"
+			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${GID}" gidNumber)"
 			if [ -z "${GIDNUMBER}" ]; then
 				echo "${modulename}: Unknown group \"${GID}\""
 				exit 6
@@ -753,7 +753,7 @@ useradd() {
 				echo "${modulename}: Failed to add group '${LOGIN}'."
 				exit 9
 			fi
-			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${LOGIN}" gidNumber)"
+			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${LOGIN}" gidNumber)"
 		fi
 	fi
 	search_group "gidNumber" "${GIDNUMBER}"
@@ -770,7 +770,7 @@ useradd() {
 					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
 					exit 6
 				fi
-				POSIXGROUP="$(ldap_search_getattr "${GROUPBASE}" "gidNumber=${POSIXGROUP}" cn)"
+				POSIXGROUP="$(ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=${POSIXGROUP}" cn)"
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
 				search_group "cn" "${POSIXGROUP}"
@@ -845,7 +845,7 @@ useradd() {
 	CN="${FIRSTNAME}"
 
 	# Setup the commands
-	append "dn: uid=${LOGIN},${USERBASE}"
+	append "dn: uid=${LOGIN},${USER_BASEDN}"
 	append "changetype: add"
 	append "objectClass: top"
 	#append "objectClass: account"
@@ -909,12 +909,12 @@ useradd() {
 	
 	# group stuff	
 	if [ -n "${ADDTOGROUPS}" ]; then
-		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 		for POSIXGROUP in ${ADDTOGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 	fi
 
@@ -1003,7 +1003,7 @@ usermod () {
 		if [ "$?" -eq 0 ]; then
 			GIDNUMBER="${GID}"
 		else
-			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${GID}" gidNumber)"
+			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${GID}" gidNumber)"
 			if [ -z "${GIDNUMBER}" ]; then
 				echo "${modulename}: Unknown group \"${GID}\""
 				exit 6
@@ -1024,7 +1024,7 @@ usermod () {
 					echo "${modulename}: Unknown other group number \"${POSIXGROUP}\""
 					exit 6
 				fi
-				POSIXGROUP="$(ldap_search_getattr "${GROUPBASE}" "gidNumber=${POSIXGROUP}" cn)"
+				POSIXGROUP="$(ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=${POSIXGROUP}" cn)"
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
 				search_group "cn" "${POSIXGROUP}"
@@ -1070,8 +1070,8 @@ usermod () {
 			fi
 		fi
 		if [ -z "${ADDTOGROUPS}" ]; then
-			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | ${GREP} "^cn:" | ${SED} "s/^cn: //")"
-			ADDTOGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUP_BASEDN}" "memberUid=${LOGIN}" | ${GREP} "^cn:" | ${SED} "s/^cn: //")"
+			ADDTOGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		fi
 	fi
 	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" = "yes" ]; then
@@ -1084,7 +1084,7 @@ usermod () {
 			echo "${modulename}: Cannot create directory \"${HOMEDIRECTORY}\""
 			exit 12
 		fi
-		OLDHOMEDIRECTORY="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" homeDirectory)"
+		OLDHOMEDIRECTORY="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" homeDirectory)"
 	fi
 	if [ -n "${SHADOWINACTIVE}" ]; then
 		if [ "${SHADOWINACTIVE}" != "-1" ]; then
@@ -1107,11 +1107,11 @@ usermod () {
 		fi
 	fi
 	if [ -n "${LOCKED}" ]; then
-		OLDPASSWORDENCODED="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" userPassword)"
+		OLDPASSWORDENCODED="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword)"
 		OLDPASSWORD="$(ldap_base64_decode "${OLDPASSWORDENCODED}")"
-		sambaNTPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" sambaNTPassword)"
-		sambaLMPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" sambaLMPassword)"
-		irixPassword="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" irixPassword)"
+		sambaNTPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaNTPassword)"
+		sambaLMPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaLMPassword)"
+		irixPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" irixPassword)"
 		if [ "${LOCKED}" = "yes" ]; then
 			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}[!]?/}!/')"
 			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]?/!/')"
@@ -1124,15 +1124,15 @@ usermod () {
 			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}!/}/')"
 		fi
 	fi
-	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}"
+	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
 	if [ -n "${ADDTOGROUPS}" ]; then
-		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 		[ -n "${NEWLOGIN}" ] && LOGIN="${NEWLOGIN}"
 		for POSIXGROUP in ${ADDTOGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 	fi
 	append "${COMMAND_DN}"
@@ -1151,7 +1151,7 @@ usermod () {
 	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}\n-"
 	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}\n-"
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}"
+	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USER_BASEDN}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}"
 	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
 	runmodify
 	if [ "${MOVEHOMEDIR}" = "yes" ]; then
@@ -1186,13 +1186,13 @@ userdel () {
 			echo "${modulename}: Only root may remove home directories"
 			exit 12
 		fi
-		HOMEDIRECTORY="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" homeDirectory)"
-		UIDNUMBER="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" uidNumber)"
+		HOMEDIRECTORY="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" homeDirectory)"
+		UIDNUMBER="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" uidNumber)"
 	fi
-	append "dn: uid=${LOGIN},${USERBASE}\nchangetype: delete\n"
-	DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
+	append "dn: uid=${LOGIN},${USER_BASEDN}\nchangetype: delete\n"
+	DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 	for POSIXGROUP in ${DELETEFROMGROUPS}; do
-		append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+		append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 	done
 	runmodify
 	if [ "${REMOVEHOMEDIR}" = "yes" -a -d "${HOMEDIRECTORY}" ]; then
@@ -1222,7 +1222,7 @@ chsh() {
 	else
 		LOGIN="${1}"
 	fi
-	OLDLOGINSHELL="`ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" "loginShell"`"
+	OLDLOGINSHELL="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "loginShell"`"
 	if [ -z "${LOGINSHELL}" ]; then
 		msg="Changing the login shell for ${LOGIN}\nEnter the new value, or press return for the default\n\tLogin Shell [${OLDLOGINSHELL}]: "
 		grabinteractiveinput "${msg}" LOGINSHELL
@@ -1316,12 +1316,12 @@ chage() {
 		exit 1
 	fi
 	if [ "x${LISTONLY}" == 'x1' ]; then
-		MINDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowMin)
-		MAXDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowMax)
-		WARNDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowWarning)
-		INACTIVEDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowInactive)
-		ACCOUNTEXPIRY=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowExpire)
-		LASTCHANGE=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowLastChange)
+		MINDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMin)
+		MAXDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMax)
+		WARNDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowWarning)
+		INACTIVEDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowInactive)
+		ACCOUNTEXPIRY=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowExpire)
+		LASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
 
 		echo -e "Minimum:\t${MINDAYS}"
 		echo -e "Maximum:\t${MAXDAYS}"
@@ -1399,13 +1399,13 @@ gpasswd() {
 	fi
 	
 	
-	COMMAND_DN="dn: cn=${GROUP},${GROUPBASE}"
+	COMMAND_DN="dn: cn=${GROUP},${GROUP_BASEDN}"
 	append "${COMMAND_DN}"
 	append "changetype: modify"
 
 	# TODO: -R/-r/passwd/ADMIN
 
-	MEMBERS_CURRENT="$(ldap_search_getattr ${GROUPBASE} "cn=${GROUP}" memberUid)"
+	MEMBERS_CURRENT="$(ldap_search_getattr ${GROUP_BASEDN} "cn=${GROUP}" memberUid)"
 	#echo MC:$MEMBERS_CURRENT
 	#echo MS:$MEMBERS_SET
 	# if we are doing SET mode, then we do it differently
@@ -1488,7 +1488,7 @@ smbhostadd() {
 		done
 	fi
 
-	append "dn: uid=${NAME}\$,${SAMBAHOSTBASE}"
+	append "dn: uid=${NAME}\$,${SAMBAHOST_BASEDN}"
 	append "changetype: add"
 	append "objectClass: sambaSidEntry"
 	append "objectClass: sambaSamAccount"
@@ -1522,7 +1522,6 @@ smbhostadd() {
 
 smbhostdel () {
 	[ -z "${modulename}" ] && modulename="smbhostdel"
-	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
 		exit 2
@@ -1534,10 +1533,16 @@ smbhostdel () {
 		echo "${modulename}: Machine \"${NAME}\" does not exist"
 		exit 6
 	fi
-	append "dn: uid=${NAME}\$,${SAMBAHOSTBASE}"
+	append "dn: uid=${NAME}\$,${SAMBAHOST_BASEDN}"
 	append "changetype: delete"
 	append "\n"
 	runmodify
+}
+
+smbhostmod() {
+	[ -z "${modulename}" ] && modulename="smbhostmod"
+	echo "Not done yet!"
+	exit 99
 }
 
 hostadd () {
@@ -1565,29 +1570,26 @@ hostadd () {
 	fi
 
 	# Setup the commands
-	append "dn: cn=${NAME},${HOSTBASE}"
+	append "dn: cn=${NAME},${HOST_BASEDN}"
 	append "changetype: add"
 	append "objectClass: top"
 	append "objectClass: device"
 	append "cn: ${NAME}"
 
 	if [ -n "${ETHERS}" ]; then
-		ETHERS="${ETHERS//,/ }"
 		append "objectClass: ieee802device"
-		for i in ${ETHERS}; do
+		for i in ${ETHERS//, }; do
 			append "macAddress: ${i}"
 		done
 	fi
 	if [ -n "${IPS}" ]; then
-		IPS="${IPS//,/ }"
 		append "objectClass: ipHost"
-		for i in ${IPS}; do
+		for i in ${IPS//, /}; do
 			append "ipHostNumber: ${i}"
 		done
 	fi
 	if [ -n "${ALIASES}" ]; then
-		ALIASES="${ALIASES//,/ }"
-		for i in ${ALIASES}; do
+		for i in ${ALIASES//,/ }; do
 			append "cn: ${i}"
 		done
 	fi
@@ -1612,7 +1614,7 @@ hostdel () {
 		echo "${modulename}: Host \"${NAME}\" does not exist"
 		exit 6
 	fi
-	append "dn: cn=${NAME}\$,${HOSTBASE}"
+	append "dn: cn=${NAME}\$,${HOST_BASEDN}"
 	append "changetype: delete"
 	append "\n"
 
@@ -1650,12 +1652,12 @@ hostmod () {
 		echo "${modulename}: Host \"${NAME}\" does not exist"
 		exit 6
 	fi
-	COMMAND_DN="dn: cn=${NAME},${HOSTBASE}"
+	COMMAND_DN="dn: cn=${NAME},${HOST_BASEDN}"
 	append "${COMMAND_DN}"
 	append "changetype: modify"
 	if [ -n "${ADDETHERS}" ]; then
 		ADDETHERS="${ADDETHERS//,/ }"
-		search_attr "${HOSTBASE}" "(cn=${NAME})" "objectClass: ieee802device"
+		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ieee802device"
 		if [ "$?" -eq 1 ]; then
 			append "add: objectClass"
 			append "objectClass: ieee802device"
@@ -1679,7 +1681,7 @@ hostmod () {
 	fi
 	if [ -n "${ADDIPS}" ]; then
 		ADDIPS="${ADDIPS//,/ }"
-		search_attr "${HOSTBASE}" "(cn=${NAME})" "objectClass: ipHost"
+		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ipHost"
 		if [ "$?" -eq 1 ]; then
 			append "add: objectClass"
 			append "objectClass: ipHost"
@@ -1720,7 +1722,7 @@ hostmod () {
 		done
 	fi
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	[ -n "${NEWNAME}" ] && append "dn: cn=${NAME},${HOSTBASE}\nchangetype: modrdn\nnewrdn: cn=${NEWNAME}\n"
+	[ -n "${NEWNAME}" ] && append "dn: cn=${NAME},${HOST_BASEDN}\nchangetype: modrdn\nnewrdn: cn=${NEWNAME}\n"
 
 	#echo "${COMMAND}"
 	runmodify
@@ -1749,15 +1751,7 @@ check() {
 
 help() {
 	[ -z "${modulename}" ] && modulename="help"
-	local helptopic
-	if [ "${#}" -le 1 ]; then
-		helptopic="_all"
-	else
-		helptopic="${@}"
-	fi
-	for topic in ${helptopic}; do
-		print_usage ${topic}
-	done
+	print_usage "${@}"
 	exit 0
 }
 

@@ -1,5 +1,5 @@
 # Begin /etc/diradm.conf
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.6 2005/01/09 03:24:41 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.7 2005/01/09 06:00:25 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # @PACKAGE@ @VERSION@
 
@@ -84,10 +84,10 @@ function grabpasswd() {
 [ -z "${BINDPASS}" ] && BINDPASS="$(grabpasswd)"
 [ -z "${BINDPASS}" ] && BINDPASS="secret"
 # back to normal stuff
-USERBASE="`grabconf nss_base_passwd "ou=Users,${BASEDN}"`"
-GROUPBASE="`grabconf nss_base_group "ou=Group,${BASEDN}"`"
-HOSTBASE="`grabconf nss_base_hosts "ou=Hosts,${BASEDN}"`"
-SAMBAHOSTBASE="ou=Computers,${BASEDN}"
+USER_BASEDN="`grabconf nss_base_passwd "ou=Users,${BASEDN}"`"
+GROUP_BASEDN="`grabconf nss_base_group "ou=Group,${BASEDN}"`"
+HOST_BASEDN="`grabconf nss_base_hosts "ou=Hosts,${BASEDN}"`"
+SAMBAHOST_BASEDN="ou=Computers,${BASEDN}"
 
 # SAMBA specific options
 # ----------------------
