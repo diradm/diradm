@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.6 2005/01/14 02:34:30 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.7 2005/02/07 09:59:39 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -286,12 +286,10 @@ useradd() {
 		done
 	fi
 
-
 	# add user
 	#echo -e "${COMMAND}"
 	runmodify
 	
-
 	if [ "${CREATEHOMEDIR}" = "yes" ]; then
 		if [ "${USER_AUTOMOUNTHOME}" = "yes" ]; then
 			# add automount entry first
@@ -342,17 +340,22 @@ usermod() {
 		esac
 	done
 	shift $((${OPTIND} - 1))
+
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
 		exit 2
 	else
 		LOGIN="${1}"
 	fi
+
+	# check that the damn user exists
 	search_user "uid" "${LOGIN}"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: User \"${LOGIN}\" does not exist"
 		exit 6
 	fi
+
+	# new uid number
 	if [ -n "${UIDNUMBER}" ]; then
 		echo "${UIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -ne 0 ]; then
@@ -365,6 +368,8 @@ usermod() {
 			exit 4
 		fi
 	fi
+
+	# new gid
 	if [ -n "${GID}" ]; then
 		echo "${GID}" | ${GREP} -qs "^[[:digit:]]*$"
 		if [ "$?" -eq 0 ]; then
@@ -381,6 +386,8 @@ usermod() {
 			echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Modifying user anyway."
 		fi
 	fi
+
+	# alternative groups
 	if [ -n "${OTHERGROUPS}" ]; then
 		OTHERGROUPS="${OTHERGROUPS//,/ }"
 		for POSIXGROUP in ${OTHERGROUPS}; do
@@ -403,6 +410,8 @@ usermod() {
 			fi
 		done
 	fi
+
+	# statute of limitations, based on hosts
 	if [ -n "${HOSTLIST}" ]; then
 		HOSTLIST="${HOSTLIST//,/ }"
 		for HOST in ${HOSTLIST}; do
@@ -410,6 +419,8 @@ usermod() {
 		done
 		HOSTS="$(echo -e "${HOSTS}")"
 	fi
+
+	# new home directory
 	if [ -n "${HOMEDIRECTORY}" ]; then
 		echo "${HOMEDIRECTORY}" | ${GREP} -qs "^/"
 		if [ "$?" -ne 0 ]; then
@@ -417,6 +428,8 @@ usermod() {
 			exit 3
 		fi
 	fi
+
+	# change of login shell
 	if [ -n "${LOGINSHELL}" ]; then
 		echo "${LOGINSHELL}" | ${GREP} -qs "^/"
 		if [ "$?" -ne 0 ]; then
@@ -424,6 +437,8 @@ usermod() {
 			exit 3
 		fi
 	fi
+
+	# if we have a new username, we must update all groups
 	if [ -n "${NEWLOGIN}" ]; then
 		echo "${NEWLOGIN}" | ${GREP} -qs "^[[:alnum:]\.]*$"
 		if [ "$?" -ne 0 ]; then
@@ -440,6 +455,8 @@ usermod() {
 			ADDTOGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		fi
 	fi
+
+	# moving home directory
 	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" = "yes" ]; then
 		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may move home directories"
@@ -452,6 +469,7 @@ usermod() {
 		fi
 		OLDHOMEDIRECTORY="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" homeDirectory)"
 	fi
+
 	if [ -n "${SHADOWINACTIVE}" ]; then
 		if [ "${SHADOWINACTIVE}" != "-1" ]; then
 			echo "${SHADOWINACTIVE}" | ${GREP} -qs "^[[:digit:]]*$"
@@ -461,28 +479,35 @@ usermod() {
 			fi
 		fi
 	fi
+
+	# calculate expiry time
 	if [ -n "${SHADOWEXPIRE}" ]; then
 		if [ "${SHADOWEXPIRE}" != "-1" ]; then
 			echo "${SHADOWEXPIRE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
 			if [ "$?" -ne 0 ]; then
-				echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
+				echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\" - format is YYYY-MM-DD"
 				exit 3
 			else
 				let SHADOWEXPIRE="$(${DATE} -d "${SHADOWEXPIRE}" +%s) / 86400"
 			fi
 		fi
 	fi
+
+	# password locking is happening
 	if [ -n "${LOCKED}" ]; then
+		# grab data
 		OLDPASSWORDENCODED="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword)"
 		OLDPASSWORD="$(ldap_base64_decode "${OLDPASSWORDENCODED}")"
 		sambaNTPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaNTPassword)"
 		sambaLMPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaLMPassword)"
 		irixPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" irixPassword)"
+		# add lock
 		if [ "${LOCKED}" = "yes" ]; then
 			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}[!]?/}!/')"
 			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]?/!/')"
 			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SED} -re 's/^[!]?/!/')"
 			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}[!]?/}!/')"
+		# remove lock
 		elif [ "${LOCKED}" = "no" ]; then
 			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}!/}/')"
 			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]//')"
@@ -490,22 +515,8 @@ usermod() {
 			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}!/}/')"
 		fi
 	fi
+
 	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
-	if [ -n "${ADDTOGROUPS}" ]; then
-		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
-		for POSIXGROUP in ${DELETEFROMGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
-			append "delete: memberUid"
-			append "memberUid: ${LOGIN}\n"
-		done
-		activelogin="${LOGIN}"
-		[ -n "${NEWLOGIN}" ] && activelogin="${NEWLOGIN}"
-		for POSIXGROUP in ${ADDTOGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
-			append "add: memberUid"
-			append "memberUid: ${activelogin}\n"
-		done
-	fi
 	append "${COMMAND_DN}"
 	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}"
 	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}"
@@ -522,8 +533,29 @@ usermod() {
 	[ -n "${sambaNTPassword}" ] && append_attrib_replace "sambaNTPassword" "${sambaNTPassword}"
 	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}"
 	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}"
+	# if we haven't set anything so far, all of our changes are in other DNs
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+	
+	# redo groups
+	if [ -n "${ADDTOGROUPS}" ]; then
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
+		for POSIXGROUP in ${DELETEFROMGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
+			append "delete: memberUid"
+			append "memberUid: ${LOGIN}\n"
+		done
+		activelogin="${LOGIN}"
+		[ -n "${NEWLOGIN}" ] && activelogin="${NEWLOGIN}"
+		for POSIXGROUP in ${ADDTOGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
+			append "add: memberUid"
+			append "memberUid: ${activelogin}\n"
+		done
+	fi
+
+	# new username
 	[ -n "${NEWLOGIN}" ] && append "\ndn: uid=${LOGIN},${USER_BASEDN}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
+
 	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
 	runmodify
 	if [ "${MOVEHOMEDIR}" = "yes" ]; then
