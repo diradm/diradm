@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.9 2003/07/14 10:56:46 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.10 2003/07/14 10:58:06 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -286,7 +286,6 @@ useradd () {
 		if [ "$?" -eq 0 ]; then
 			GIDNUMBER="${GID}"
 		else
-			#GIDNUMBER="$(${LDAPSEARCH} -b "${GROUPBASE}" "cn=${GID}" | grep "gidNumber: " | sed "s/gidNumber: //")"
 			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${GID}" gidNumber)"
 			if [ -z "${GIDNUMBER}" ]; then
 				echo "${modulename}: Unknown group \"${GID}\""
@@ -310,9 +309,6 @@ useradd () {
 					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
 					exit 6
 				fi
-				#POSIXGROUP="$(${LDAPSEARCH} -b "${GROUPBASE}" "gidNumber=${POSIXGROUP}" |
-				#	grep "^cn:" |
-				#	sed "s/cn: //")"
 				POSIXGROUP="$(ldap_search_getattr "${GROUPBASE}" "gidNumber=${POSIXGROUP}" cn)"
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
@@ -421,7 +417,6 @@ useradd () {
 	append "\n\n"
 
 	if [ -n "${ADDTOGROUPS}" ]; then
-		#DELETEFROMGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
 			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
@@ -494,7 +489,6 @@ usermod () {
 		if [ "$?" -eq 0 ]; then
 			GIDNUMBER="${GID}"
 		else
-			#GIDNUMBER="$(${LDAPSEARCH} -b "${GROUPBASE}" "cn=${GID}" | grep "gidNumber: " | sed "s/gidNumber: //")"
 			GIDNUMBER="$(ldap_search_getattr "${GROUPBASE}" "cn=${GID}" gidNumber)"
 			if [ -z "${GIDNUMBER}" ]; then
 				echo "${modulename}: Unknown group \"${GID}\""
@@ -516,9 +510,6 @@ usermod () {
 					echo "${modulename}: Unknown other group number \"${POSIXGROUP}\""
 					exit 6
 				fi
-				#POSIXGROUP="$(${LDAPSEARCH} -b "${GROUPBASE}" "gidNumber=${POSIXGROUP}" |
-				#	grep "^cn:" |
-				#	sed "s/cn: //")"
 				POSIXGROUP="$(ldap_search_getattr "${GROUPBASE}" "gidNumber=${POSIXGROUP}" cn)"
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
@@ -579,9 +570,6 @@ usermod () {
 			echo "${modulename}: Cannot create directory \"${HOMEDIRECTORY}\""
 			exit 12
 		fi
-		#OLDHOMEDIRECTORY="$(${LDAPSEARCH} -b "${USERBASE}" "uid=${LOGIN}" |
-		#	grep "^homeDirectory:" |
-		#	sed "s/^homeDirectory: //")"
 		OLDHOMEDIRECTORY="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" homeDirectory)"
 	fi
 	if [ -n "${SHADOWINACTIVE}" ]; then
@@ -605,9 +593,6 @@ usermod () {
 		fi
 	fi
 	if [ -n "${LOCKED}" ]; then
-		#OLDPASSWORD="$(ldapsearch ${ADMINOPTIONS} -b "${USERBASE}" "uid=${LOGIN}" |
-		#	grep "^userPassword::" |
-		#	sed "s/^userPassword:: //")"
 		OLDPASSWORD="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" userPassword)"
 		if [ "${LOCKED}" = "yes" ]; then
 			USERPASSWORD="!${OLDPASSWORD}"
@@ -630,7 +615,6 @@ usermod () {
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
 	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
 	if [ -n "${ADDTOGROUPS}" ]; then
-		#DELETEFROMGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
 			append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
@@ -673,17 +657,10 @@ userdel () {
 			echo "${modulename}: Only root may remove home directories"
 			exit 12
 		fi
-		#HOMEDIRECTORY="$(${LDAPSEARCH} -b "${USERBASE}" "uid=${LOGIN}" |
-		#	grep "^homeDirectory:" |
-		#	sed "s/^homeDirectory: //")"
 		HOMEDIRECTORY="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" homeDirectory)"
-		#UIDNUMBER="$(${LDAPSEARCH} -b "${USERBASE}" "uid=${LOGIN}" |
-		#	grep "^uidNumber:" |
-		#	sed "s/^uidNumber: //")"
 		UIDNUMBER="$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" uidNumber)"
 	fi
 	append "dn: uid=${LOGIN},${USERBASE}\nchangetype: delete\n"
-	#DELETEFROMGROUPS="$(${LDAPSEARCH} -b "${GROUPBASE}" "memberUid=${LOGIN}" | grep "^cn:" | sed "s/^cn: //")"
 	DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 	for POSIXGROUP in ${DELETEFROMGROUPS}; do
 		append "dn: cn=${POSIXGROUP},${GROUPBASE}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
