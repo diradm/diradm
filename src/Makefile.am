@@ -1,4 +1,4 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Makefile.am,v 1.5 2005/01/09 07:03:26 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Makefile.am,v 1.6 2005/01/09 07:05:14 robbat2 Exp $
 # Copyright (C) 2004 Robin Hugh Johnson <robbat2@orbis-terrarum.net>
 #  
 # This file is free software; as a special exception the author gives
@@ -15,6 +15,7 @@ CONFFILE = diradm.conf
 #BUILT_SOURCES = diradm.sh diradm-mkpasswd.pl diradm.conf
 #diradm_SOURCES = diradm.sh
 #diradm_mkpasswd_SOURCES = diradm-mkpasswd.pl
+BUILT_SOURCES = $(COMPONENTS)
 sbin_SCRIPTS = $(BINARY)
 libexec_SCRIPTS = $(HELPER) $(COMPONENTS)
 sysconf_DATA = $(CONFFILE)
