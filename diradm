@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.15 2003/10/02 17:01:01 pat Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.16 2003/10/02 17:37:08 pat Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -50,7 +50,7 @@ done
 
 source "${CONFIG}"
 CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
-	DEFAULT_LOGINSHELL DOMAINSID SAMBAPATHPREPEND SAMBAPROFILEPREPEND SAMBADRIVE"
+	DEFAULT_LOGINSHELL DOMAINSID SAMBAPATHPREPEND SAMBAPROFILEPREPEND SAMBADRIVE SAMBALOGONSCRIPT"
 CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER
 	GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
@@ -231,7 +231,7 @@ daysnow() {
 
 useradd () {
 	[ -z "${modulename}" ] && modulename="useradd"
-	while getopts "u:og:G:h:d:s:c:mk:f:e:p:S" OPTION; do
+	while getopts "u:og:G:h:d:s:c:mk:f:e:p:Si" OPTION; do
 		case "${OPTION}" in
 			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
@@ -247,6 +247,7 @@ useradd () {
 			e) SHADOWEXPIRE="${OPTARG}";;
 			p) USERPASSWORD="${OPTARG}";;
 			S) SAMBA="yes";;
+			i) IRIX="yes";;
 			*) exit 1;;
 		esac
 	done
@@ -421,7 +422,7 @@ useradd () {
 	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
 	append "gecos: ${COMMENT}"
 
-	if [ "${SAMBA}" = "yes" ]; then
+	if [ "${SAMBA}" = "yes" -a -n ${DOMAINSID} ]; then
 		append "objectClass: sambaSamAccount"
 
 		let RID="2*${UIDNUMBER}+1000"
@@ -431,9 +432,17 @@ useradd () {
 		append "sambaPrimaryGroupSID: ${DOMAINSID}-${DEFAULT_SAMBAGID}"
 		append "sambaAcctFlags: [UX]"
 		append "sambaPwdCanChange: 0"
+		append "sambaNTPassword: $(mkntpasswd.pl -n ${USERPASSWORD})"
+		append "sambaLMPassword: $(mkntpasswd.pl -l ${USERPASSWORD})"
+		append "sambaPwdLastSet: $(date -u +%s -d '${*}')";
 		[ -n ${SAMBADRIVE} ] && append "sambaHomeDrive: ${SAMBADRIVE}"
 		[ -n ${SAMBAPATHPREPEND} ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\${LOGIN}"
 		[ -n ${SAMBAPROFILEPREPEND} ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\${LOGIN}"
+		[ -n ${SAMBALOGONSCRIPT} ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
+	fi
+	if [ "${IRIX}" = "yes" ]; then
+		append "objectClass: irixAccount"
+		append "irixPassword: $(mkirixpasswd.pl ${USERPASSWORD})"
 	fi
 	append "\n\n"
 
