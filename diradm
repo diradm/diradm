@@ -5,9 +5,11 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.17 2003/10/09 11:55:45 pat Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.18 2004/07/12 03:32:30 robbat2 Exp $
 #
-# Copyright (C) 2003  Daniel Himler  <dan@hits.at>
+# Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
+# Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
+# Patrick Lougheed <pat@tfsb.org>.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,7 +53,7 @@ done
 source "${CONFIG}"
 CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
 	DEFAULT_LOGINSHELL"
-CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER
+CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER 
 	GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID"
 CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
 CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
@@ -112,9 +114,10 @@ if [ -n "${BINDPASS}" ]; then
 else
 	ADMINOPTIONS="${OPTIONS} -D ${BINDDN} -W"
 fi
+#echo $ADMINOPTIONS
 LDAPSEARCH="ldapsearch ${ADMINOPTIONS}"
 LDAPADD="ldapadd ${ADMINOPTIONS}"
-LDAPMODIFY="ldapmodify ${ADMINOPTIONS}"
+LDAPMODIFY="ldapmodify -c ${ADMINOPTIONS}"
 LDAPDELETE="ldapdelete ${ADMINOPTIONS}"
 
 print_usage () {
@@ -136,7 +139,7 @@ print_usage () {
 	echo
 	echo "       diradm chsh [-s login_shell] name"
 	echo
-    echo "       diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
+	echo "       diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
 	echo "                   [-o other] name"
 	echo
 	echo "       diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]"
@@ -149,6 +152,15 @@ print_usage () {
 	echo "       diradm gpasswd -R group"
 	echo "       diradm gpasswd -r group"
 	echo "       diradm gpasswd [-A user,...] [-M user,...] group"
+	echo
+	echo "       diradm smbhostadd [-r RID] host"
+	echo "       diradm smbhostdel host"
+	echo
+	echo "       diradm hostadd [-i IP,...] [-e MAC,...] [-a othername,...] host"
+	echo "       diradm hostmod [-i add-IP,...] [-I del-IP,...] [-e add-MAC,...]"
+	echo "                      [-E del-MAC,...] [-a add-othername,...]"
+	echo "                      [-A del-othername,...] [-n newname] host"
+	echo "       diradm hostdel host"
 	echo
 	echo "       diradm --version   Print diradm version number, then exit"
 	echo
@@ -173,18 +185,27 @@ ldap_search_getattr() {
 	${LDAPSEARCH} -b "${basedn}" "${search}" ${attr} | egrep "${regex}" | sed -re "s/${regex}//"
 }
 
-search_smbhost() {
+search_attr() {
+	${LDAPSEARCH} -b "${1}" "${2}" | grep -qs "^${3}$"
+	return "$?"
+}
 
-	${LDAPSEARCH} -b "${SAMBAHOSTBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
+search_smbhost() {
+	search_attr "${SAMBAHOSTBASE}" "${1}=${2}" "${1}: ${2}"
+	return "$?"
+}
+
+search_host() {
+	search_attr "${HOSTBASE}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 search_user() {
-	${LDAPSEARCH} -b "${USERBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
+	search_attr "${USERBASE}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 
 search_group() {
-	${LDAPSEARCH} -b "${GROUPBASE}" "${1}=${2}" | grep -qs "^${1}: ${2}$"
+	search_attr "${GROUPBASE}" "${1}=${2}" "${1}: ${2}"
 	return "$?"
 }
 
@@ -192,21 +213,45 @@ append() {
 [ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
 }
 
-append_attribute() {
+append_attrib_replace() {
 	local attrib="$1"
 	shift
 	append "replace: ${attrib}\n${attrib}: ${*}"
 }
+append_attrib_add() {
+	local attrib="$1"
+	shift
+	append "add: ${attrib}\n${attrib}: ${*}"
+}
 
 runmodify() {
+if [ -n "${DEBUG}" ]; then
+	echo LDAP Modify:
+	echo -------
+	[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | uniq
+	echo -------
+fi
+
 [ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPMODIFY} > /dev/null
 }
 
 runadd() {
+if [ -n "${DEBUG}" ]; then
+	echo LDAP Add:
+	echo -------
+	[ -n "${COMMAND}" ] && echo -e "${COMMAND}" | uniq
+	echo -------
+fi
 [ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPADD} > /dev/null
 }
 
 rundelete() {
+if [ -n "${DEBUG}" ]; then
+	echo LDAP Delete
+	echo -------
+	echo "${*}"
+	echo -------
+fi
 [ -n "${*}" ] && ${LDAPDELETE} "${*}" > /dev/null
 }
 
@@ -216,8 +261,8 @@ rundelete() {
 days_to_date() {
 local D="${1}"
 shift
-[ -n "$*" ] && local OPT="+'${*}'"
-date -u -d "Jan $((${D}+1)), 1970" ${OPT}
+#date -u -d "Jan $((${D}+1)), 1970" ${OPT}
+date -u -d "00:00:00 1970-01-01 UTC +$D days" "${*}"
 }
 
 # Does the reverse of days_to_date
@@ -262,7 +307,7 @@ useradd () {
 	else
 		LOGIN="${1}"
 	fi
-	echo "${LOGIN}" | grep -qs "^[[:alnum:]]*$"
+	echo "${LOGIN}" | grep -qs "^[[:alnum:]\.]*$"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Invalid user name \"${LOGIN}\""
 		exit 3
@@ -291,6 +336,10 @@ useradd () {
 			[ "$?" -ne 0 ] && break
 			let UIDNUMBER="${UIDNUMBER} + 1"
 		done
+		if [ "${UIDNUMBER}" -gt "${UIDNUMBERMAX}" ]; then
+			echo "${modulename}: Can't get unique uid"
+			exit 4
+		fi
 	fi
 	if [ -n "${GID}" ]; then
 		echo "${GID}" | grep -qs "^[[:digit:]]*$"
@@ -404,7 +453,7 @@ useradd () {
 	append "objectClass: organizationalPerson"
 	append "objectClass: inetOrgperson"
 	append "uid: ${LOGIN}"
-	append "userPassword: $(mkpasswd.pl -m ${USERPASSWORD})"
+	append "userPassword: {CRYPT}$(mkpasswd.pl -m ${USERPASSWORD} | tr -d \"\n\")"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
 	append "cn: ${CN}"
@@ -434,19 +483,19 @@ useradd () {
 
 		append "sambaSID: ${SID}"
 		append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-${DEFAULT_SAMBAGID}"
-		append "sambaAcctFlags: [UX]"
+		append "sambaAcctFlags: [UX         ]"
 		append "sambaPwdCanChange: 0"
 		append "sambaNTPassword: $(mkpasswd.pl -n ${USERPASSWORD})"
 		append "sambaLMPassword: $(mkpasswd.pl -l ${USERPASSWORD})"
 		append "sambaPwdLastSet: $(date -u +%s)";
 		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
-		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\${LOGIN}"
-		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\${LOGIN}"
+		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\\\${LOGIN}"
+		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
 		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
 	fi
 	if [ "${IRIX}" = "yes" ]; then
 		append "objectClass: irixAccount"
-		append "irixPassword: $(mkpasswd.pl -i ${USERPASSWORD})"
+		append "irixPassword: {CRYPT}$(mkpasswd.pl -i ${USERPASSWORD})"
 	fi
 	append "\n\n"
 
@@ -467,6 +516,7 @@ useradd () {
 			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 	fi
+	#echo "${COMMAND}"
 	runmodify
 	if [ "${CREATEHOMEDIR}" = "yes" -a ! -d "${HOMEDIRECTORY}" ]; then
 		mkdir ${HOMEDIRECTORY}
@@ -482,7 +532,7 @@ usermod () {
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
-	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LU" OPTION; do
+	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LUS" OPTION; do
 		case "${OPTION}" in
 			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
@@ -499,6 +549,7 @@ usermod () {
 			p) if [ -n "${LOCKED}" ]; then print_usage; exit 2; fi; USERPASSWORD="${2}";;
 			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="yes";;
 			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage; exit 2; fi; LOCKED="no";;
+			S) SAMBA="yes";;
 			*) exit 1;;
 		esac
 	done
@@ -643,19 +694,6 @@ usermod () {
 		fi
 	fi
 	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}\n"
-	append "${COMMAND_DN}"
-	[ -n "${UIDNUMBER}" ] && append_attrib "uidNumber" "${UIDNUMBER}\n-\n"
-	[ -n "${GIDNUMBER}" ] && append_attrib "gidNumber" "${GIDNUMBER}\n-\n"
-	[ -n "${HOSTS}" ] && append_attrib "replace: host\n${HOSTS}\n-\n"
-	[ -n "${HOMEDIRECTORY}" ] && append_attrib "homeDirectory" "${HOMEDIRECTORY}\n-\n"
-	[ -n "${LOGINSHELL}" ] && append_attrib "loginShell" "${LOGINSHELL}\n-\n"
-	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
-	[ -n "${COMMENT}" ] && append_attrib "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
-	[ -n "${SHADOWINACTIVE}" ] && append_attrib "shadowInactive" "${SHADOWINACTIVE}\n-\n"
-	[ -n "${SHADOWEXPIRE}" ] && append_attrib "shadowExpire" "${SHADOWEXPIRE}\n-\n"
-	[ -n "${USERPASSWORD}" ] && append_attrib "userPassword" "${USERPASSWORD}\n-\n"
-	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
 	if [ -n "${ADDTOGROUPS}" ]; then
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUPBASE}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
@@ -666,6 +704,20 @@ usermod () {
 			append "dn: cn=${POSIXGROUP},${GROUPBASE}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
 		done
 	fi
+	append "${COMMAND_DN}"
+	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}\n-\n"
+	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}\n-\n"
+	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-\n"
+	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}\n-\n"
+	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}\n-\n"
+	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
+	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
+	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}\n-\n"
+	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}\n-\n"
+	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}\n-\n"
+	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
+	echo "${COMMAND}"
 	runmodify
 	if [ "${MOVEHOMEDIR}" = "yes" ]; then
 		mv ${OLDHOMEDIRECTORY} ${HOMEDIRECTORY} > /dev/null 2>&1
@@ -760,12 +812,16 @@ groupadd () {
 			exit 4
 		fi
 	else
-		GIDNUMBER="${GIDNUMBER}MIN"
-		while [ "${GIDNUMBER}" -le "${GIDNUMBER}MAX" ]; do
+		GIDNUMBER="${GIDNUMBERMIN}"
+		while [ "${GIDNUMBER}" -le "${GIDNUMBERMAX}" ]; do
 			search_group "gidNumber" "${GIDNUMBER}"
 			[ "$?" -ne 0 ] && break
 			let GIDNUMBER="${GIDNUMBER} + 1"
 		done
+		if [ "${GIDNUMBER}" -gt "${GIDNUMBERMAX}" ]; then
+			echo "${modulename}: Can't get unique gid"
+			exit 4
+		fi
 	fi
 	# setup commands
 	append "dn: cn=${CN},${GROUPBASE}"
@@ -916,12 +972,12 @@ chfn() {
 		CN="${FIRSTNAME}"
 
 	fi
-	[ -n "${SURNAME}" ] && append "replace: sn\nsn: ${SURNAME}"
-	[ -n "${FIRSTNAME}" ] && append "givenName: ${FIRSTNAME}"
-	[ -n "${FULLNAME}" ] && append "displayName: ${FULLNAME}"
-	[ -n "${ROOMNUMBER}" ] && append "roomNumber: ${ROOMNUMBER}"
-	[ -n "${HOMEPHONE}" ] && append "homePhone: ${HOMEPHONE}"
-	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
+	[ -n "${SURNAME}" ] && append_attrib_replace sn "${SURNAME}"
+	[ -n "${FIRSTNAME}" ] && append_attrib_replace givenName "${FIRSTNAME}"
+	[ -n "${FULLNAME}" ] && append_attrib_replace displayName "${FULLNAME}"
+	[ -n "${ROOMNUMBER}" ] && append_attrib_replace roomNumber "${ROOMNUMBER}"
+	[ -n "${HOMEPHONE}" ] && append_attrib_replace homePhone "${HOMEPHONE}"
+	[ -n "${WORKPHONE}" ] && append_attrib_replace telephoneNumber "${WORKPHONE}"
 	append "gecos: ${COMMENT}"
 	append "\n\n"
 
@@ -930,6 +986,82 @@ chfn() {
 }
 
 chage() {
+
+	LISTONLY="0"
+	[ -z "${modulename}" ] && modulename="chsh"
+	while getopts "lm:M:W:I:E:d:" OPTION; do
+		case "${OPTION}" in
+			l) LISTONLY="1";;
+			m) MINDAYS="${OPTION}";;
+			M) MAXDAYS="${OPTION}";;
+			W) WARNDAYS="${OPTION}";;
+			I) INACTIVEDAYS="${OPTION}";;
+			E) ACCOUNTEXPIRY="${OPTION}";;
+			d) LASTCHANGE="${OPTION}";;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	ALLOWED=0
+	[ "x${LISTONLY}" == 'x1' -a `whoami` == "${LOGIN}" ] && ALLOWED=1
+	[ `whoami` == 'root' ] && ALLOWED=1
+	if [ ${ALLOWED} -ne 1 ]; then
+		#You must be root to change password aging information, or view it"
+		#for any user other than yourself."
+		echo "${modulename}: permission denied"
+		exit 1
+	fi
+	search_user "uid" "${LOGIN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: unknown user: ${LOGIN}"
+		exit 1
+	fi
+	if [ "x${LISTONLY}" == 'x1' ]; then
+		MINDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowMin)
+		MAXDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowMax)
+		WARNDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowWarning)
+		INACTIVEDAYS=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowInactive)
+		ACCOUNTEXPIRY=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowExpire)
+		LASTCHANGE=$(ldap_search_getattr "${USERBASE}" "uid=${LOGIN}" shadowLastChange)
+
+		echo -e "Minimum:\t${MINDAYS}"
+		echo -e "Maximum:\t${MAXDAYS}"
+		echo -e "Warning:\t${WARNDAYS}"
+		echo -e "Inactive:\t${INACTIVEDAYS}"
+		#echo -e "Last Change:\t${LASTCHANGE}" # raw
+		echo -e "Last Change:\t$(days_to_date ${LASTCHANGE} +'%b %d, %Y')"
+		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 ]; then
+			PASSWORDEXPIRY_STRING="Never"
+		else
+			PASSWORDEXPIRY_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS})) +'%b %d, %Y')"
+		fi
+		echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
+		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 -o ${INACTIVEDAYS} -le 0 ]; then
+			PASSWORDINACTIVE_STRING="Never"
+		else
+			PASSWORDINACTIVE_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS} + ${INACTIVEDAYS})) +'%b %d, %Y')"
+		fi
+		echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
+		if [ ${ACCOUNTEXPIRY} -le 0  ]; then
+			ACCOUNTEXPIRY_STRING="Never"
+		else
+			ACCOUNTEXPIRY_STRING="$(days_to_date ${ACCOUNTEXPIRY} +'%b %d, %Y')"
+		fi
+		echo -e "Account Expires:\t${ACCOUNTEXPIRY_STRING}"
+# shadowLastChange - The number of days (since January 1, 1970) since the password was last changed.
+# shadowMin - The number of days before password may be changed (0 indicates it may be changed at any time)
+# shadowMax - The number of days after which password must be changed (99999 indicates user can keep his or her password unchanged for many, many years)
+# shadowWarning - The number of days to warn user of an expiring password (7 for a full week)
+# shadowInactive - The number of days after password expires that account is disabled
+# shadowExpire - The number of days since January 1, 1970 that an account has been disabled
+# shadowFlag - A reserved field for possible future use
+		exit 0
+	fi
 	# TODO
 	echo "Not done yet! "
 	exit 99
@@ -988,7 +1120,7 @@ smbhostadd() {
 	append "sambaPwdLastSet: ${CANCHANGE}"
 	let MUSTCHANGE="${CANCHANGE} + 1814400"
 	append "sambaPwdMustChange: ${MUSTCHANGE}"
-	append "sambaAcctFlags: [W]"
+	append "sambaAcctFlags: [W          ]"
 	append "sambaLMPassword: $(mkpasswd.pl -l ${NAME}\$)"
 	append "sambaNTPassword: $(mkpasswd.pl -n ${NAME}\$)"
 	append "\n\n"
@@ -996,7 +1128,7 @@ smbhostadd() {
 	runmodify
 }
 
-smbhostdel {
+smbhostdel () {
 	[ -z "${modulename}" ] && modulename="smbhostdel"
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
@@ -1010,15 +1142,227 @@ smbhostdel {
 		echo "${modulename}: Machine \"${NAME}\" does not exist"
 		exit 6
 	fi
-	fi
 	append "dn: uid=${NAME}\$,${SAMBAHOSTBASE}"
 	append "changetype: delete"
 	append "\n"
 	runmodify
 }
 
+hostadd () {
+	[ -z "${modulename}" ] && modulename="hostadd"
+	while getopts "e:i:a:" OPTION; do
+		case "${OPTION}" in
+			e) ETHERS="${OPTARG}";;
+			i) IPS="${OPTARG}";;
+			a) ALIASES="${OPTARG}";;
+			*) exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		NAME="${1}"
+	fi
+	search_host "cn" "${NAME}"
+	if [ "$?" -eq 0 ]; then
+		echo "${modulename}: User \"${NAME}\" exists"
+		exit 9
+	fi
+
+	# Setup the commands
+	append "dn: cn=${NAME},${HOSTBASE}"
+	append "changetype: add"
+	append "objectClass: top"
+	append "objectClass: device"
+	append "cn: ${NAME}"
+
+	if [ -n "${ETHERS}" ]; then
+		ETHERS="${ETHERS//,/ }"
+		append "objectClass: ieee802device"
+		for i in ${ETHERS}; do
+			append "macAddress: ${i}"
+		done
+	fi
+	if [ -n "${IPS}" ]; then
+		IPS="${IPS//,/ }"
+		append "objectClass: ipHost"
+		for i in ${IPS}; do
+			append "ipHostNumber: ${i}"
+		done
+	fi
+	if [ -n "${ALIASES}" ]; then
+		ALIASES="${ALIASES//,/ }"
+		for i in ${ALIASES}; do
+			append "cn: ${i}"
+		done
+	fi
+
+	append "\n\n"
+
+	runmodify
+}
+
+hostdel () {
+	[ -z "${modulename}" ] && modulename="hostdel"
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		NAME="${1}"
+	fi
+	search_host "cn" "${NAME}\$"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Host \"${NAME}\" does not exist"
+		exit 6
+	fi
+	append "dn: cn=${NAME}\$,${HOSTBASE}"
+	append "changetype: delete"
+	append "\n"
+
+	runmodify
+}
+
+hostmod () {
+	[ -z "${modulename}" ] && modulename="hostmod"
+	if [ "${#}" -le 1 ]; then
+		echo "${modulename}: No flags given"
+		exit 2
+	fi
+	while getopts "e:E:i:I:a:A:n:" OPTION; do
+		case "${OPTION}" in
+			e) ADDETHERS="${OPTARG} ${ADDETHERS}";;
+			E) DELETHERS="${OPTARG} ${DELETHERS}";;
+			i) ADDIPS="${OPTARG} ${ADDIPS}";;
+			I) DELIPS="${OPTARG} ${DELIPS}";;
+			a) ADDALIASES="${OPTARG} ${ADDALIASES}";;
+			A) DELALIASES="${OPTARG} ${DELALIASES}";;
+			n) NEWNAME="${OPTARG}";;
+			*) exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		NAME="${1}"
+	fi
+	search_host "cn" "${NAME}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Host \"${NAME}\" does not exist"
+		exit 6
+	fi
+	COMMAND_DN="dn: cn=${NAME},${HOSTBASE}"
+	append "${COMMAND_DN}"
+	append "changetype: modify"
+	if [ -n "${ADDETHERS}" ]; then
+		ADDETHERS="${ADDETHERS//,/ }"
+		search_attr "${HOSTBASE}" "(cn=${NAME})" "objectClass: ieee802device"
+		if [ "$?" -eq 1 ]; then
+			append "add: objectClass"
+			append "objectClass: ieee802device"
+			append "-"
+		fi
+		for i in ${ADDETHERS}; do
+			append "add: macAddress"
+			append "macAddress: ${i}"
+			append "-"
+		done
+	fi
+	if [ -n "${DELETHERS}" ]; then
+		DELETHERS="${DELETHERS//,/ }"
+		for i in ${DELETHERS}; do
+			append "delete: macAddress"
+			append "macAddress: ${i}"
+			append "-"
+		done
+	fi
+	if [ -n "${ADDIPS}" ]; then
+		ADDIPS="${ADDIPS//,/ }"
+		search_attr "${HOSTBASE}" "(cn=${NAME})" "objectClass: ipHost"
+		if [ "$?" -eq 1 ]; then
+			append "add: objectClass"
+			append "objectClass: ipHost"
+			append "-"
+		fi
+		for i in ${ADDIPS}; do
+			append "add: ipHostNumber"
+			append "ipHostNumber: ${i}"
+			append "-"
+		done
+	fi
+	if [ -n "${DELIPS}" ]; then
+		DELIPS="${DELIPS//,/ }"
+		for i in ${DELIPS}; do
+			append "delete: ipHostNumber"
+			append "ipHostNumber: ${i}"
+			append "-"
+		done
+	fi
+	if [ -n "${ADDALIASES}" ]; then
+		ADDALIASES="${ADDALIASES//,/ }"
+		for i in ${ADDALIASES}; do
+			append "add: cn"
+			append "cn: ${i}"
+			append "-"
+		done
+	fi
+	if [ -n "${DELALIASES}" ]; then
+		DELALIASES="${DELALIASES//,/ }"
+		for i in ${DELALIASES}; do
+			append "delete: cn"
+			append "cn: ${i}"
+			append "-"
+		done
+	fi
+	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+	[ -n "${NEWNAME}" ] && append "dn: cn=${NAME},${HOSTBASE}\nchangetype: modrdn\nnewrdn: cn=${NEWNAME}\n"
+
+	#echo "${COMMAND}"
+	runmodify
+}
+
+cvsadd() {
+	[ -z "${modulename}" ] && modulename="hostadd"
+	while getopts "m:" OPTION; do
+		case "${OPTION}" in
+			m) MEMBERS="${OPTARG}";;
+			*) exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		NAME="${1}"
+	fi
+	search_group "cn" "${NAME}"
+	if [ "$?" -eq 0 ]; then
+		echo "${modulename}: Group \"${NAME}\" exists"
+		exit 9
+	fi
+
+	# Setup the commands
+	append "dn: cn=${NAME},${GROUPBASE}"
+	append "changetype: add"
+	append "objectClass: top"
+	append "objectClass: device"
+	append "cn: ${NAME}"
+
+	if [ -n "${MEMBERS}" ]; then
+		MEMBERS="${MEMBERS//,/ }"
+		for i in ${MEMBERS}; do
+			append "memberUid: ${i}"
+		done
+	fi
+}
+
 case "${1}" in
-	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel)
+	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd|smbhostadd|smbhostdel|hostadd|hostdel|hostmod)
 		ACTION="${1}"
 		shift 1
 		${ACTION} "$@"
