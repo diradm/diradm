@@ -1,0 +1,91 @@
+#!@FALSE@
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Attic/diradm.samba.sh,v 1.1 2005/01/09 07:01:49 robbat2 Exp $
+# vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
+# This contains all of the functions specific to the user sub-system.
+
+smbhostadd() {
+	[ -z "${modulename}" ] && modulename="smbhostadd"
+	while getopts "u:" OPTION; do
+		case "${OPTION}" in
+			r) HOSTRID="${OPTARG}";;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename} 
+		exit 2
+	else
+		NAME="${1}"
+	fi
+
+	if [ -n "${HOSTRID}" ]; then
+		echo "${HOSTRID}" | ${GREP} -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${HOSTRID}\""
+			exit 3
+		fi
+		search_smbhost "sambaSID" "${SAMBADOMAINSID}-${HOSTRID}"
+		if [ "$?" -eq 0 ]; then
+			echo "${modulename}: uid ${HOSTRID} is not unique"
+			exit 4
+		fi
+	else
+		HOSTRID="${SAMBAHOSTRIDMIN}"
+		while [ "${HOSTRID}" -le "${SAMBAHOSTRIDMAX}" ]; do
+			search_smbhost "sambaSID" "${SAMBADOMAINSID}-${HOSTRID}"
+			[ "$?" -ne 0 ] && break
+			let HOSTRID="${HOSTRID} + 1"
+		done
+	fi
+
+	append "dn: uid=${NAME}\$,${SAMBAHOST_BASEDN}"
+	append "changetype: add"
+	append "objectClass: sambaSidEntry"
+	append "objectClass: sambaSamAccount"
+	append "uid: ${NAME}\$"
+	append "sambaSID: ${SAMBADOMAINSID}-${HOSTRID}"
+	append "sambaAcctFlags: [W          ]"
+	LMPASS="$(${MKPASSWD} -l ${NAME}\$)"
+	NTPASS="$(${MKPASSWD} -n ${NAME}\$)"
+	append "sambaLMPassword: ${LMPASS}"
+	append "sambaNTPassword: ${NTPASS}"
+
+	# from IDEALX scripts
+	append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-0"
+	append "sambaBadPasswordCount: 0"
+	append "sambaBadPasswordTime: 0"
+
+	let CANCHANGE="$(${DATE} -u +%s)"
+	let MUSTCHANGE="${CANCHANGE} + 1814400"
+	# leave password rotation alone for now
+	# all of the following are timestamps
+	append "sambaPwdCanChange: 0"
+	append "sambaPwdMustChange: 0"
+	append "sambaPwdLastSet: 0"
+	append "sambaLogonTime: 0"
+	append "sambaLogoffTime: 2147483647"
+	append "sambaKickoffTime: 2147483647"
+	append "\n\n"
+
+	runmodify
+}
+
+smbhostdel() {
+	[ -z "${modulename}" ] && modulename="smbhostdel"
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		NAME="${1}"
+	fi
+	search_smbhost "uid" "${NAME}\$"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Machine \"${NAME}\" does not exist"
+		exit 6
+	fi
+	append "dn: uid=${NAME}\$,${SAMBAHOST_BASEDN}"
+	append "changetype: delete"
+	append "\n"
+	runmodify
+}

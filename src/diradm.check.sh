@@ -1,0 +1,133 @@
+#!@FALSE@
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Attic/diradm.check.sh,v 1.1 2005/01/09 07:01:49 robbat2 Exp $
+# vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
+
+# This contains all of the functions specific to the check sub-system.
+check() {
+	[ -z "${modulename}" ] && modulename="check"
+	args="$@"
+	[ -z "${args}" ] && args="all"
+	[ "${args/all}" != "${args}" ] && args="${args//all/self config}"
+	for a in ${args}; do
+		case ${a} in
+			self) 
+				check_self 
+				;;
+			config) 
+				check_config 
+				;;
+			*) 
+				print_usage ${modulename}
+				echo "${modulename}: Unknown test" 
+				exit 2 
+				;;
+		esac
+	done
+}
+
+check_self() {
+	DEPENDENCIES="${GREP} ${LDAPSEARCH} ${LDAPADD} ${LDAPMODIFY} ${LDAPDELETE} ${SED} ${STAT} ${PERL} ${AWK} ${EGREP} ${FGREP} ${HEAD} ${TAIL} ${BASHSH} ${DATE} ${CUT} ${UNIQ}"
+	if [ "x$ENABLE_SAMBA" = "xyes" ]; then
+		DEPENDENCIES="${DEPENDENCIES} ${SAMBA_NET}"
+	fi
+	for DEPENDENCY in ${DEPENDENCIES}; do
+		echo "Testing ${DEPENDENCY}"
+		if [ ! -x "${DEPENDENCY}" ]; then
+			echo "Cannot find \"${DEPENDENCY}\"!"
+			exit 1
+		fi
+	done
+	echo "Validating diradm-mkpasswd"
+	${MKPASSWD} 1>/dev/null
+	if [ $? -ne 1 ]; then
+		echo "${MKPASSWD} failed!"
+		exit 1
+	fi
+	# note specification of salt in test!
+	test_m="$(${MKPASSWD} -m foo '$1$bJZFRnEN')"
+	corr_m='$1$bJZFRnEN$O8Ms1y4YqCDDqbbt8bVFe0'
+	test_i="$(${MKPASSWD} -i foo 'Eo')"
+	corr_i='Eo5MXp8EqPaqE'
+	test_l="$(${MKPASSWD} -l foo)"
+	corr_l='5BFAFBEBFB6A0942AAD3B435B51404EE'
+	test_n="$(${MKPASSWD} -n foo)"
+	corr_n='AC8E657F83DF82BEEA5D43BDAF7800CC'
+	t="${test_m}" c="${corr_m}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	t="${test_i}" c="${corr_i}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	t="${test_l}" c="${corr_l}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	t="${test_n}" c="${corr_n}"
+	if [ "${t}" != "${c}" ]; then
+		echo "${MKPASSWD} produced incorrect output: ${t} != ${c}"
+		exit 1
+	fi
+	echo "Selftest passed"
+}
+check_config() {
+	# Up to date as of 2.2
+	CONFIGOPTIONS_STRING="LDAPURI BINDDN USER_BASEDN GROUPHOMEBASE HOMEBASE SKEL DEFAULT_LOGINSHELL USERGROUPS BASEDN LDAPURI BINDPASS GROUP_BASEDN HOST_BASEDN SAMBAHOST_BASEDN ENABLE_SAMBA SAMBADOMAIN SAMBADOMAINSID SAMBAPATHPREPEND SAMBADRIVE AUTOMOUNT_BASEDN AUTOMOUNT_USERDESC AUTOMOUNT_GROUPDESC AUTOMOUNT_USERMAP AUTOMOUNT_GROUPMAP AUTOMOUNT_USERBASE AUTOMOUNT_GROUPBASE AUTOMOUNT_OPTIONS AUTOMOUNT_BASE AUTOMOUNT_HASHING"
+	CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING DEFAULT_SAMBAGID SAMBAHOSTRIDMIN SAMBAHOSTRIDMAX"
+	CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
+	CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
+	for CONFIGOPTION in ${CONFIGOPTIONS_STRING}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		fi
+	done
+	for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		else
+			echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
+			if [ "$?" -ne 0 ]; then
+				echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
+				exit 1
+			fi
+		fi
+	done
+	for CONFIGOPTION in ${CONFIGOPTIONS_DIGIT_DISABLE}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		else
+			if [ "${VALUE}" != "-1" ]; then
+				echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]*$"
+				if [ "$?" -ne 0 ]; then
+					echo "Configuration error: ${CONFIGOPTION} has invalid numerical value \"${VALUE}\"!"
+					exit 1
+				fi
+			fi
+		fi
+	done
+	for CONFIGOPTION in ${CONFIGOPTIONS_DATE_DISABLE}; do
+		eval VALUE="\$${CONFIGOPTION}"
+		if [ -z "${VALUE}" ]; then
+			echo "Configuration error: ${CONFIGOPTION} not defined!"
+			exit 1
+		else
+			if [ "${VALUE}" != "-1" ]; then
+				echo "${VALUE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+				if [ "$?" -ne 0 ]; then
+					echo "Configuration error: ${CONFIGOPTION} has invalid date value \"${VALUE}\"!"
+					exit 1
+				fi
+			fi
+		fi
+	done
+}

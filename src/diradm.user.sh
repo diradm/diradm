@@ -1,0 +1,710 @@
+#!@FALSE@
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Attic/diradm.user.sh,v 1.1 2005/01/09 07:01:49 robbat2 Exp $
+# vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
+# This contains all of the functions specific to the user sub-system.
+
+useradd() {
+	[ -z "${modulename}" ] && modulename="useradd"
+	while getopts "u:og:G:h:d:s:rRc:mk:f:e:E:p:Si" OPTION; do
+		case "${OPTION}" in
+			u) UIDNUMBER="${OPTARG}";;
+			o) DUPLICATES="yes";;
+			g) GID="${OPTARG}";;
+			G) OTHERGROUPS="${OPTARG}";;
+			h) HOSTLIST="${OPTARG}";;
+			d) HOMEDIRECTORY="${OPTARG}";;
+			s) LOGINSHELL="${OPTARG}";;
+			c) COMMENT="${OPTARG}";;
+			m) CREATEHOMEDIR="yes";;
+			r) USERGROUPS="yes";;
+			R) USERGROUPS="no";;
+			k) SKEL="${OPTARG}";;
+			f) SHADOWINACTIVE="${OPTARG}";;
+			e) SHADOWEXPIRE="${OPTARG}";;
+			E) EMAIL="${OPTARG}";;
+			p) USERPASSWORD="${OPTARG}";;
+			S) SAMBA="yes";;
+			i) IRIX="yes";;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	echo "${LOGIN}" | ${GREP} -qs "^[[:alnum:]\.]*$"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Invalid user name \"${LOGIN}\""
+		exit 3
+	else
+		search_user "uid" "${LOGIN}"
+		if [ "$?" -eq 0 ]; then
+			echo "${modulename}: User \"${LOGIN}\" exists"
+			exit 9
+		fi
+	fi
+	if [ -n "${UIDNUMBER}" ]; then
+		echo "${UIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${UIDNUMBER}\""
+			exit 3
+		fi
+		search_user "uidNumber" "${UIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: uid ${UIDNUMBER} is not unique"
+			exit 4
+		fi
+	else
+		UIDNUMBER="${UIDNUMBERMIN}"
+		while [ "${UIDNUMBER}" -le "${UIDNUMBERMAX}" ]; do
+			search_user "uidNumber" "${UIDNUMBER}"
+			[ "$?" -ne 0 ] && break
+			let UIDNUMBER="${UIDNUMBER} + 1"
+		done
+		if [ "${UIDNUMBER}" -gt "${UIDNUMBERMAX}" ]; then
+			echo "${modulename}: Can't get unique uid"
+			exit 4
+		fi
+	fi
+	if [ -n "${GID}" ]; then
+		echo "${GID}" | ${GREP} -qs "^[[:digit:]]*$"
+		if [ "$?" -eq 0 ]; then
+			GIDNUMBER="${GID}"
+		else
+			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${GID}" gidNumber)"
+			if [ -z "${GIDNUMBER}" ]; then
+				echo "${modulename}: Unknown group \"${GID}\""
+				exit 6
+			fi
+		fi
+	else
+		if [ "$USERGROUPS" = "no" ]; then
+			GIDNUMBER="${DEFAULT_GIDNUMBER}"
+		else
+			# that evil redhat thing of a group for every user
+			## TODO: TEST THIS
+			search_group "cn" "${LOGIN}"
+			if [ "$?" -eq 0 ]; then
+				echo "${modulename}: Group '${LOGIN}' already exists!"
+				echo "Pass -R to useradd to disable USERGROUPS usage."
+				echo "And add the user to a group afterwards."
+				exit 9
+			fi
+			# recursive, but bring in the code first
+			. ${libexec}/diradm.group.sh
+			groupadd "${LOGIN}"
+			if [ "$?" -ne 0 ]; then
+				echo "${modulename}: Failed to add group '${LOGIN}'."
+				exit 9
+			fi
+			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${LOGIN}" gidNumber)"
+		fi
+	fi
+	search_group "gidNumber" "${GIDNUMBER}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Adding user anyway."
+	fi
+	if [ -n "${OTHERGROUPS}" ]; then
+		OTHERGROUPS="${OTHERGROUPS//,/ }"
+		for POSIXGROUP in ${OTHERGROUPS}; do
+			echo "${POSIXGROUP}" | ${GREP} -qs "^[[:digit:]]*$"
+			if [ "$?" -eq 0 ]; then
+				search_group "gidNumber" "${POSIXGROUP}"
+				if [ "$?" -ne 0 ]; then
+					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
+					exit 6
+				fi
+				POSIXGROUP="$(ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=${POSIXGROUP}" cn)"
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
+			else
+				search_group "cn" "${POSIXGROUP}"
+				if [ "$?" -ne 0 ]; then
+					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
+					exit 6
+				fi
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
+			fi
+		done
+	fi
+	if [ -n "${HOSTLIST}" ]; then
+		HOSTLIST="${HOSTLIST//,/ }"
+		for HOST in ${HOSTLIST}; do
+			HOSTS="${HOSTS}host: ${HOST}\n"
+		done
+		HOSTS="$(echo -e "${HOSTS}")"
+	fi
+	[ -z "${HOMEDIRECTORY}" ] && HOMEDIRECTORY="${HOMEBASE}/${LOGIN}"
+	echo "${HOMEDIRECTORY}" | ${GREP} -qs "^/"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Invalid home directory \"${HOMEDIRECTORY}\""
+		exit 3
+	fi
+	[ -z "${LOGINSHELL}" ] && LOGINSHELL="${DEFAULT_LOGINSHELL}"
+	echo "${LOGINSHELL}" | ${GREP} -qs "^/"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
+		exit 3
+	fi
+	[ -z "${COMMENT}" ] && COMMENT="${LOGIN},,,"
+	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" = "yes" ]; then
+		if [ "$(whoami)" != "root" ]; then
+			echo "${modulename}: Only root may create home directories"
+			exit 12
+		fi
+		PARENTDIR="$(dirname "${HOMEDIRECTORY}")"
+		if [ ! -w "${PARENTDIR}" ]; then
+			echo "${modulename}: Cannot create directory \"${HOMEDIRECTORY}\""
+			exit 12
+		fi
+	fi
+	[ -z "${SHADOWINACTIVE}" ] && SHADOWINACTIVE="${DEFAULT_SHADOWINACTIVE}"
+	if [ "${SHADOWINACTIVE}" != "-1" ]; then
+		echo "${SHADOWINACTIVE}" | ${GREP} -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${SHADOWINACTIVE}\""
+			exit 3
+		fi
+	fi
+	[ -z "${SHADOWEXPIRE}" ] && SHADOWEXPIRE="${DEFAULT_SHADOWEXPIRE}"
+	if [ "${SHADOWEXPIRE}" != "-1" ]; then
+		echo "${SHADOWEXPIRE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
+			exit 3
+		else
+			SHADOWEXPIRE="$(date_to_days "${SHADOWEXPIRE}")"
+		fi
+	fi
+	# Set this to today's date
+	# This is N days since Jan 1, 1970
+	SHADOWLASTCHANGE="$(daysnow)"
+
+	# Users Full Name
+	FULLNAME="$(echo ${COMMENT} | ${CUT} -d, -f1)"
+	ROOMNUMBER="$(echo ${COMMENT} | ${CUT} -d, -f2)"
+	WORKPHONE="$(echo ${COMMENT} | ${CUT} -d, -f3)"
+	HOMEPHONE="$(echo ${COMMENT} | ${CUT} -d, -f4)"
+	FIRSTNAME="${FULLNAME// *}"
+	SURNAME="${FULLNAME##* }"
+	CN="${FIRSTNAME}"
+
+	# Setup the commands
+	append "dn: uid=${LOGIN},${USER_BASEDN}"
+	append "changetype: add"
+	append "objectClass: top"
+	#append "objectClass: account"
+	append "objectClass: posixAccount"
+	append "objectClass: shadowAccount"
+	append "objectClass: organizationalPerson"
+	append "objectClass: inetOrgperson"
+	append "objectClass: userInformation"
+	append "uid: ${LOGIN}"
+	userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
+	sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
+	sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
+	irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
+	append "userPassword: {CRYPT}${userPasswordCrypt}"
+	append "uidNumber: ${UIDNUMBER}"
+	append "gidNumber: ${GIDNUMBER}"
+	append "cn: ${CN}"
+	append "homeDirectory: ${HOMEDIRECTORY}"
+	append "loginShell: ${LOGINSHELL}"
+	append "shadowLastChange: ${SHADOWLASTCHANGE}"
+	append "shadowInactive: ${SHADOWINACTIVE}"
+	append "shadowExpire: ${SHADOWEXPIRE}"
+	append "shadowMin: ${SHADOWMIN}"
+	append "shadowMax: ${SHADOWMAX}"
+	append "shadowWarning: ${SHADOWWARNING}"
+	append "shadowFlag: ${SHADOWFLAG}"
+	[ -n "${HOSTS}" ] && append "${HOSTS}"
+	[ -n "${SURNAME}" ] && append "sn: ${SURNAME}"
+	[ -n "${FIRSTNAME}" ] && append "givenName: ${FIRSTNAME}"
+	[ -n "${FULLNAME}" ] && append "displayName: ${FULLNAME}"
+	[ -n "${ROOMNUMBER}" ] && append "roomNumber: ${ROOMNUMBER}"
+	[ -n "${HOMEPHONE}" ] && append "homePhone: ${HOMEPHONE}"
+	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
+	[ -n "${EMAIL}" ] && append "email: ${EMAIL}"
+	append "gecos: ${COMMENT}"
+
+	if [ "${SAMBA}" = "yes" -a -n "${SAMBADOMAINSID}" ]; then
+		append "objectClass: sambaSamAccount"
+
+		let RID="2*${UIDNUMBER}+1000"
+		SID="${SAMBADOMAINSID}-${RID}" 
+
+		append "sambaSID: ${SID}"
+		append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-${DEFAULT_SAMBAGID}"
+		append "sambaAcctFlags: [UX         ]"
+		append "sambaPwdCanChange: 0"
+		append "sambaNTPassword: ${sambaNTPassword}"
+		append "sambaLMPassword: ${sambaLMPassword}"
+		append "sambaPwdLastSet: $(${DATE} -u +%s)";
+		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
+		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\\\${LOGIN}"
+		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
+		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
+	fi
+	# todo: config var for this
+	if [ "${IRIX}" = "yes" ]; then
+		append "objectClass: irixAccount"
+		append "irixPassword: {CRYPT}${irixPassword}"
+	fi
+	append "\n\n"
+	
+	# group stuff	
+	if [ -n "${ADDTOGROUPS}" ]; then
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
+		for POSIXGROUP in ${DELETEFROMGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+		done
+		for POSIXGROUP in ${ADDTOGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+		done
+	fi
+
+	# TODO: abstract this to a new automount function
+	# automounted homedirs etc.
+	append "dn: cn=${LOGIN},${AUTOMOUNT_USERBASE}"
+	append "changetype: add"
+	append "objectClass: automount"
+	append "cn: ${LOGIN}"
+	# build correct string
+	val="${LOGIN}"
+	AUTOMOUNT_APPEND="`eval echo "${AUTOMOUNT_HASHING}"`"
+	append "automountInformation: ${AUTOMOUNT_OPTIONS} ${AUTOMOUNT_BASE}/${AUTOMOUNT_APPEND}"
+	append "description: ${AUTOMOUNT_USERDESC}";
+	append "\n\n"
+
+	#echo -e "${COMMAND}"
+	runmodify
+
+	# Create Homedir
+	targetdir="${AUTOMOUNT_BASE}/${AUTOMOUNT_APPEND}"
+	# strip NFS host and assume local
+	targetdir="${targetdir/*:}"
+	if [ "${CREATEHOMEDIR}" = "yes" -a ! -d "${HOMEDIRECTORY}" -a ! -d "${targetdir}" ]; then
+		echo Making Homedir stored in $targetdir, available as $HOMEDIRECTORY
+		cp -ra "${SKEL}" "${targetdir}" >/dev/null
+		chmod "${HOMEPERM}" "${targetdir}"
+		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${targetdir}"
+	fi
+}
+
+usermod() {
+	[ -z "${modulename}" ] && modulename="usermod"
+	if [ "${#}" -le 1 ]; then
+		print_usage ${modulename}
+		echo "${modulename}: No flags given"
+		exit 2
+	fi
+	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LUS" OPTION; do
+		case "${OPTION}" in
+			u) UIDNUMBER="${OPTARG}";;
+			o) DUPLICATES="yes";;
+			g) GID="${OPTARG}";;
+			G) OTHERGROUPS="${OPTARG}";;
+			h) HOSTLIST="${OPTARG}";;
+			d) HOMEDIRECTORY="${OPTARG}";;
+			s) LOGINSHELL="${OPTARG}";;
+			c) COMMENT="${OPTARG}";;
+			l) NEWLOGIN="${OPTARG}";;
+			m) MOVEHOMEDIR="yes";;
+			f) SHADOWINACTIVE="${OPTARG}";;
+			e) SHADOWEXPIRE="${OPTARG}";;
+			E) EMAIL="${OPTARG}";;
+			p) if [ -n "${LOCKED}" ]; then print_usage ${modulename} ; exit 1; fi; USERPASSWORD="${2}";;
+			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="yes";;
+			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="no";;
+			S) SAMBA="yes";;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	search_user "uid" "${LOGIN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: User \"${LOGIN}\" does not exist"
+		exit 6
+	fi
+	if [ -n "${UIDNUMBER}" ]; then
+		echo "${UIDNUMBER}" | ${GREP} -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid numeric argument \"${UIDNUMBER}\""
+			exit 3
+		fi
+		search_user "uidNumber" "${UIDNUMBER}"
+		if [ "$?" -eq 0 -a "${DUPLICATES}" != "yes" ]; then
+			echo "${modulename}: uid ${UIDNUMBER} is not unique"
+			exit 4
+		fi
+	fi
+	if [ -n "${GID}" ]; then
+		echo "${GID}" | ${GREP} -qs "^[[:digit:]]*$"
+		if [ "$?" -eq 0 ]; then
+			GIDNUMBER="${GID}"
+		else
+			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${GID}" gidNumber)"
+			if [ -z "${GIDNUMBER}" ]; then
+				echo "${modulename}: Unknown group \"${GID}\""
+				exit 6
+			fi
+		fi
+		search_group "gidNumber" "${GIDNUMBER}"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Modifying user anyway."
+		fi
+	fi
+	if [ -n "${OTHERGROUPS}" ]; then
+		OTHERGROUPS="${OTHERGROUPS//,/ }"
+		for POSIXGROUP in ${OTHERGROUPS}; do
+			echo "${POSIXGROUP}" | ${GREP} -qs "^[[:digit:]]*$"
+			if [ "$?" -eq 0 ]; then
+				search_group "gidNumber" "${POSIXGROUP}"
+				if [ "$?" -ne 0 ]; then
+					echo "${modulename}: Unknown other group number \"${POSIXGROUP}\""
+					exit 6
+				fi
+				POSIXGROUP="$(ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=${POSIXGROUP}" cn)"
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
+			else
+				search_group "cn" "${POSIXGROUP}"
+				if [ "$?" -ne 0 ]; then
+					echo "${modulename}: Unknown other group \"${POSIXGROUP}\""
+					exit 6
+				fi
+				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
+			fi
+		done
+	fi
+	if [ -n "${HOSTLIST}" ]; then
+		HOSTLIST="${HOSTLIST//,/ }"
+		for HOST in ${HOSTLIST}; do
+			HOSTS="${HOSTS}host: ${HOST}\n"
+		done
+		HOSTS="$(echo -e "${HOSTS}")"
+	fi
+	if [ -n "${HOMEDIRECTORY}" ]; then
+		echo "${HOMEDIRECTORY}" | ${GREP} -qs "^/"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid home directory \"${HOMEDIRECTORY}\""
+			exit 3
+		fi
+	fi
+	if [ -n "${LOGINSHELL}" ]; then
+		echo "${LOGINSHELL}" | ${GREP} -qs "^/"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
+			exit 3
+		fi
+	fi
+	if [ -n "${NEWLOGIN}" ]; then
+		echo "${NEWLOGIN}" | ${GREP} -qs "^[[:alnum:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "${modulename}: Invalid user name \"${NEWLOGIN}\""
+			exit 3
+		else
+			search_user "uid" "${NEWLOGIN}"
+			if [ "$?" -eq 0 ]; then
+				echo "${modulename}: User \"${NEWLOGIN}\" exists"
+				exit 9
+			fi
+		fi
+		if [ -z "${ADDTOGROUPS}" ]; then
+			#ADDTOGROUPS="$(${LDAPSEARCH} -b "${GROUP_BASEDN}" "memberUid=${LOGIN}" | ${GREP} "^cn:" | ${SED} "s/^cn: //")"
+			ADDTOGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
+		fi
+	fi
+	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" = "yes" ]; then
+		if [ "$(whoami)" != "root" ]; then
+			echo "${modulename}: Only root may move home directories"
+			exit 12
+		fi
+		PARENTDIR="$(dirname "${HOMEDIRECTORY}")"
+		if [ ! -w "${PARENTDIR}" ]; then
+			echo "${modulename}: Cannot create directory \"${HOMEDIRECTORY}\""
+			exit 12
+		fi
+		OLDHOMEDIRECTORY="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" homeDirectory)"
+	fi
+	if [ -n "${SHADOWINACTIVE}" ]; then
+		if [ "${SHADOWINACTIVE}" != "-1" ]; then
+			echo "${SHADOWINACTIVE}" | ${GREP} -qs "^[[:digit:]]*$"
+			if [ "$?" -ne 0 ]; then
+				echo "${modulename}: Invalid numeric argument \"${SHADOWINACTIVE}\""
+				exit 3
+			fi
+		fi
+	fi
+	if [ -n "${SHADOWEXPIRE}" ]; then
+		if [ "${SHADOWEXPIRE}" != "-1" ]; then
+			echo "${SHADOWEXPIRE}" | ${GREP} -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+			if [ "$?" -ne 0 ]; then
+				echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
+				exit 3
+			else
+				let SHADOWEXPIRE="$(${DATE} -d "${SHADOWEXPIRE}" +%s) / 86400"
+			fi
+		fi
+	fi
+	if [ -n "${LOCKED}" ]; then
+		OLDPASSWORDENCODED="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword)"
+		OLDPASSWORD="$(ldap_base64_decode "${OLDPASSWORDENCODED}")"
+		sambaNTPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaNTPassword)"
+		sambaLMPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaLMPassword)"
+		irixPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" irixPassword)"
+		if [ "${LOCKED}" = "yes" ]; then
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}[!]?/}!/')"
+			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]?/!/')"
+			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SED} -re 's/^[!]?/!/')"
+			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}[!]?/}!/')"
+		elif [ "${LOCKED}" = "no" ]; then
+			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SED} -re 's/}!/}/')"
+			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SED} -re 's/^[!]//')"
+			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SED} -re 's/^[!]//')"
+			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SED} -re 's/}!/}/')"
+		fi
+	fi
+	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
+	if [ -n "${ADDTOGROUPS}" ]; then
+		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
+		for POSIXGROUP in ${DELETEFROMGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+		done
+		[ -n "${NEWLOGIN}" ] && LOGIN="${NEWLOGIN}"
+		for POSIXGROUP in ${ADDTOGROUPS}; do
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+		done
+	fi
+	append "${COMMAND_DN}"
+	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}"
+	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}"
+	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}"
+	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}"
+	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}"
+	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}"
+	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
+	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}"
+	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
+	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
+	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}"
+	[ -n "${sambaNTPassword}" ] && append_attrib_replace "sambaNTPassword" "${sambaNTPassword}"
+	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}"
+	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}"
+	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
+	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USER_BASEDN}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}"
+	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
+	runmodify
+	if [ "${MOVEHOMEDIR}" = "yes" ]; then
+		mv ${OLDHOMEDIRECTORY} ${HOMEDIRECTORY} > /dev/null 2>&1
+		chmod "${HOMEPERM}" "${HOMEDIRECTORY}"
+		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${HOMEDIRECTORY}"
+	fi
+}
+
+userdel() {
+	[ -z "${modulename}" ] && modulename="userdel"
+	while getopts "r" OPTION; do
+		case "${OPTION}" in
+			r) REMOVEHOMEDIR="yes";;
+			*) print_usage ${modulename} ; exit 1;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	search_user "uid" "${LOGIN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: User \"${LOGIN}\" does not exist"
+		exit 6
+	fi
+	if [ "${REMOVEHOMEDIR}" = "yes" ]; then
+		if [ "$(whoami)" != "root" ]; then
+			echo "${modulename}: Only root may remove home directories"
+			exit 12
+		fi
+		HOMEDIRECTORY="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" homeDirectory)"
+		UIDNUMBER="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" uidNumber)"
+	fi
+	append "dn: uid=${LOGIN},${USER_BASEDN}\nchangetype: delete\n"
+	DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
+	for POSIXGROUP in ${DELETEFROMGROUPS}; do
+		append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+	done
+	runmodify
+	if [ "${REMOVEHOMEDIR}" = "yes" -a -d "${HOMEDIRECTORY}" ]; then
+		OWNER_UIDNUMBER="$(${STAT} "${HOMEDIRECTORY}" |
+			${GREP} "Uid:" |
+			${SED} "s/^.*Uid:.*(\(.*\)\/.*Gid:.*$/\1/" | tr -d " ")"
+		if [ "${UIDNUMBER}" -eq "${OWNER_UIDNUMBER}" ]; then
+			rm -rf "${HOMEDIRECTORY}"
+		else
+			echo "${modulename}: ${HOMEDIRECTORY} not owned by user \"${LOGIN}\", not removing"
+			exit 12
+		fi
+	fi
+}
+
+chsh() {
+	[ -z "${modulename}" ] && modulename="chsh"
+	while getopts "s:" OPTION; do
+		case "${OPTION}" in
+			s) LOGINSHELL="${OPTARG}";;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	OLDLOGINSHELL="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "loginShell"`"
+	if [ -z "${LOGINSHELL}" ]; then
+		msg="Changing the login shell for ${LOGIN}\nEnter the new value, or press return for the default\n\tLogin Shell [${OLDLOGINSHELL}]: "
+		grabinteractiveinput "${msg}" LOGINSHELL
+		[ -z "${LOGINSHELL}" ] && LOGINSHELL="${OLDLOGINSHELL}"
+	fi
+
+	# recursive behaviour is nice...
+	# But we only do the call if they are changing the shell
+	[ "${OLDLOGINSHELL}" != "${LOGINSHELL}" ] && usermod -s "${LOGINSHELL}" "${LOGIN}"
+}
+
+chfn() {
+	# TODO: complete this
+	[ -z "${modulename}" ] && modulename="chfn"
+	while getopts "f:h:o:r:w:" OPTION; do
+		case "${OPTION}" in
+			f) FULLNAME="${OPTARG}";;
+			h) HOMEPHONE="${OPTARG}";;
+			o) OTHER="${OPTARG}";;
+			r) ROOMNUMBER="${OPTARG}";;
+			w) WORKPHONE="${OPTARG}";;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+
+	[ -n "${HOMEPH}" ] && append ""
+	#FULLNAME="$(echo ${COMMENT} | ${CUT} -d, -f1)"
+	#ROOMNUMBER="$(echo ${COMMENT} | ${CUT} -d, -f2)"
+	#WORKPHONE="$(echo ${COMMENT} | ${CUT} -d, -f3)"
+	#HOMEPHONE="$(echo ${COMMENT} | ${CUT} -d, -f4)"
+	
+	if [ -n "${FULLNAME}" ]; then
+		FIRSTNAME="${FULLNAME// *}"
+		SURNAME="${FULLNAME##* }"
+		CN="${FIRSTNAME}"
+
+	fi
+	[ -n "${SURNAME}" ] && append_attrib_replace sn "${SURNAME}"
+	[ -n "${FIRSTNAME}" ] && append_attrib_replace givenName "${FIRSTNAME}"
+	[ -n "${FULLNAME}" ] && append_attrib_replace displayName "${FULLNAME}"
+	[ -n "${ROOMNUMBER}" ] && append_attrib_replace roomNumber "${ROOMNUMBER}"
+	[ -n "${HOMEPHONE}" ] && append_attrib_replace homePhone "${HOMEPHONE}"
+	[ -n "${WORKPHONE}" ] && append_attrib_replace telephoneNumber "${WORKPHONE}"
+	append "gecos: ${COMMENT}"
+	append "\n\n"
+
+	echo "Not done yet!"
+	exit 99
+}
+
+chage() {
+	# TODO: complete this
+	LISTONLY="0"
+	[ -z "${modulename}" ] && modulename="chage"
+	while getopts "lm:M:W:I:E:d:" OPTION; do
+		case "${OPTION}" in
+			l) LISTONLY="1";;
+			m) MINDAYS="${OPTION}";;
+			M) MAXDAYS="${OPTION}";;
+			W) WARNDAYS="${OPTION}";;
+			I) INACTIVEDAYS="${OPTION}";;
+			E) ACCOUNTEXPIRY="${OPTION}";;
+			d) LASTCHANGE="${OPTION}";;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	ALLOWED=0
+	[ "x${LISTONLY}" == 'x1' -a `whoami` == "${LOGIN}" ] && ALLOWED=1
+	[ `whoami` == 'root' ] && ALLOWED=1
+	if [ ${ALLOWED} -ne 1 ]; then
+		#You must be root to change password aging information, or view it"
+		#for any user other than yourself."
+		echo "${modulename}: permission denied"
+		exit 1
+	fi
+	search_user "uid" "${LOGIN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: unknown user: ${LOGIN}"
+		exit 1
+	fi
+	if [ "x${LISTONLY}" == 'x1' ]; then
+		MINDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMin)
+		MAXDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMax)
+		WARNDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowWarning)
+		INACTIVEDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowInactive)
+		ACCOUNTEXPIRY=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowExpire)
+		LASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
+
+		echo -e "Minimum:\t${MINDAYS}"
+		echo -e "Maximum:\t${MAXDAYS}"
+		echo -e "Warning:\t${WARNDAYS}"
+		echo -e "Inactive:\t${INACTIVEDAYS}"
+		#echo -e "Last Change:\t${LASTCHANGE}" # raw
+		echo -e "Last Change:\t$(days_to_date ${LASTCHANGE} +'%b %d, %Y')"
+		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 ]; then
+			PASSWORDEXPIRY_STRING="Never"
+		else
+			PASSWORDEXPIRY_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS})) +'%b %d, %Y')"
+		fi
+		echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
+		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 -o ${INACTIVEDAYS} -le 0 ]; then
+			PASSWORDINACTIVE_STRING="Never"
+		else
+			PASSWORDINACTIVE_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS} + ${INACTIVEDAYS})) +'%b %d, %Y')"
+		fi
+		echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
+		if [ ${ACCOUNTEXPIRY} -le 0  ]; then
+			ACCOUNTEXPIRY_STRING="Never"
+		else
+			ACCOUNTEXPIRY_STRING="$(days_to_date ${ACCOUNTEXPIRY} +'%b %d, %Y')"
+		fi
+		echo -e "Account Expires:\t${ACCOUNTEXPIRY_STRING}"
+# shadowLastChange - The number of days (since January 1, 1970) since the password was last changed.
+# shadowMin - The number of days before password may be changed (0 indicates it may be changed at any time)
+# shadowMax - The number of days after which password must be changed (99999 indicates user can keep his or her password unchanged for many, many years)
+# shadowWarning - The number of days to warn user of an expiring password (7 for a full week)
+# shadowInactive - The number of days after password expires that account is disabled
+# shadowExpire - The number of days since January 1, 1970 that an account has been disabled
+# shadowFlag - A reserved field for possible future use
+		exit 0
+	fi
+	# TODO
+	echo "Not done yet! "
+	exit 99
+}
