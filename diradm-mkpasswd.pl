@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm-mkpasswd.pl,v 1.1 2004/12/10 01:12:11 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm-mkpasswd.pl,v 1.2 2004/12/10 03:12:50 robbat2 Exp $
 use Crypt::SmbHash qw(lmhash nthash ntlmgen);
 #use warnings;
 use strict;
@@ -17,15 +17,41 @@ sub generatesalt {
     return sprintf($formatstr, $randstr);
 }
 
-# trim whitespace
-my $passwd = $ARGV[1];
-$passwd =~ s/^\s+//g;
-$passwd =~ s/\s+$//g;
-#print "passwd: '",$passwd,"'\n";
+sub usage {
+	print "Usage: diradm-mkpasswd.pl [-m|-i] password [salt]\n";
+	print "       diradm-mkpasswd.pl [-n|-l] password\n";
+	exit 1;
+}
 
-if( $ARGV[0] =~ /-m/ ) {    print  crypt( $passwd, generatesalt( '$1$%.8s$' ) ) }
-elsif( $ARGV[0] =~ /-i/ ) { print  crypt( $passwd, generatesalt ) }
-elsif( $ARGV[0] =~ /-n/ ) { print nthash( $passwd ) }
-elsif( $ARGV[0] =~ /-l/ ) { print lmhash( $passwd ) }
+my $passwd;
+my $ARGC=$#ARGV+1;
+if($ARGC >= 2) {
+	# trim whitespace
+	$passwd = $ARGV[1];
+	$passwd =~ s/^\s+//g;
+	$passwd =~ s/\s+$//g;
+	#print "passwd: '",$passwd,"'\n";
+} else {
+	usage;
+}
+
+
+my $salt;
+
+if( $ARGV[0] =~ /-m/ ) {    
+	$salt = generatesalt( '$1$%.8s$' );
+	$salt = $ARGV[2] if $ARGV[2];
+	print  crypt( $passwd, $salt ) ;
+} elsif( $ARGV[0] =~ /-i/ ) { 
+	$salt = generatesalt;
+	$salt = $ARGV[2] if $ARGV[2];
+	print  crypt( $passwd, $salt ) ;
+} elsif( $ARGV[0] =~ /-n/ ) { 
+	print nthash( $passwd ) ;
+} elsif( $ARGV[0] =~ /-l/ ) { 
+	print lmhash( $passwd ) ;
+} else {
+	usage;
+}
 
 #print "\n"
