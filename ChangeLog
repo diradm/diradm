@@ -1,3 +1,17 @@
+2004-12-12 07:42  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.3), "Exp", lines: +1 -1
+
+	Make release.
+
+2004-12-12 07:41  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		cvs2cl-update.sh (1.2), "Exp", lines: +3 -1
+
+	add accum.
+
 2004-12-12 07:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
