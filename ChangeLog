@@ -1,193 +1,437 @@
-2004-12-11 19:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-12-12 07:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* reconf, src/diradm.in: BASHSH var, any version of auto*.
+	Changed:
+		configure.ac (1.8), "Exp", lines: +1 -1
 
-2004-12-11 19:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	new version number for release.
 
-	* Makefile.am: readme in build
+2004-12-12 07:39  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-12-11 19:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Added:
+		cvs2cl-update.sh (1.1)
 
-	* configure.ac: autoconf version
+	helper script.
+
+2004-12-12 07:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		cvs2cl.ufile (1.1)
+
+	for auto-data.
 
-2004-12-11 18:57  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-12-12 07:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* .cvsignore, Makefile.am, README.in, configure.ac: automake
-	  foreign mode
+	Added:
+		CHANGES.prefork (1.1)
+		README.prefork (1.1)
+		diradm.spec.in (1.1)
+	Changed:
+		.cvsignore (1.5), "Exp", lines: +2 -1
+		AUTHORS (1.2), "Exp", lines: +8 -0
+		Makefile.am (1.8), "Exp", lines: +7 -4
+		NEWS (1.2), "Exp", lines: +2 -0
+		README.in (1.3), "Exp", lines: +2 -0
+		THANKS (1.2), "Exp", lines: +4 -6
+		config.h.in (1.3), "Exp", lines: +3 -0
+		configure.ac (1.7), "Exp", lines: +15 -8
+		m4/Makefile.am (1.3), "Exp", lines: +2 -2
+		src/.cvsignore (1.3), "Exp", lines: +2 -1
+		src/Makefile.am (1.4), "Exp", lines: +7 -7
+		src/diradm.conf.in (1.2), "Exp", lines: +58 -20
+		src/diradm.in (1.3), "Exp", lines: +35 -8
+
+	initial changelog by cvs2cl.
+
+2004-12-12 03:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		reconf (1.3), "Exp", lines: +3 -3
+		src/diradm.in (1.2), "Exp", lines: +3 -4
+
+	BASHSH var, any version of auto*.
+
+2004-12-12 03:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		Makefile.am (1.7), "Exp", lines: +4 -2
+
+	readme in build
+
+2004-12-12 03:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.6), "Exp", lines: +1 -0
+
+	autoconf version
+
+2004-12-12 02:57  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		.cvsignore (1.4), "Exp", lines: +1 -0
+		Makefile.am (1.6), "Exp", lines: +3 -2
+		README.in (1.2), "Exp", lines: +2 -2
+		configure.ac (1.5), "Exp", lines: +1 -1
+
+	automake foreign mode
+
+2004-12-12 02:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Deleted:
+		README (1.3)
+		aclocal.m4 (1.2)
+		configure.in (1.2)
+		src/diradm-mkpasswd.pl (1.2)
+		src/diradm.conf (1.2)
+		src/diradm.sh (1.2)
+	Added:
+		m4/autoconf-path_progs_error.m4 (1.1)
+		m4/autoconf-prog_perl_modules.m4 (1.1)
+		src/diradm-mkpasswd.pl.in (1.1)
+		src/diradm.conf.in (1.1)
+		src/diradm.in (1.1)
+	Changed:
+		.cvsignore (1.3), "Exp", lines: +1 -0
+		Makefile.am (1.5), "Exp", lines: +3 -1
+		config.h.in (1.2), "Exp", lines: +3 -0
+		configure.ac (1.4), "Exp", lines: +31 -1
+		reconf (1.2), "Exp", lines: +3 -3
+		m4/Makefile.am (1.2), "Exp", lines: +3 -1
+		src/.cvsignore (1.2), "Exp", lines: +1 -0
+		src/Makefile.am (1.3), "Exp", lines: +7 -11
+
+	auto-ize nearly done!
+
+2004-12-10 03:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Deleted:
+		Makefile.in (1.4)
+		src/Makefile.in (1.2)
+	Added:
+		m4/.cvsignore (1.1)
+		src/.cvsignore (1.1)
+	Changed:
+		.cvsignore (1.2), "Exp", lines: +5 -0
+		Makefile.am (1.4), "Exp", lines: +1 -12
+		README (1.2), "Exp", lines: +5 -0
+		configure.ac (1.3), "Exp", lines: +1 -0
+		src/Makefile.am (1.2), "Exp", lines: +13 -0
 
-2004-12-11 18:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	cvsignore
 
-	* .cvsignore, Makefile.am, README, aclocal.m4, config.h.in,
-	  configure.ac, configure.in, reconf, m4/Makefile.am,
-	  m4/autoconf-path_progs_error.m4,
-	  m4/autoconf-prog_perl_modules.m4, src/.cvsignore,
-	  src/Makefile.am, src/diradm-mkpasswd.pl,
-	  src/diradm-mkpasswd.pl.in, src/diradm.conf, src/diradm.conf.in,
-	  src/diradm.in, src/diradm.sh: auto-ize nearly done!
+2004-12-10 03:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-12-09 19:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Deleted:
+		diradm (1.26)
+		diradm-mkpasswd.pl (1.3)
+		diradm.conf (1.10)
+		diradm.sh (1.2)
+	Added:
+		.cvsignore (1.1)
+		README.in (1.1)
+		THANKS (1.1)
+		aclocal.m4 (1.1)
+		config.h.in (1.1)
+		configure.in (1.1)
+		reconf (1.1)
+		m4/Makefile.am (1.1)
+		src/Makefile.am (1.1)
+		src/Makefile.in (1.1)
+		src/diradm-mkpasswd.pl (1.1)
+		src/diradm.conf (1.1)
+		src/diradm.sh (1.1)
+	Changed:
+		INSTALL (1.2), "Exp", lines: +231 -0
+		Makefile.am (1.3), "Exp", lines: +7 -1
+		Makefile.in (1.3), "Exp", lines: +247 -62
+		configure.ac (1.2), "Exp", lines: +26 -4
 
-	* .cvsignore, Makefile.am, Makefile.in, README, configure.ac,
-	  m4/.cvsignore, src/.cvsignore, src/Makefile.am, src/Makefile.in:
-	  cvsignore
+	autotool!
 
-2004-12-09 19:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-12-10 03:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* .cvsignore, INSTALL, Makefile.am, Makefile.in, README.in, THANKS,
-	  aclocal.m4, config.h.in, configure.ac, configure.in, diradm,
-	  diradm-mkpasswd.pl, diradm.conf, diradm.sh, reconf,
-	  m4/Makefile.am, src/Makefile.am, src/Makefile.in,
-	  src/diradm-mkpasswd.pl, src/diradm.conf, src/diradm.sh: autotool!
+	Changed:
+		Makefile.am (1.2), "Exp", lines: +3 -32
+		Makefile.in (1.2), "Exp", lines: +30 -115
 
-2004-12-09 19:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	autohell
 
-	* Makefile.am, Makefile.in: autohell
+2004-12-10 03:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-12-09 19:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Added:
+		AUTHORS (1.1)
+		COPYING (1.1)
+		INSTALL (1.1)
+		Makefile.am (1.1)
+		Makefile.in (1.1)
+		NEWS (1.1)
+		README (1.1)
+		configure.ac (1.1)
+		diradm.sh (1.1)
+	Changed:
+		diradm-mkpasswd.pl (1.2), "Exp", lines: +37 -11
+		diradm.conf (1.9), "Exp", lines: +3 -2
 
-	* AUTHORS, COPYING, ChangeLog, INSTALL, Makefile.am, Makefile.in,
-	  NEWS, README, configure.ac, diradm-mkpasswd.pl, diradm.conf,
-	  diradm.sh: auto-toolize, move source to new file.
+	auto-toolize, move source to new file.
 
-2004-12-09 17:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-12-10 01:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm: cleanup.
+	Changed:
+		diradm (1.25), "Exp", lines: +30 -14
 
-2004-12-09 17:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	cleanup.
 
-	* diradm-mkpasswd.pl, mkpasswd.pl: rename mkpasswd.
+2004-12-10 01:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-12-09 06:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Deleted:
+		mkpasswd.pl (1.5)
+	Added:
+		diradm-mkpasswd.pl (1.1)
 
-	* mkpasswd.pl: perl cleanup.
+	rename mkpasswd.
 
-2004-12-09 05:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-12-09 14:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm: versioning
+	Changed:
+		mkpasswd.pl (1.4), "Exp", lines: +13 -5
 
-2004-12-09 05:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	perl cleanup.
 
-	* diradm: gpasswd implementation, help cleanup, versioning, sets.
+2004-12-09 13:57  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-11-18 18:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm (1.24), "Exp", lines: +2 -2
 
-	* diradm: add complete password locking algorithm, fix usermod.
+	versioning
 
-2004-09-21 22:16  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-12-09 13:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm: Add support for emails. Fix password system. Fix homedir
-	  creation.
+	Changed:
+		diradm (1.23), "Exp", lines: +2 -2
 
-2004-09-21 22:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	versioning
 
-	* mkpasswd.pl: make life easier.
+2004-12-09 13:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-09-21 22:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm (1.22), "Exp", lines: +247 -81
 
-	* diradm.conf: fix syntax error.
+	gpasswd implementation, help cleanup, versioning, sets.
 
-2004-09-09 13:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-11-19 02:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm: correct hashing code.
+	Changed:
+		diradm (1.21), "Exp", lines: +36 -19
 
-2004-09-09 13:35  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	add complete password locking algorithm, fix usermod.
 
-	* diradm.conf: cleanup ldap info pulling.
+2004-09-22 05:16  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2004-07-11 20:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm (1.20), "Exp", lines: +41 -23
 
-	* diradm, diradm.conf: latest changes
+	Add support for emails. Fix password system. Fix homedir creation.
 
-2003-10-09 04:55  Patrick Lougheed <pat@tfsb.org>
+2004-09-22 05:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm, diradm.conf, mkpasswd.pl: SMB host add/del additions
+	Changed:
+		mkpasswd.pl (1.3), "Exp", lines: +1 -1
 
-2003-10-06 04:39  Patrick Lougheed <pat@tfsb.org>
+	make life easier.
 
-	* mkirixpasswd.pl, mkntpasswd.pl, mkpasswd.pl: Combined
-	  mkirixpasswd and mkntpasswd into mkpasswd
+2004-09-22 05:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2003-10-02 10:37  Patrick Lougheed <pat@tfsb.org>
+	Changed:
+		diradm.conf (1.8), "Exp", lines: +2 -2
 
-	* diradm, mkirixpasswd.pl: Added irixAccount support to diradm
-	  useradd
+	fix syntax error.
 
-	  Added mkirixpasswd.pl as a helper program to generate irix
-	  passwords
+2004-09-09 20:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2003-10-02 10:01  Patrick Lougheed <pat@tfsb.org>
+	Changed:
+		diradm (1.19), "Exp", lines: +5 -2
 
-	* diradm, mkntpasswd.pl: Added mkntpasswd.pl to create nt and ntlm
-	  passwords
+	correct hashing code.
 
-	  Began adding samba information to diradm
+2004-09-09 20:35  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2003-07-31 08:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm.conf (1.7), "Exp", lines: +6 -6
 
-	* diradm: chsh should work now
+	cleanup ldap info pulling.
 
-2003-07-29 16:43  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2004-07-12 03:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm, diradm.conf: cleanups and initial samba-ldap support
+	Changed:
+		diradm (1.18), "Exp", lines: +387 -43
+		diradm.conf (1.6), "Exp", lines: +23 -8
 
-2003-07-25 06:13  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	latest changes
 
-	* diradm: append_attribute usage
+2003-10-09 11:55  Patrick Lougheed <pat@tfsb.org>
 
-2003-07-14 04:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm (1.17), "Exp", lines: +107 -24
+		diradm.conf (1.5), "Exp", lines: +22 -3
+		mkpasswd.pl (1.2), "Exp", lines: +2 -1
 
-	* diradm: notes on what to finish/fix
+	SMB host add/del additions
 
-2003-07-14 03:58  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2003-10-06 11:39  Patrick Lougheed <pat@tfsb.org>
 
-	* diradm: removed some old code
+	Deleted:
+		mkirixpasswd.pl (1.2)
+		mkntpasswd.pl (1.2)
+	Added:
+		mkpasswd.pl (1.1)
 
-2003-07-14 03:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Combined mkirixpasswd and mkntpasswd into mkpasswd
 
-	* diradm: missed fixing $#
+2003-10-02 17:37  Patrick Lougheed <pat@tfsb.org>
 
-2003-07-14 03:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Added:
+		mkirixpasswd.pl (1.1)
+	Changed:
+		diradm (1.16), "Exp", lines: +13 -4
 
-	* diradm: full GECOS functionality for useradd
+	Added irixAccount support to diradm useradd
 
-2003-07-14 03:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+		Added mkirixpasswd.pl as a helper program to generate irix
+	passwords
 
-	* diradm: Fix braces on _every_ variable $foo.	Add 'run*' and
-	  append abstractions.	Convert LDAPADD calls to LDAPMODIFY calls
-	  for more speed.
+2003-10-02 17:01  Patrick Lougheed <pat@tfsb.org>
 
-2003-07-14 02:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Added:
+		mkntpasswd.pl (1.1)
+	Changed:
+		diradm (1.15), "Exp", lines: +25 -4
 
-	* diradm: added docs for chage,gpasswd. helper functions
+	Added mkntpasswd.pl to create nt and ntlm passwords
 
-2003-07-12 04:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+		Began adding samba information to diradm
 
-	* diradm: Start on chfn code.  Escape many variables properly.
-	  Multiple config file detection.  Correct shadowLastChange value.
-	  Work on correct GECOS/cn/sn values.
+2003-07-31 15:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2003-07-12 03:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm (1.14), "Exp", lines: +2 -10
 
-	* diradm.conf: fix GID stuff
+	chsh should work now
 
-2003-07-12 03:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2003-07-29 23:43  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm, diradm.conf: my custom improvements
+	Changed:
+		diradm (1.13), "Exp", lines: +17 -10
+		diradm.conf (1.4), "Exp", lines: +1 -0
 
-2003-07-12 03:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	cleanups and initial samba-ldap support
 
-	* diradm.conf: initial old file
+2003-07-25 13:13  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-2003-07-12 03:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	Changed:
+		diradm (1.12), "Exp", lines: +22 -5
 
-	* diradm: Abstract module names (\$modulename).  Add easy lookup
-	  functions (ldap_search_getattr) and convert code to use it.  Add
-	  chsh code.
+	append_attribute usage
 
-2003-07-12 03:52  Robin H. Johnson <robbat2@orbis-terrarum.net>
+2003-07-14 11:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
-	* diradm: initial fixes so it actually works!
+	Changed:
+		diradm (1.11), "Exp", lines: +30 -8
 
-2003-07-12 03:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+	notes on what to finish/fix
 
-	* diradm: Initial import into CVS. Been in use for a few months already.
+2003-07-14 10:58  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.10), "Exp", lines: +1 -24
+
+	removed some old code
+
+2003-07-14 10:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.9), "Exp", lines: +11 -11
+
+	missed fixing $#
+
+2003-07-14 10:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.8), "Exp", lines: +51 -28
+
+	full GECOS functionality for useradd
+
+2003-07-14 10:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.7), "Exp", lines: +377 -357
+
+	Fix braces on _every_ variable $foo.  Add 'run*' and append
+	abstractions.  Convert LDAPADD calls to LDAPMODIFY calls for more
+	speed.
+
+2003-07-14 09:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.6), "Exp", lines: +29 -4
+
+	added docs for chage,gpasswd. helper functions
+
+2003-07-12 11:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.5), "Exp", lines: +1 -1
+
+	Start on chfn code.  Escape many variables properly.  Multiple
+	config file detection.	Correct shadowLastChange value.  Work on
+	correct GECOS/cn/sn values.
+
+2003-07-12 10:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm.conf (1.3), "Exp", lines: +2 -2
+
+	fix GID stuff
+
+2003-07-12 10:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.4), "Exp", lines: +55 -17
+		diradm.conf (1.2), "Exp", lines: +43 -13
+
+	my custom improvements
+
+2003-07-12 10:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		diradm.conf (1.1)
+
+	initial old file
+
+2003-07-12 10:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.3), "Exp", lines: +148 -69
+
+	Abstract module names (\$modulename).  Add easy lookup functions
+	(ldap_search_getattr) and convert code to use it.  Add chsh code.
+
+2003-07-12 10:52  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.2), "Exp", lines: +9 -9
+
+	initial fixes so it actually works!
+
+2003-07-12 10:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		diradm (1.1.1.1), "Exp", lines: +0 -0
+
+	Initial import
+
+2003-07-12 10:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		diradm (1.1)
+
+	Initial revision
+
