@@ -11,11 +11,11 @@
 #!/bin/sh
 rm -f config.cache
 echo "- aclocal."
-aclocal -I m4
+aclocal-1.9 -I m4
 echo "- autoconf."
-autoconf
+autoconf-2.59
 echo "- autoheader."
-autoheader
+autoheader-2.59 --warnings all
 echo "- automake."
-automake -a
+automake-1.9 --add-missing --copy
 exit
