@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.3 2005/01/09 08:05:09 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.4 2005/01/09 12:17:52 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -200,12 +200,8 @@ useradd() {
 	append "objectClass: shadowAccount"
 	append "objectClass: organizationalPerson"
 	append "objectClass: inetOrgperson"
-	append "objectClass: userInformation"
 	append "uid: ${LOGIN}"
 	userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
-	sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
-	sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
-	irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
 	append "userPassword: {CRYPT}${userPasswordCrypt}"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
@@ -226,10 +222,19 @@ useradd() {
 	[ -n "${ROOMNUMBER}" ] && append "roomNumber: ${ROOMNUMBER}"
 	[ -n "${HOMEPHONE}" ] && append "homePhone: ${HOMEPHONE}"
 	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
-	[ -n "${EMAIL}" ] && append "email: ${EMAIL}"
+	if [ -n "${EMAIL}" ]; then
+		# this is a custom objectclass!
+		#append "objectClass: userInformation"
+		#append "email: ${EMAIL}"
+		
+		# alternative approach
+		append "mail: ${EMAIL}"
+	fi
 	append "gecos: ${COMMENT}"
 
 	if [ "${SAMBA}" = "yes" -a -n "${SAMBADOMAINSID}" ]; then
+		sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
+		sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
 		append "objectClass: sambaSamAccount"
 
 		let RID="2*${UIDNUMBER}+1000"
@@ -249,6 +254,8 @@ useradd() {
 	fi
 	# todo: config var for this
 	if [ "${IRIX}" = "yes" ]; then
+		irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
+		# this is a custom objectclass!
 		append "objectClass: irixAccount"
 		append "irixPassword: {CRYPT}${irixPassword}"
 	fi
@@ -494,7 +501,8 @@ usermod() {
 	append "${COMMAND_DN}"
 	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}"
 	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}"
-	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}"
+	#[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}"
+	[ -n "${EMAIL}" ] && append_attrib_replace "mail" "${EMAIL}"
 	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}"
 	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}"
 	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}"
