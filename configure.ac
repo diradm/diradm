@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT([diradm],
-        [2.2],
+        [2.3],
         [Robin Hugh Johnson robbat2@orbis-terrarum.net],
         [diradm])
 AC_CONFIG_AUX_DIR(config)
