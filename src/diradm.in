@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.9 2005/01/09 06:00:25 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.10 2005/01/09 06:31:46 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -93,9 +93,9 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-CVS_REVISION='$Revision: 1.9 $'
-CVS_DATE='$Date: 2005/01/09 06:00:25 $'
-CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.9 2005/01/09 06:00:25 robbat2 Exp $'
+CVS_REVISION='$Revision: 1.10 $'
+CVS_DATE='$Date: 2005/01/09 06:31:46 $'
+CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.10 2005/01/09 06:31:46 robbat2 Exp $'
 # get the stripped versions
 CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
 CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
@@ -275,10 +275,14 @@ print_usage_sub() {
 	_)
 	echo
 	;;
+	*)
+	echo "Unknown command!"
+	exit 1
+	;;
 	esac
 }
 
-print_usage () {
+print_usage() {
 	list=''
 	[ -n "$*" ] && list="$@"
 	echo "Usage:"
@@ -461,12 +465,18 @@ append() {
 append_attrib_replace() {
 	local attrib="$1"
 	shift
-	append "replace: ${attrib}\n${attrib}: ${*}"
+	append "replace: ${attrib}\n${attrib}: ${*}\n-"
+
 }
 append_attrib_add() {
 	local attrib="$1"
 	shift
-	append "add: ${attrib}\n${attrib}: ${*}"
+	append "add: ${attrib}\n${attrib}: ${*}\n-"
+}
+append_attrib_delete() {
+	local attrib="$1"
+	shift
+	append "delete: ${attrib}\n${attrib}: ${*}\n-"
 }
 
 runmodify() {
@@ -523,7 +533,7 @@ daysnow() {
 }
 
 
-groupadd () {
+groupadd() {
 	[ -z "${modulename}" ] && modulename="groupadd"
 	while getopts "g:o" OPTION; do
 		case "${OPTION}" in
@@ -584,9 +594,10 @@ groupadd () {
 	runmodify
 }
 
-groupmod () {
+groupmod() {
 	[ -z "${modulename}" ] && modulename="groupmod"
 	if [ "${#}" -le 1 ]; then
+		print_usage ${modulename}
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
@@ -640,7 +651,7 @@ groupmod () {
 	runmodify
 }
 
-groupdel () {
+groupdel() {
 	[ -z "${modulename}" ] && modulename="groupdel"
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
@@ -946,9 +957,10 @@ useradd() {
 	fi
 }
 
-usermod () {
+usermod() {
 	[ -z "${modulename}" ] && modulename="usermod"
 	if [ "${#}" -le 1 ]; then
+		print_usage ${modulename}
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
@@ -1136,20 +1148,20 @@ usermod () {
 		done
 	fi
 	append "${COMMAND_DN}"
-	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}\n-"
-	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}\n-"
-	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}\n-"
-	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-"
-	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}\n-"
-	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}\n-"
+	[ -n "${UIDNUMBER}" ] && append_attrib_replace "uidNumber" "${UIDNUMBER}"
+	[ -n "${GIDNUMBER}" ] && append_attrib_replace "gidNumber" "${GIDNUMBER}"
+	[ -n "${EMAIL}" ] && append_attrib_replace "email" "${EMAIL}"
+	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}"
+	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}"
+	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}"
 	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
-	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-"
-	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}\n-"
-	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}\n-"
-	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}\n-"
-	[ -n "${sambaNTPassword}" ] && append_attrib_replace "sambaNTPassword" "${sambaNTPassword}\n-"
-	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}\n-"
-	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}\n-"
+	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}"
+	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
+	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
+	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}"
+	[ -n "${sambaNTPassword}" ] && append_attrib_replace "sambaNTPassword" "${sambaNTPassword}"
+	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}"
+	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}"
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
 	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USER_BASEDN}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}"
 	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
@@ -1161,7 +1173,7 @@ usermod () {
 	fi
 }
 
-userdel () {
+userdel() {
 	[ -z "${modulename}" ] && modulename="userdel"
 	while getopts "r" OPTION; do
 		case "${OPTION}" in
@@ -1520,7 +1532,7 @@ smbhostadd() {
 	runmodify
 }
 
-smbhostdel () {
+smbhostdel() {
 	[ -z "${modulename}" ] && modulename="smbhostdel"
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
@@ -1539,13 +1551,7 @@ smbhostdel () {
 	runmodify
 }
 
-smbhostmod() {
-	[ -z "${modulename}" ] && modulename="smbhostmod"
-	echo "Not done yet!"
-	exit 99
-}
-
-hostadd () {
+hostadd() {
 	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostadd"
 	while getopts "e:i:a:" OPTION; do
@@ -1599,43 +1605,44 @@ hostadd () {
 	runmodify
 }
 
-hostdel () {
+hostdel() {
 	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostdel"
-	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
 		exit 2
 	else
 		NAME="${1}"
 	fi
-	search_host "cn" "${NAME}\$"
+	NAME_DOLLAR="${NAME}\$"
+	search_host "cn" "${NAME_DOLLAR}"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Host \"${NAME}\" does not exist"
 		exit 6
 	fi
-	append "dn: cn=${NAME}\$,${HOST_BASEDN}"
+	append "dn: cn=${NAME_DOLLAR},${HOST_BASEDN}"
 	append "changetype: delete"
 	append "\n"
 
 	runmodify
 }
 
-hostmod () {
+hostmod() {
 	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostmod"
 	if [ "${#}" -le 1 ]; then
+		print_usage ${modulename}
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
 	while getopts "e:E:i:I:a:A:n:" OPTION; do
 		case "${OPTION}" in
-			e) ADDETHERS="${OPTARG} ${ADDETHERS}";;
-			E) DELETHERS="${OPTARG} ${DELETHERS}";;
-			i) ADDIPS="${OPTARG} ${ADDIPS}";;
-			I) DELIPS="${OPTARG} ${DELIPS}";;
-			a) ADDALIASES="${OPTARG} ${ADDALIASES}";;
-			A) DELALIASES="${OPTARG} ${DELALIASES}";;
+			e) ETHERS_ADD="${OPTARG//,/ } ${ETHERS_ADD}";;
+			E) ETHERS_DELETE="${OPTARG//,/ } ${ETHERS_DELETE}";;
+			i) IPS_ADD="${OPTARG//,/ } ${IPS_ADD}";;
+			I) IPS_DELETE="${OPTARG//,/ } ${IPS_DELETE}";;
+			a) ALIASES_ADD="${OPTARG//,/ } ${ALIASES_ADD}";;
+			A) ALIASES_DELETE="${OPTARG//,/ } ${ALIASES_DELETE}";;
 			n) NEWNAME="${OPTARG}";;
 			*) print_usage ${modulename} ; exit 1;;
 		esac
@@ -1655,70 +1662,56 @@ hostmod () {
 	COMMAND_DN="dn: cn=${NAME},${HOST_BASEDN}"
 	append "${COMMAND_DN}"
 	append "changetype: modify"
-	if [ -n "${ADDETHERS}" ]; then
-		ADDETHERS="${ADDETHERS//,/ }"
-		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ieee802device"
-		if [ "$?" -eq 1 ]; then
-			append "add: objectClass"
-			append "objectClass: ieee802device"
-			append "-"
-		fi
-		# TODO: use correct set of ethers to avoid ldap error
-		for i in ${ADDETHERS}; do
-			append "add: macAddress"
-			append "macAddress: ${i}"
-			append "-"
+	ETHERS_CURRENT="$(ldap_search_getattr ${HOST_BASEDN} "cn=${NAME}" macAddress)"
+	IPS_CURRENT="$(ldap_search_getattr ${HOST_BASEDN} "cn=${NAME}" ipHostNumber)"
+	ALIASES_CURRENT="$(ldap_search_getattr ${HOST_BASEDN} "cn=${NAME}" cn)"
+	# build correct data
+	ETHERS_ADD="$(set_complement "${ETHERS_ADD}" "${ETHERS_CURRENT} ${ETHERS_DELETE}")"
+	ETHERS_DELETE=$(set_intersection "${ETHERS_DELETE}" "${ETHERS_CURRENT}")
+	# build correct data
+	IPS_ADD="$(set_complement "${IPS_ADD}" "${IPS_CURRENT} ${IPS_DELETE}")"
+	IPS_DELETE=$(set_intersection "${IPS_DELETE}" "${IPS_CURRENT}")
+	# build correct data
+	ALIASES_ADD="$(set_complement "${ALIASES_ADD}" "${ALIASES_CURRENT} ${ALIASES_DELETE}")"
+	ALIASES_DELETE=$(set_intersection "${ALIASES_DELETE}" "${ALIASES_CURRENT}")
+	if [ -n "$(set_intersection "${ALIASES_DELETE}" "${NAME}")" ]; then
+		echo "${modulename}: Cannot delete primary name of ${NAME}! Use rename instead."
+		print_usage ${modulename}
+		exit 6
+	fi
+
+	if [ -n "${ETHERS_ADD}" ]; then
+		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ieee802device" \
+			|| append_attrib_add objectClass "ieee802device"
+		for i in ${ETHERS_ADD}; do
+			append_attrib_add macAddress "${i}"
 		done
 	fi
-	# TODO: use correct set of ethers to avoid ldap error
-	if [ -n "${DELETHERS}" ]; then
-		DELETHERS="${DELETHERS//,/ }"
-		for i in ${DELETHERS}; do
-			append "delete: macAddress"
-			append "macAddress: ${i}"
-			append "-"
+	if [ -n "${ETHERS_DELETE}" ]; then
+		for i in ${ETHERS_DELETE}; do
+			append_attrib_delete macAddress "${i}"
 		done
 	fi
-	if [ -n "${ADDIPS}" ]; then
-		ADDIPS="${ADDIPS//,/ }"
-		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ipHost"
-		if [ "$?" -eq 1 ]; then
-			append "add: objectClass"
-			append "objectClass: ipHost"
-			append "-"
-		fi
-		# TODO: use correct set of ip to avoid ldap error
-		for i in ${ADDIPS}; do
-			append "add: ipHostNumber"
-			append "ipHostNumber: ${i}"
-			append "-"
+	if [ -n "${IPS_ADD}" ]; then
+		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ipHost" \
+			|| append_attrib_add objectClass "ipHost"
+		for i in ${IPS_ADD}; do
+			append_attrib_add ipHostNumber "${i}"
 		done
 	fi
-	# TODO: use correct set of ip to avoid ldap error
-	if [ -n "${DELIPS}" ]; then
-		DELIPS="${DELIPS//,/ }"
-		for i in ${DELIPS}; do
-			append "delete: ipHostNumber"
-			append "ipHostNumber: ${i}"
-			append "-"
+	if [ -n "${IPS_DELETE}" ]; then
+		for i in ${IPS_DELETE}; do
+			append_attrib_delete ipHostNumber "${i}"
 		done
 	fi
-	# TODO: use correct set of aliases to avoid ldap error
-	if [ -n "${ADDALIASES}" ]; then
-		ADDALIASES="${ADDALIASES//,/ }"
-		for i in ${ADDALIASES}; do
-			append "add: cn"
-			append "cn: ${i}"
-			append "-"
+	if [ -n "${ALIASES_ADD}" ]; then
+		for i in ${ALIASES_ADD}; do
+			append_attrib_add cn "${i}"
 		done
 	fi
-	# TODO: use correct set of aliases to avoid ldap error
-	if [ -n "${DELALIASES}" ]; then
-		DELALIASES="${DELALIASES//,/ }"
-		for i in ${DELALIASES}; do
-			append "delete: cn"
-			append "cn: ${i}"
-			append "-"
+	if [ -n "${ALIASES_DELETE}" ]; then
+		for i in ${ALIASES_DELETE}; do
+			append_attrib_delete cn "${i}"
 		done
 	fi
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
@@ -1742,6 +1735,7 @@ check() {
 				check_config 
 				;;
 			*) 
+				print_usage ${modulename}
 				echo "${modulename}: Unknown test" 
 				exit 2 
 				;;
