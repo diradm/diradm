@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.7 2003/07/14 10:08:21 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.8 2003/07/14 10:55:19 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -199,6 +199,31 @@ rundelete() {
 [ -n "${*}" ] && ${LDAPDELETE} "${*}" > /dev/null
 }
 
+Save some animals, eat a vegetarian
+
+# Convert N days since Jan 1, 1970 to a date
+# first paramater is the days
+# rest is passed to date
+days_to_date() {
+local D="${1}"
+shift
+[ -n "$*" ] && local OPT="+'${*}'"
+date -u -d "Jan $((${D}+1)), 1970" ${OPT}
+}
+
+# Does the reverse of days_to_date
+# expects a date
+# returns a number of days since Jan 1, 1970
+date_to_days() {
+local UNIXTIMESTAMP="$(date -u +%s -d "${*}")"
+echo $((${UNIXTIMESTAMP}/(3600*24)))
+}
+
+daysnow() {
+	date_to_days `date -u`
+}
+
+
 useradd () {
 	[ -z "${modulename}" ] && modulename="useradd"
 	while getopts "u:og:G:h:d:s:c:mk:f:e:p:" OPTION; do
@@ -319,7 +344,7 @@ useradd () {
 		echo "${modulename}: Invalid shell \"${LOGINSHELL}\""
 		exit 3
 	fi
-	[ -z "${COMMENT}" ] && COMMENT="${LOGIN}"
+	[ -z "${COMMENT}" ] && COMMENT="${LOGIN},,,"
 	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" = "yes" ]; then
 		if [ "$(whoami)" != "root" ]; then
 			echo "${modulename}: Only root may create home directories"
@@ -346,13 +371,21 @@ useradd () {
 			echo "${modulename}: Invalid date \"${SHADOWEXPIRE}\""
 			exit 3
 		else
-			let SHADOWEXPIRE="$(date -d "${SHADOWEXPIRE}" +%s) / 86400"
+			SHADOWEXPIRE="$(date_to_days "${SHADOWEXPIRE}")"
 		fi
 	fi
 	# Set this to today's date
 	# This is N days since Jan 1, 1970
-	SHADOWLASTCHANGE=$((`date +%s`/3600/24+1))
-	FULLNAME=${COMMENT//,.*}
+	SHADOWLASTCHANGE="$(daysnow)"
+
+	# Users Full Name
+	FULLNAME="$(echo ${COMMENT} | cut -d, -f1)"
+	ROOMNUMBER="$(echo ${COMMENT} | cut -d, -f2)"
+	WORKPHONE="$(echo ${COMMENT} | cut -d, -f3)"
+	HOMEPHONE="$(echo ${COMMENT} | cut -d, -f4)"
+	FIRSTNAME="${FULLNAME// *}"
+	SURNAME="${FULLNAME##* }"
+	CN="${FIRSTNAME}"
 
 	# Setup the commands
 	append "dn: uid=${LOGIN},${USERBASE}"
@@ -361,12 +394,13 @@ useradd () {
 	append "objectClass: account"
 	append "objectClass: posixAccount"
 	append "objectClass: shadowAccount"
+	append "objectClass: organizationalPerson"
+	append "objectClass: inetOrgperson"
 	append "uid: ${LOGIN}"
 	append "userPassword: ${USERPASSWORD}"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
-	append "cn: ${FULLNAME}"
-	append "gecos: ${COMMENT}"
+	append "cn: ${CN}"
 	append "homeDirectory: ${HOMEDIRECTORY}"
 	append "loginShell: ${LOGINSHELL}"
 	append "shadowLastChange: ${SHADOWLASTCHANGE}"
@@ -376,7 +410,14 @@ useradd () {
 	append "shadowMax: ${SHADOWMAX}"
 	append "shadowWarning: ${SHADOWWARNING}"
 	append "shadowFlag: ${SHADOWFLAG}"
-	append "${HOSTS}"
+	[ -n "${HOSTS}" ] && append "${HOSTS}"
+	[ -n "${SURNAME}" ] && append "sn: ${SURNAME}"
+	[ -n "${FIRSTNAME}" ] && append "givenName: ${FIRSTNAME}"
+	[ -n "${FULLNAME}" ] && append "displayName: ${FULLNAME}"
+	[ -n "${ROOMNUMBER}" ] && append "roomNumber: ${ROOMNUMBER}"
+	[ -n "${HOMEPHONE}" ] && append "homePhone: ${HOMEPHONE}"
+	[ -n "${WORKPHONE}" ] && append "telephoneNumber: ${WORKPHONE}"
+	append "gecos: ${COMMENT}"
 	append "\n\n"
 
 	if [ -n "${ADDTOGROUPS}" ]; then
@@ -581,7 +622,7 @@ usermod () {
 	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-\n"
 	[ -n "${HOMEDIRECTORY}" ] && append "replace: homeDirectory\nhomeDirectory: ${HOMEDIRECTORY}\n-\n"
 	[ -n "${LOGINSHELL}" ] && append "replace: loginShell\nloginShell: ${LOGINSHELL}\n-\n"
-	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,.*}
+	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
 	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
 	[ -n "${SHADOWINACTIVE}" ] && append "replace: shadowInactive\nshadowInactive: ${SHADOWINACTIVE}\n-\n"
 	[ -n "${SHADOWEXPIRE}" ] && append "replace: shadowExpire\nshadowExpire: ${SHADOWEXPIRE}\n-\n"
@@ -848,26 +889,8 @@ chfn() {
 	[ -n "${HOMEPH}" ] && append "${COMMAND}"
 	
 }
-
-# Convert N days since Jan 1, 1970 to a date
-# first paramater is the days
-# rest is passed to date
-days_to_date() {
-local D="${1}"
-shift
-[ -n "$*" ] && local OPT="+'${*}'"
-date -u -d "Jan $((${D}+1)), 1970" ${OPT}
-}
-
-# Does the reverse of days_to_date
-# expects a date
-# returns a number of days since Jan 1, 1970
-date_to_days() {
-date +%s -d "${*}"
-}
-
 case "${1}" in
-	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn)
+	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd)
 		ACTION="${1}"
 		shift 1
 		${ACTION} "$@"
