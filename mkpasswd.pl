@@ -20,4 +20,4 @@ elsif( $ARGV[0] =~ /-i/ ) { print crypt( $ARGV[0], generatesalt ) }
 elsif( $ARGV[0] =~ /-n/ ) { print nthash( $ARGV[1] ) }
 elsif( $ARGV[0] =~ /-l/ ) { print lmhash( $ARGV[1] ) }
 
-print "\n"
+#print "\n"
