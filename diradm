@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.3 2003/07/12 10:55:33 robbat2 Exp $
+# Version:	1.1
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -25,7 +25,10 @@
 #
 ################################################################################
 
-CONFIG="/etc/diradm.conf"
+CONFIG_FILENAME="diradm.conf"
+CONFIG="/etc/${CONFIG_FILENAME}"
+[ ! -f "${CONFIG}" ] && CONFIG="`dirname $0`/${CONFIG_FILENAME}"
+[ ! -f "${CONFIG}" ] && CONFIG="~/.${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
@@ -130,6 +133,11 @@ print_usage () {
 	echo "       diradm groupmod [-g gid [-o]] [-n name] group"
 	echo
 	echo "       diradm groupdel group"
+	echo
+	echo "       diradm chsh [-s login_shell] name"
+	echo
+    echo "       diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
+	echo "                   [-o other] name"
 	echo
 	echo "       diradm --version   Print diradm version number, then exit"
 	echo
@@ -314,6 +322,10 @@ useradd () {
 			let SHADOWEXPIRE="$(date -d "$SHADOWEXPIRE" +%s) / 86400"
 		fi
 	fi
+	# Set this to today's date
+	# This is N days since Jan 1, 1970
+	SHADOWLASTCHANGE=$((`date +%s`/3600/24+1))
+	FULLNAME=${COMMENT//,.*}
 	(
 	cat << EOF
 dn: uid=$LOGIN,$USERBASE
@@ -325,10 +337,11 @@ uid: $LOGIN
 userPassword: $USERPASSWORD
 uidNumber: $UIDNUMBER
 gidNumber: $GIDNUMBER
-cn: $COMMENT
+cn: $FULLNAME
+gecos: $COMMENT
 homeDirectory: $HOMEDIRECTORY
 loginShell: $LOGINSHELL
-shadowLastChange: 0
+shadowLastChange: $SHADOWLASTCHANGE
 shadowInactive: $SHADOWINACTIVE
 shadowExpire: $SHADOWEXPIRE
 shadowMin: $SHADOWMIN
@@ -534,18 +547,19 @@ usermod () {
 		fi
 	fi
 	COMMAND="dn: uid=$LOGIN,$USERBASE\n"
-	[ -n "$UIDNUMBER" ] && COMMAND="${COMMAND}replace: uidNumber\nuidNumber: $UIDNUMBER\n-\n"
-	[ -n "$GIDNUMBER" ] && COMMAND="${COMMAND}replace: gidNumber\ngidNumber: $GIDNUMBER\n-\n"
-	[ -n "$HOSTS" ] && COMMAND="${COMMAND}replace: host\n$HOSTS\n-\n"
-	[ -n "$HOMEDIRECTORY" ] && COMMAND="${COMMAND}replace: homeDirectory\nhomeDirectory: $HOMEDIRECTORY\n-\n"
-	[ -n "$LOGINSHELL" ] && COMMAND="${COMMAND}replace: loginShell\nloginShell: $LOGINSHELL\n-\n"
-	[ -n "$COMMENT" ] && COMMAND="${COMMAND}replace: cn\ncn: $COMMENT\n-\n"
-	[ -n "$SHADOWINACTIVE" ] && COMMAND="${COMMAND}replace: shadowInactive\nshadowInactive: $SHADOWINACTIVE\n-\n"
-	[ -n "$SHADOWEXPIRE" ] && COMMAND="${COMMAND}replace: shadowExpire\nshadowExpire: $SHADOWEXPIRE\n-\n"
-	[ -n "$USERPASSWORD" ] && COMMAND="${COMMAND}replace: userPassword\nuserPassword: $USERPASSWORD\n-\n"
-	[ "$COMMAND" = "dn: uid=$LOGIN,$USERBASE\n" ] && unset COMMAND
-	[ -n "$NEWLOGIN" ] && COMMAND="${COMMAND}\ndn: uid=$LOGIN,$USERBASE\nchangetype: modrdn\nnewrdn: uid=$NEWLOGIN\n"
-	if [ -n "$ADDTOGROUPS" ]; then
+	[ -n "${UIDNUMBER}" ] && COMMAND="${COMMAND}replace: uidNumber\nuidNumber: ${UIDNUMBER}\n-\n"
+	[ -n "${GIDNUMBER}" ] && COMMAND="${COMMAND}replace: gidNumber\ngidNumber: ${GIDNUMBER}\n-\n"
+	[ -n "${HOSTS}" ] && COMMAND="${COMMAND}replace: host\n${HOSTS}\n-\n"
+	[ -n "${HOMEDIRECTORY}" ] && COMMAND="${COMMAND}replace: homeDirectory\nhomeDirectory: ${HOMEDIRECTORY}\n-\n"
+	[ -n "${LOGINSHELL}" ] && COMMAND="${COMMAND}replace: loginShell\nloginShell: ${LOGINSHELL}\n-\n"
+	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,.*}
+	[ -n "${COMMENT}" ] && COMMAND="${COMMAND}replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
+	[ -n "${SHADOWINACTIVE}" ] && COMMAND="${COMMAND}replace: shadowInactive\nshadowInactive: ${SHADOWINACTIVE}\n-\n"
+	[ -n "${SHADOWEXPIRE}" ] && COMMAND="${COMMAND}replace: shadowExpire\nshadowExpire: ${SHADOWEXPIRE}\n-\n"
+	[ -n "${USERPASSWORD}" ] && COMMAND="${COMMAND}replace: userPassword\nuserPassword: ${USERPASSWORD}\n-\n"
+	[ "${COMMAND}" = "dn: uid=$LOGIN,$USERBASE\n" ] && unset COMMAND
+	[ -n "${NEWLOGIN}" ] && COMMAND="${COMMAND}\ndn: uid=$LOGIN,$USERBASE\nchangetype: modrdn\nnewrdn: uid=$NEWLOGIN\n"
+	if [ -n "${ADDTOGROUPS}" ]; then
 		#DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
 		DELETEFROMGROUPS="$(ldap_search_getattr "$GROUPBASE" "memberUid=$LOGIN" cn)"
 		for POSIXGROUP in $DELETEFROMGROUPS; do
@@ -783,8 +797,32 @@ chsh() {
 	[ "${OLDLOGINSHELL}" != "${LOGINSHELL}" ] && usermod -s "${LOGINSHELL}" "${LOGIN}"
 }
 
+chfn() {
+    #chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]" 
+	#     [-o other] name"
+	[ -z "${modulename}" ] && modulename="chfn"
+	while getopts "s:" OPTION; do
+		case "$OPTION" in
+			f) FULLNAME="$OPTARG";;
+			h) HOMEPH="$OPTARG";;
+			o) OTHER="$OPTARG";;
+			r) ROOMNO="$OPTARG";;
+			w) WORKPH="$OPTARG";;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		LOGIN="$1"
+	fi
+
+	
+}
+
 case "$1" in
-	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh)
+	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn)
 		ACTION="$1"
 		shift 1
 		$ACTION "$@"
