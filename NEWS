@@ -1,6 +1,13 @@
-2004-12-11:
-diradm-2.0 - The first official release since the fork.
-2004-12-23:
-diradm-2.1 - Actually release this time.
-2005-01-09:
-diradm-2.2 - Fixed hostdel/hostmod bugs, added user-tests, work with non-C locale.
+2004-12-11: diradm-2.0 
+- The first official release since the fork.
+
+2004-12-23: diradm-2.1 
+- Actually release this time.
+
+2005-01-09: diradm-2.2 
+- Fixed hostdel/hostmod bugs, added user-tests, work with non-C locale.
+
+2005-01-09: diradm-2.3 
+- Forgot I used some customized schema stuff for email and irix passwords. 
+- Changed to a standard mail schema
+- provide my irixAccount schema with diradm.
