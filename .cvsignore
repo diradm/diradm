@@ -1,8 +1,9 @@
 Makefile
+diradm.spec
+README
 Makefile.in
 autom4te.cache
 configure
-.in
 config.h
 config.log
 config.status

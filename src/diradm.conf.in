@@ -1,29 +1,49 @@
 # Begin /etc/diradm.conf
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.1 2004/12/12 02:44:30 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.2 2004/12/12 07:30:14 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # @PACKAGE@ @VERSION@
 
 # Options for user accounts
 # ---------------------------------
+# thse are similar variables to /etc/default/useradd
+# You should start ldap UIDs/GIDs much higher than you expect to reach with
+# your normal system values.
 UIDNUMBERMIN="1001"
 UIDNUMBERMAX="60000"
 HOMEBASE="/home/users"
-HOMEPERM="0711"
+# that crazy redhat thing of a group for every user...
+USERGROUPS="no"
+# we don't do that crazy redhat thing of a group for every user by default
+if [ "$USERGROUPS" = "no" ]; then
+	HOMEPERM="0711"
+else
+	HOMEPERM="0751"
+fi
 SKEL="/etc/skel"
 DEFAULT_GIDNUMBER="100"
-DEFAULT_LOGINSHELL="/bin/bash"
-DEFAULT_SHADOWINACTIVE="7"
+# you might want to use /bin/bash here
+# but localshell is our custom shell limitation system
+DEFAULT_LOGINSHELL="/bin/localshell"
+DEFAULT_SHADOWINACTIVE="-1"
 DEFAULT_SHADOWEXPIRE="-1"
 SHADOWMIN="0"
 SHADOWMAX="99999"
 SHADOWWARNING="7"
 SHADOWFLAG="0"
+
+# Misc options
+# ----------------------------------
+# This is the path to the script bundled with diradm
+# we use it to generate the passwords needed quickly.
 MKPASSWD="${libexecdir}/diradm-mkpasswd.pl"
 
 # Options for group accounts
 # ----------------------------------
 GIDNUMBERMIN="500"
 GIDNUMBERMAX="60000"
+# for groups that have a shared home-directory
+# see also the automount group stuff...
+GROUPBASE="/home/projects"
 
 # LDAP specific options
 # ---------------------
@@ -34,7 +54,8 @@ function pullsetting() {
 	# Parameter 2 is the setting to get
 	src="$1"
 	setting="$2"
-	grep -i "^${setting}" ${src} | tail -n1 | awk '{print $2}'
+	#grep -i "^${setting}" ${src} | tail -n1 | awk '{print $2}'
+	@AWK@ "BEGIN{IGNORECASE=1} /^${setting}/{print $2}" ${src} | @TAIL@ -n1
 }
 
 function grabconf() {
@@ -54,19 +75,20 @@ function grabconf() {
 }
 
 function grabpasswd() {
-	pullsetting /etc/ldap.secret ''
+	#pullsetting /etc/ldap.secret ''
+	@SED@ -n -e '1p' /etc/ldap.secret
 }
 
 # LDAP specific options
 # ---------------------
+# Allow these variables to be passed in from outside at any run. Useful if you
+# use replicated LDAP and want to write to the master from a client
 [ -z "${BASEDN}" ] && BASEDN="`grabconf base 'o=MyOrg'`"
 [ -z "${LDAPURI}" ] && LDAPURI="`grabconf uri ldap://127.0.0.1/`"
 [ -z "${BINDDN}" ] && BINDDN="`grabconf rootbinddn "cn=Manager,${BASEDN}"`"
-# Be extremely careful with read rights
-# of this file if you set this value!!!
-# BINDPASS="secret"
-BINDPASS="$(grabpasswd)"
+[ -z "${BINDPASS}" ] && BINDPASS="$(grabpasswd)"
 [ -z "${BINDPASS}" ] && BINDPASS="secret"
+# back to normal stuff
 USERBASE="`grabconf nss_base_passwd "ou=Users,${BASEDN}"`"
 GROUPBASE="`grabconf nss_base_group "ou=Group,${BASEDN}"`"
 HOSTBASE="`grabconf nss_base_hosts "ou=Hosts,${BASEDN}"`"
@@ -74,11 +96,19 @@ SAMBAHOSTBASE="ou=Computers,${BASEDN}"
 
 # SAMBA specific options
 # ----------------------
+ENABLE_SAMBA="@ENABLE_SAMBA@"
+# your domain name here
 SAMBADOMAIN="RESEARCH"
 # automatically fetch the SAMBADOMAINSID
-SAMBADOMAINSID="$(net getlocalsid ${SAMBADOMAIN} |cut -d: -f2 | xargs)"
-#SAMBADOMAINSID="S-1-5-21-3721693875-1545016702-1248474524"
-SAMBAPATHPREPEND="\\\\\\YAMATO\\Users"
+if [ -n "$ENABLE_SAMBA" ]; then
+	SAMBADOMAINSID="$(@SAMBA_NET@ getlocalsid ${SAMBADOMAIN} | @AWK@ '{print $6}')"
+else
+	SAMBADOMAINSID="S-1-5-21-3721693875-1545016702-1248474524"
+fi
+# format is \\[${DOMAIN}]\${SERVER}\${SHARE}
+SAMBAPATHPREPEND='\\\YAMATO\Users'
+# quoteing example
+#SAMBAPATHPREPEND="\\\\\\YAMATO\\Users"
 SAMBADRIVE="U:"
 DEFAULT_SAMBAGID="513"
 SAMBAHOSTRIDMIN="100000"
@@ -86,16 +116,24 @@ SAMBAHOSTRIDMAX="999999"
 
 # Automount Info
 # --------------
-AUTOMOUNT_USERBASE="ou=home.users,ou=AutoFS,dc=iat,dc=sfu,dc=ca"
-AUTOMOUNT_GROUPBASE="ou=home.projects,ou=AutoFS,dc=iat,dc=sfu,dc=ca"
-AUTOMOUNT_OPTIONS="-rw,noatime,nosuid,nodev,nolock,rsize=32768,wsize=32768,soft,tcp,nfsvers=3,vers=3,retry=1,acregmin=15,acregmax=120,acdirmin=60,acdirmax=120"
+# nss_ldap doesn't support automount...
+AUTOMOUNT_BASEDN="ou=AutoFS,${BASEDN}"
 AUTOMOUNT_USERDESC="users"
 AUTOMOUNT_GROUPDESC="projects"
+AUTOMOUNT_USERMAP="home.users"
+AUTOMOUNT_GROUPMAP="home.projects"
+AUTOMOUNT_USERBASE="ou=${AUTOMOUNT_USERMAP},${AUTOMOUNT_BASEDN}"
+AUTOMOUNT_USERBASE="ou=${AUTOMOUNT_GROUPMAP},${AUTOMOUNT_BASEDN}"
+# noatime provides a large performance boost
+# nolock,soft is safe with NFSv3 over TCP
+# see nfs(5) for more defaults on some of these settings
+AUTOMOUNT_OPTIONS="-rw,noatime,nosuid,nodev,nolock,rsize=32768,wsize=32768,soft,tcp,nfsvers=3,vers=3,retry=1,acregmin=15,acregmax=120,acdirmin=60,acdirmax=120"
+# This is the common base directory that the user-specific string is appended onto
 AUTOMOUNT_BASE="209.87.56.240:/export/users/0"
 
-# single quotes are important here!
-#AUTOMOUNT_HASHING='${val}' # no hashing
-AUTOMOUNT_HASHING='${val:0:1}/${val}' # first level hashing
-#AUTOMOUNT_HASHING='${val:0:1}/${val:0:2}/${val}' # second level hashing
+# single quotes are important here, as we evaluate this later...
+#AUTOMOUNT_HASHING='${val}' # no hashing - 'robbat2'
+AUTOMOUNT_HASHING='${val:0:1}/${val}' # first level hashing - 'r/robbat2'
+#AUTOMOUNT_HASHING='${val:0:1}/${val:0:2}/${val}' # second level hashing - 'r/ro/robbat2'
 
 # End /etc/diradm.conf

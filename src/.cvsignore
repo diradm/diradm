@@ -1,4 +1,5 @@
 diradm
-diradm-mkpasswd
+diradm.conf
+diradm-mkpasswd.pl
 Makefile
 Makefile.in

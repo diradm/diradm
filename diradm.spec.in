@@ -1,0 +1,70 @@
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 1
+%define __PN %{name}
+%define __PV %{version}
+%define __PR %{release}
+%define __PVR %{version}-%{release}
+%define __P %{name}-%{version}
+%define __PF %{name}-%{version}-%{release}
+
+Summary: A tool for managing posix-like things in a LDAP directory.
+Group: Applications/System
+Source: %{__P}.tar.bz2
+License: GPL
+#URL: http://www.orbis-terrarum.net/
+Packager: Robin H. Johnson <robbat2@orbis-terrarum.net>
+BuildRoot: %{_tmppath}/%{__PF}-buildroot
+Provides: config(%{__PN}) = %{__PVR}
+Requires: /bin/bash 
+Requires: /usr/bin/gawk
+Requires: /bin/egrep
+Requires: /bin/fgrep
+Requires: /bin/grep
+Requires: /usr/bin/head
+Requires: /usr/bin/ldapadd
+Requires: /usr/bin/ldapdelete
+Requires: /usr/bin/ldapmodify
+Requires: /usr/bin/ldapsearch
+Requires: /usr/bin/sed
+Requires: /usr/bin/stat
+Requires: /usr/bin/tail
+Requires: /usr/bin/perl 
+Requires: config(%{__PN}) = %{__PVR}
+Requires: perl(Crypt::SmbHash)
+Requires: perl(MIME::Base64)
+
+%description
+diradm is a tool for managing posix-like things in a LDAP directory. It uses
+ldap[add|modify|delete] from the OpenLDAP project. Samba is supported as well.
+
+%prep
+%setup
+
+%build
+set -x
+# figure out configure options options based on what packages are installed
+# to override, use the OVERRIDE_OPTIONS environment variable.  To add
+# extra options, use the OPTIONS environment variable.
+if test "x$OVERRIDE_OPTIONS" = "x"; then
+    ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --enable-samba \
+    $OPTIONS
+else
+    ./configure $OVERRIDE_OPTIONS
+fi
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make DESTDIR=$RPM_BUILD_ROOT install
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+/usr/libexec/diradm-mkpasswd.pl
+/usr/sbin/diradm
+%config /etc/diradm.conf
+%doc INSTALL AUTHORS COPYING ChangeLog THANKS README
