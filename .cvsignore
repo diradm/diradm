@@ -9,3 +9,4 @@ config.log
 config.status
 stamp-h1
 aclocal.m4
+config.cache
