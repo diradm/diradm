@@ -9,5 +9,6 @@
 
 2005-01-09: diradm-2.3 
 - Forgot I used some customized schema stuff for email and irix passwords. 
-- Changed to a standard mail schema
+- Changed to a standard mail schema.
 - provide my irixAccount schema with diradm.
+- Fix useradd without password.
