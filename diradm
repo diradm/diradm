@@ -1,0 +1,741 @@
+#!/bin/bash
+#
+################################################################################
+#
+# diradm:	A tool for managing posix users and groups in a LDAP directory.
+#		It uses ldap[add|modify|delete] from the OpenLDAP project.
+#
+# Version:	1.1
+#
+# Copyright (C) 2003  Daniel Himler  <dan@hits.at>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+################################################################################
+
+CONFIG="/etc/diradm.conf"
+
+##################### Don't touch anything below this line #####################
+
+VERSION="1.1"
+
+if [ ! -r "$CONFIG" ]; then
+	echo "Unable to open configuration file \"$CONFIG\"!"
+	exit 1
+fi
+
+DEPENDENCIES="grep ldapsearch ldapadd ldapmodify ldapdelete sed stat"
+for DEPENDENCY in $DEPENDENCIES; do
+	EXECUTABLE="$(which "$DEPENDENCY" 2> /dev/null)"
+	if [ ! -x "$EXECUTABLE" ]; then
+		echo "Cannot find \"$DEPENDENCY\"!"
+		exit 1
+	fi
+done
+
+source "$CONFIG"
+CONFIGOPTIONS_STRING="LDAPURI BINDDN USERBASE GROUPBASE HOMEBASE SKEL
+	DEFAULT_LOGINSHELL"
+CONFIGOPTIONS_DIGIT="UIDNUMBERMIN UIDNUMBERMAX HOMEPERM DEFAULT_GIDNUMBER
+	GIDNUMBERMIN GIDNUMBERMAX SHADOWMIN SHADOWMAX SHADOWWARNING"
+CONFIGOPTIONS_DIGIT_DISABLE="DEFAULT_SHADOWINACTIVE SHADOWFLAG"
+CONFIGOPTIONS_DATE_DISABLE="DEFAULT_SHADOWEXPIRE"
+for CONFIGOPTION in $CONFIGOPTIONS_STRING; do
+	eval VALUE="\$$CONFIGOPTION"
+	if [ -z "$VALUE" ]; then
+		echo "Configuration error: $CONFIGOPTION not defined!"
+		exit 1
+	fi
+done
+for CONFIGOPTION in $CONFIGOPTIONS_DIGIT; do
+	eval VALUE="\$$CONFIGOPTION"
+	if [ -z "$VALUE" ]; then
+		echo "Configuration error: $CONFIGOPTION not defined!"
+		exit 1
+	else
+		echo "$VALUE" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "Configuration error: $CONFIGOPTION has invalid numerical value \"$VALUE\"!"
+			exit 1
+		fi
+	fi
+done
+for CONFIGOPTION in $CONFIGOPTIONS_DIGIT_DISABLE; do
+	eval VALUE="\$$CONFIGOPTION"
+	if [ -z "$VALUE" ]; then
+		echo "Configuration error: $CONFIGOPTION not defined!"
+		exit 1
+	else
+		if [ "$VALUE" != "-1" ]; then
+			echo "$VALUE" | grep -qs "^[[:digit:]]*$"
+			if [ "$?" -ne 0 ]; then
+				echo "Configuration error: $CONFIGOPTION has invalid numerical value \"$VALUE\"!"
+				exit 1
+			fi
+		fi
+	fi
+done
+for CONFIGOPTION in $CONFIGOPTIONS_DATE_DISABLE; do
+	eval VALUE="\$$CONFIGOPTION"
+	if [ -z "$VALUE" ]; then
+		echo "Configuration error: $CONFIGOPTION not defined!"
+		exit 1
+	else
+		if [ "$VALUE" != "-1" ]; then
+			echo "$VALUE" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+			if [ "$?" -ne 0 ]; then
+				echo "Configuration error: $CONFIGOPTION has invalid date value \"$VALUE\"!"
+				exit 1
+			fi
+		fi
+	fi
+done
+
+OPTIONS="-x -H $LDAPURI"
+if [ -n "$BINDPASS" ]; then
+	ADMINOPTIONS="$OPTIONS -D $BINDDN -w $BINDPASS"
+else
+	ADMINOPTIONS="$OPTIONS -D $BINDDN -W"
+fi
+LDAPSEARCH="ldapsearch $OPTIONS"
+LDAPADD="ldapadd $ADMINOPTIONS"
+LDAPMODIFY="ldapmodify $ADMINOPTIONS"
+LDAPDELETE="ldapdelete $ADMINOPTIONS"
+
+print_usage () {
+	echo "Usage: diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
+	echo "                      [-d home] [-s shell] [-c comment] [-m [-k template]]"
+	echo "                      [-f inactive] [-e expire] [-p passwd] name"
+	echo
+	echo "       diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
+	echo "                      [-d home [-m]] [-s shell] [-c comment] [-l new_name]"
+	echo "                      [-f inactive] [-e expire ] [-p passwd] [-L|-U] name"
+	echo
+	echo "       diradm userdel [-r] name"
+	echo
+	echo "       diradm groupadd [-g gid [-o]] group"
+	echo
+	echo "       diradm groupmod [-g gid [-o]] [-n name] group"
+	echo
+	echo "       diradm groupdel group"
+	echo
+	echo "       diradm --version   Print diradm version number, then exit"
+	echo
+	echo "       diradm --help      Print this help, then exit"
+}
+
+print_version () {
+	echo "diradm $VERSION"
+	echo "Copyright (C) 2003 Daniel Himler <dan@hits.at>"
+	echo "This is free software; see the source for copying conditions.  There is NO"
+	echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+}
+
+search_user () {
+	$LDAPSEARCH -b "$USERBASE" "$1=$2" | grep -qs "^$1: $2$"
+	return "$?"
+}
+
+search_group () {
+	$LDAPSEARCH -b "$GROUPBASE" "$1=$2" | grep -qs "^$1: $2$"
+	return "$?"
+}
+
+useradd () {
+	while getopts "u:og:G:h:d:s:c:mk:f:e:p:" OPTION; do
+		case "$OPTION" in
+			u) UIDNUMBER="$OPTARG";;
+			o) DUPLICATES="yes";;
+			g) GID="$OPTARG";;
+			G) OTHERGROUPS="$OPTARG";;
+			h) HOSTLIST="$OPTARG";;
+			d) HOMEDIRECTORY="$OPTARG";;
+			s) LOGINSHELL="$OPTARG";;
+			c) COMMENT="$OPTARG";;
+			m) CREATEHOMEDIR="yes";;
+			k) SKEL="$OPTARG";;
+			f) SHADOWINACTIVE="$OPTARG";;
+			e) SHADOWEXPIRE="$OPTARG";;
+			p) USERPASSWORD="$OPTARG";;
+			*) exit 1;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		LOGIN="$1"
+	fi
+	echo "$LOGIN" | grep -qs "^[[:alnum:]]*$"
+	if [ "$?" -ne 0 ]; then
+		echo "useradd: Invalid user name \"$LOGIN\""
+		exit 3
+	else
+		search_user "uid" "$LOGIN"
+		if [ "$?" -eq 0 ]; then
+			echo "useradd: User \"$LOGIN\" exists"
+			exit 9
+		fi
+	fi
+	if [ -n "$UIDNUMBER" ]; then
+		echo "$UIDNUMBER" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "useradd: Invalid numeric argument \"$UIDNUMBER\""
+			exit 3
+		fi
+		search_user "uidNumber" "$UIDNUMBER"
+		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
+			echo "useradd: uid $UIDNUMBER is not unique"
+			exit 4
+		fi
+	else
+		UIDNUMBER="$UIDNUMBERMIN"
+		while [ "$UIDNUMBER" -le "$UIDNUMBERMAX" ]; do
+			search_user "uidNumber" "$UIDNUMBER"
+			[ "$?" -ne 0 ] && break
+			let UIDNUMBER="$UIDNUMBER + 1"
+		done
+	fi
+	if [ -n "$GID" ]; then
+		echo "$GID" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -eq 0 ]; then
+			GIDNUMBER="$GID"
+		else
+			GIDNUMBER="$($LDAPSEARCH -b "$GROUPBASE" "cn=$GID" | grep "gidNumber: " | sed "s/gidNumber: //")"
+			if [ -z "$GIDNUMBER" ]; then
+				echo "useradd: Unknown group \"$GID\""
+				exit 6
+			fi
+		fi
+	else
+		GIDNUMBER="$DEFAULT_GIDNUMBER"
+	fi
+	search_group "gidNumber" "$GIDNUMBER"
+	if [ "$?" -ne 0 ]; then
+		echo "useradd: Warning! Group $GIDNUMBER not found. Adding user anyway."
+	fi
+	if [ -n "$OTHERGROUPS" ]; then
+		OTHERGROUPS="$(echo "$OTHERGROUPS" | sed "s/,/ /")"
+		for POSIXGROUP in $OTHERGROUPS; do
+			echo "$POSIXGROUP" | grep -qs "^[[:digit:]]*$"
+			if [ "$?" -eq 0 ]; then
+				search_group "gidNumber" "$POSIXGROUP"
+				if [ "$?" -ne 0 ]; then
+					echo "useradd: Unknown group \"$POSIXGROUP\""
+					exit 6
+				fi
+				POSIXGROUP="$($LDAPSEARCH -b "$GROUPBASE" "gidNumber=$POSIXGROUP" |
+					grep "^cn:" |
+					sed "s/cn: //")"
+				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+			else
+				search_group "cn" "$POSIXGROUP"
+				if [ "$?" -ne 0 ]; then
+					echo "useradd: Unknown group \"$POSIXGROUP\""
+					exit 6
+				fi
+				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+			fi
+		done
+	fi
+	if [ -n "$HOSTLIST" ]; then
+		HOSTLIST="$(echo "$HOSTLIST" | sed "s/,/ /")"
+		for HOST in $HOSTLIST; do
+			HOSTS="${HOSTS}host: $HOST\n"
+		done
+		HOSTS="$(echo -e "$HOSTS")"
+	fi
+	[ -z "$HOMEDIRECTORY" ] && HOMEDIRECTORY="$HOMEBASE/$LOGIN"
+	echo "$HOMEDIRECTORY" | grep -qs "^/"
+	if [ "$?" -ne 0 ]; then
+		echo "useradd: Invalid home directory \"$HOMEDIRECTORY\""
+		exit 3
+	fi
+	[ -z "$LOGINSHELL" ] && LOGINSHELL="$DEFAULT_LOGINSHELL"
+	echo "$LOGINSHELL" | grep -qs "^/"
+	if [ "$?" -ne 0 ]; then
+		echo "useradd: Invalid shell \"$LOGINSHELL\""
+		exit 3
+	fi
+	[ -z "$COMMENT" ] && COMMENT="$LOGIN"
+	if [ -n "$HOMEDIRECTORY" -a "$CREATEHOMEDIR" = "yes" ]; then
+		if [ "$(whoami)" != "root" ]; then
+			echo "useradd: Only root may create home directories"
+			exit 12
+		fi
+		PARENTDIR="$(dirname "$HOMEDIRECTORY")"
+		if [ ! -w "$PARENTDIR" ]; then
+			echo "useradd: Cannot create directory \"$HOMEDIRECTORY\""
+			exit 12
+		fi
+	fi
+	[ -z "$SHADOWINACTIVE" ] && SHADOWINACTIVE="$DEFAULT_SHADOWINACTIVE"
+	if [ "$SHADOWINACTIVE" != "-1" ]; then
+		echo "$SHADOWINACTIVE" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "useradd: Invalid numeric argument \"$SHADOWINACTIVE\""
+			exit 3
+		fi
+	fi
+	[ -z "$SHADOWEXPIRE" ] && SHADOWEXPIRE="$DEFAULT_SHADOWEXPIRE"
+	if [ "$SHADOWEXPIRE" != "-1" ]; then
+		echo "$SHADOWEXPIRE" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+		if [ "$?" -ne 0 ]; then
+			echo "useradd: Invalid date \"$SHADOWEXPIRE\""
+			exit 3
+		else
+			let SHADOWEXPIRE="$(date -d "$SHADOWEXPIRE" +%s) / 86400"
+		fi
+	fi
+	(
+	cat << EOF
+dn: uid=$LOGIN,$USERBASE
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: $LOGIN
+userPassword: $USERPASSWORD
+uidNumber: $UIDNUMBER
+gidNumber: $GIDNUMBER
+cn: $COMMENT
+homeDirectory: $HOMEDIRECTORY
+loginShell: $LOGINSHELL
+shadowLastChange: 0
+shadowInactive: $SHADOWINACTIVE
+shadowExpire: $SHADOWEXPIRE
+shadowMin: $SHADOWMIN
+shadowMax: $SHADOWMAX
+shadowWarning: $SHADOWWARNING
+shadowFlag: $SHADOWFLAG
+$HOSTS
+EOF
+	) | $LDAPADD > /dev/null
+	if [ -n "$ADDTOGROUPS" ]; then
+		DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
+		for POSIXGROUP in $DELETEFROMGROUPS; do
+			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\ndelete: memberUid\nmemberUid: $LOGIN\n"
+		done
+		for POSIXGROUP in $ADDTOGROUPS; do
+			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\nadd: memberUid\nmemberUid: $LOGIN\n"
+		done
+		echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
+	fi
+	if [ "$CREATEHOMEDIR" = "yes" -a ! -d "$HOMEDIRECTORY" ]; then
+		mkdir $HOMEDIRECTORY
+		cp -a $SKEL/{*,.[^.]*} $HOMEDIRECTORY > /dev/null 2>&1
+		chmod "$HOMEPERM" "$HOMEDIRECTORY"
+		chown -R "$UIDNUMBER":"$GIDNUMBER" "$HOMEDIRECTORY"
+	fi
+}
+
+usermod () {
+	if [ "$#" -le 1 ]; then
+		echo "usermod: No flags given"
+		exit 2
+	fi
+	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LU" OPTION; do
+		case "$OPTION" in
+			u) UIDNUMBER="$OPTARG";;
+			o) DUPLICATES="yes";;
+			g) GID="$OPTARG";;
+			G) OTHERGROUPS="$OPTARG";;
+			h) HOSTLIST="$OPTARG";;
+			d) HOMEDIRECTORY="$OPTARG";;
+			s) LOGINSHELL="$OPTARG";;
+			c) COMMENT="$OPTARG";;
+			l) NEWLOGIN="$OPTARG";;
+			m) MOVEHOMEDIR="yes";;
+			f) SHADOWINACTIVE="$OPTARG";;
+			e) SHADOWEXPIRE="$OPTARG";;
+			p) if [ -n "$LOCKED" ]; then print_usage; exit 2; fi; USERPASSWORD="$2";;
+			L) if [ -n "$LOCKED" -o -n "$USERPASSWORD" ]; then print_usage; exit 2; fi; LOCKED="yes";;
+			U) if [ -n "$LOCKED" -o -n "$USERPASSWORD" ]; then print_usage; exit 2; fi; LOCKED="no";;
+			*) exit 1;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		LOGIN="$1"
+	fi
+	search_user "uid" "$LOGIN"
+	if [ "$?" -ne 0 ]; then
+		echo "usermod: User \"$LOGIN\" does not exist"
+		exit 6
+	fi
+	if [ -n "$UIDNUMBER" ]; then
+		echo "$UIDNUMBER" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "usermod: Invalid numeric argument \"$UIDNUMBER\""
+			exit 3
+		fi
+		search_user "uidNumber" "$UIDNUMBER"
+		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
+			echo "usermod: uid $UIDNUMBER is not unique"
+			exit 4
+		fi
+	fi
+	if [ -n "$GID" ]; then
+		echo "$GID" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -eq 0 ]; then
+			GIDNUMBER="$GID"
+		else
+			GIDNUMBER="$($LDAPSEARCH -b "$GROUPBASE" "cn=$GID" | grep "gidNumber: " | sed "s/gidNumber: //")"
+			if [ -z "$GIDNUMBER" ]; then
+				echo "usermod: Unknown group \"$GID\""
+				exit 6
+			fi
+		fi
+		search_group "gidNumber" "$GIDNUMBER"
+		if [ "$?" -ne 0 ]; then
+			echo "useradd: Warning! Group $GIDNUMBER not found. Modifying user anyway."
+		fi
+	fi
+	if [ -n "$OTHERGROUPS" ]; then
+		OTHERGROUPS="$(echo "$OTHERGROUPS" | sed "s/,/ /")"
+		for POSIXGROUP in $OTHERGROUPS; do
+			echo "$POSIXGROUP" | grep -qs "^[[:digit:]]*$"
+			if [ "$?" -eq 0 ]; then
+				search_group "gidNumber" "$POSIXGROUP"
+				if [ "$?" -ne 0 ]; then
+					echo "usermod: Unknown group \"$POSIXGROUP\""
+					exit 6
+				fi
+				POSIXGROUP="$($LDAPSEARCH -b "$GROUPBASE" "gidNumber=$POSIXGROUP" |
+					grep "^cn:" |
+					sed "s/cn: //")"
+				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+			else
+				search_group "cn" "$POSIXGROUP"
+				if [ "$?" -ne 0 ]; then
+					echo "usermod: Unknown group \"$POSIXGROUP\""
+					exit 6
+				fi
+				ADDTOGROUPS="$ADDTOGROUPS $POSIXGROUP"
+			fi
+		done
+	fi
+	if [ -n "$HOSTLIST" ]; then
+		HOSTLIST="$(echo "$HOSTLIST" | sed "s/,/ /")"
+		for HOST in $HOSTLIST; do
+			HOSTS="${HOSTS}host: $HOST\n"
+		done
+		HOSTS="$(echo -e "$HOSTS")"
+	fi
+	if [ -n "$HOMEDIRECTORY" ]; then
+		echo "$HOMEDIRECTORY" | grep -qs "^/"
+		if [ "$?" -ne 0 ]; then
+			echo "usermod: Invalid home directory \"$HOMEDIRECTORY\""
+			exit 3
+		fi
+	fi
+	if [ -n "$LOGINSHELL" ]; then
+		echo "$LOGINSHELL" | grep -qs "^/"
+		if [ "$?" -ne 0 ]; then
+			echo "usermod: Invalid shell \"$LOGINSHELL\""
+			exit 3
+		fi
+	fi
+	if [ -n "$NEWLOGIN" ]; then
+		echo "$NEWLOGIN" | grep -qs "^[[:alnum:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "usermod: Invalid user name \"$NEWLOGIN\""
+			exit 3
+		else
+			search_user "uid" "$NEWLOGIN"
+			if [ "$?" -eq 0 ]; then
+				echo "usermod: User \"$NEWLOGIN\" exists"
+				exit 9
+			fi
+		fi
+		if [ -z "$ADDTOGROUPS" ]; then
+			ADDTOGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
+		fi
+	fi
+	if [ -n "$HOMEDIRECTORY" -a "$MOVEHOMEDIR" = "yes" ]; then
+		if [ "$(whoami)" != "root" ]; then
+			echo "usermod: Only root may move home directories"
+			exit 12
+		fi
+		PARENTDIR="$(dirname "$HOMEDIRECTORY")"
+		if [ ! -w "$PARENTDIR" ]; then
+			echo "usermod: Cannot create directory \"$HOMEDIRECTORY\""
+			exit 12
+		fi
+		OLDHOMEDIRECTORY="$($LDAPSEARCH -b "$USERBASE" "uid=$LOGIN" |
+			grep "^homeDirectory:" |
+			sed "s/^homeDirectory: //")"
+	fi
+	if [ -n "$SHADOWINACTIVE" ]; then
+		if [ "$SHADOWINACTIVE" != "-1" ]; then
+			echo "$SHADOWINACTIVE" | grep -qs "^[[:digit:]]*$"
+			if [ "$?" -ne 0 ]; then
+				echo "usermod: Invalid numeric argument \"$SHADOWINACTIVE\""
+				exit 3
+			fi
+		fi
+	fi
+	if [ -n "$SHADOWEXPIRE" ]; then
+		if [ "$SHADOWEXPIRE" != "-1" ]; then
+			echo "$SHADOWEXPIRE" | grep -qs "^[[:digit:]]\{4\}-[[:digit:]]\{2\}-[[:digit:]]\{2\}$"
+			if [ "$?" -ne 0 ]; then
+				echo "usermod: Invalid date \"$SHADOWEXPIRE\""
+				exit 3
+			else
+				let SHADOWEXPIRE="$(date -d "$SHADOWEXPIRE" +%s) / 86400"
+			fi
+		fi
+	fi
+	if [ -n "$LOCKED" ]; then
+		OLDPASSWORD="$(ldapsearch $ADMINOPTIONS -b "$USERBASE" "uid=$LOGIN" |
+			grep "^userPassword::" |
+			sed "s/^userPassword:: //")"
+		if [ "$LOCKED" = "yes" ]; then
+			USERPASSWORD="!$OLDPASSWORD"
+		elif [ "$LOCKED" = "no" ]; then
+			USERPASSWORD="$(echo "$OLDPASSWORD" | sed "s/!//")"
+		fi
+	fi
+	COMMAND="dn: uid=$LOGIN,$USERBASE\n"
+	[ -n "$UIDNUMBER" ] && COMMAND="${COMMAND}replace: uidNumber\nuidNumber: $UIDNUMBER\n-\n"
+	[ -n "$GIDNUMBER" ] && COMMAND="${COMMAND}replace: gidNumber\ngidNumber: $GIDNUMBER\n-\n"
+	[ -n "$HOSTS" ] && COMMAND="${COMMAND}replace: host\n$HOSTS\n-\n"
+	[ -n "$HOMEDIRECTORY" ] && COMMAND="${COMMAND}replace: homeDirectory\nhomeDirectory: $HOMEDIRECTORY\n-\n"
+	[ -n "$LOGINSHELL" ] && COMMAND="${COMMAND}replace: loginShell\nloginShell: $LOGINSHELL\n-\n"
+	[ -n "$COMMENT" ] && COMMAND="${COMMAND}replace: cn\ncn: $COMMENT\n-\n"
+	[ -n "$SHADOWINACTIVE" ] && COMMAND="${COMMAND}replace: shadowInactive\nshadowInactive: $SHADOWINACTIVE\n-\n"
+	[ -n "$SHADOWEXPIRE" ] && COMMAND="${COMMAND}replace: shadowExpire\nshadowExpire: $SHADOWEXPIRE\n-\n"
+	[ -n "$USERPASSWORD" ] && COMMAND="${COMMAND}replace: userPassword\nuserPassword: $USERPASSWORD\n-\n"
+	[ "$COMMAND" = "dn: uid=$LOGIN,$USERBASE\n" ] && unset COMMAND
+	[ -n "$NEWLOGIN" ] && COMMAND="${COMMAND}\ndn: uid=$LOGIN,$USERBASE\nchangetype: modrdn\nnewrdn: uid=$NEWLOGIN\n"
+	if [ -n "$ADDTOGROUPS" ]; then
+		DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
+		for POSIXGROUP in $DELETEFROMGROUPS; do
+			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\ndelete: memberUid\nmemberUid: $LOGIN\n"
+		done
+		[ -n "$NEWLOGIN" ] && LOGIN="$NEWLOGIN"
+		for POSIXGROUP in $ADDTOGROUPS; do
+			COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\nadd: memberUid\nmemberUid: $LOGIN\n"
+		done
+	fi
+	echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
+	if [ "$MOVEHOMEDIR" = "yes" ]; then
+		mv $OLDHOMEDIRECTORY $HOMEDIRECTORY > /dev/null 2>&1
+		chmod "$HOMEPERM" "$HOMEDIRECTORY"
+		chown -R "$UIDNUMBER":"$GIDNUMBER" "$HOMEDIRECTORY"
+	fi
+}
+
+userdel () {
+	while getopts "r" OPTION; do
+		case "$OPTION" in
+			r) REMOVEHOMEDIR="yes";;
+			*) exit 1;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		LOGIN="$1"
+	fi
+	search_user "uid" "$LOGIN"
+	if [ "$?" -ne 0 ]; then
+		echo "userdel: User \"$LOGIN\" does not exist"
+		exit 6
+	fi
+	if [ "$REMOVEHOMEDIR" = "yes" ]; then
+		if [ "$(whoami)" != "root" ]; then
+			echo "userdel: Only root may remove home directories"
+			exit 12
+		fi
+		HOMEDIRECTORY="$($LDAPSEARCH -b "$USERBASE" "uid=$LOGIN" |
+			grep "^homeDirectory:" |
+			sed "s/^homeDirectory: //")"
+		UIDNUMBER="$($LDAPSEARCH -b "$USERBASE" "uid=$LOGIN" |
+			grep "^uidNumber:" |
+			sed "s/^uidNumber: //")"
+	fi
+	COMMAND="dn: uid=$LOGIN,$USERBASE\nchangetype: delete\n"
+	DELETEFROMGROUPS="$($LDAPSEARCH -b "$GROUPBASE" "memberUid=$LOGIN" | grep "^cn:" | sed "s/^cn: //")"
+	for POSIXGROUP in $DELETEFROMGROUPS; do
+		COMMAND="$COMMAND\ndn: cn=$POSIXGROUP,$GROUPBASE\ndelete: memberUid\nmemberUid: $LOGIN\n"
+	done
+	echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
+	if [ "$REMOVEHOMEDIR" = "yes" -a -d "$HOMEDIRECTORY" ]; then
+		OWNER_UIDNUMBER="$(stat "$HOMEDIRECTORY" |
+			grep "Uid:" |
+			sed "s/^.*Uid:.*(\(.*\)\/.*Gid:.*$/\1/" | tr -d " ")"
+		if [ "$UIDNUMBER" -eq "$OWNER_UIDNUMBER" ]; then
+			rm -rf "$HOMEDIRECTORY"
+		else
+			echo "userdel: $HOMEDIRECTORY not owned by user \"$LOGIN\", not removing"
+			exit 12
+		fi
+	fi
+}
+
+groupadd () {
+	while getopts "g:o" OPTION; do
+		case "$OPTION" in
+			g) GIDNUMBER="$OPTARG";;
+			o) DUPLICATES="yes";;
+			*) exit 1;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		CN="$1"
+	fi
+	echo "$CN" | grep -qs "^[[:alnum:]]*$"
+	if [ "$?" -ne 0 ]; then
+		echo "groupadd: \"$CN\" is not a valid group name"
+		exit 3
+	else
+		search_group "cn" "$CN"
+		if [ "$?" -eq 0 ]; then
+			echo "groupadd: Group \"$CN\" exists"
+			exit 9
+		fi
+	fi
+	if [ -n "$GIDNUMBER" ]; then
+		echo "$GIDNUMBER" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "groupadd: Invalid numeric argument \"$GIDNUMBER\""
+			exit 2
+		fi
+		search_group "gidNumber" "$GIDNUMBER"
+		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
+			echo "groupadd: gid $GIDNUMBER is not unique"
+			exit 4
+		fi
+	else
+		GIDNUMBER="$GIDNUMBERMIN"
+		while [ "$GIDNUMBER" -le "$GIDNUMBERMAX" ]; do
+			search_group "gidNumber" "$GIDNUMBER"
+			[ "$?" -ne 0 ] && break
+			let GIDNUMBER="$GIDNUMBER + 1"
+		done
+	fi
+	(
+	cat << EOF
+dn: cn=$CN,$GROUPBASE
+objectClass: top
+objectClass: posixGroup
+cn: $CN
+gidNumber: $GIDNUMBER
+EOF
+	) | $LDAPADD > /dev/null
+}
+
+groupmod () {
+	if [ "$#" -le 1 ]; then
+		echo "groupmod: No flags given"
+		exit 2
+	fi
+	while getopts "g:on:" OPTION; do
+		case "$OPTION" in
+			g) GIDNUMBER="$OPTARG";;
+			o) DUPLICATES="yes";;
+			n) NEWCN="$OPTARG";;
+			*) exit 1;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		CN="$1"
+	fi
+	search_group "cn" "$CN"
+	if [ "$?" -ne 0 ]; then
+		echo "groupmod: Group \"$CN\" does not exist"
+		exit 6
+	fi
+	if [ -n "$GIDNUMBER" ]; then
+		echo "$GIDNUMBER" | grep -qs "^[[:digit:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "groupmod: Invalid numeric argument \"$GIDNUMBER\""
+			exit 2
+		fi
+		search_group "gidNumber" "$GIDNUMBER"
+		if [ "$?" -eq 0 -a "$DUPLICATES" != "yes" ]; then
+			echo "groupadd: gid $GIDNUMBER is not unique"
+			exit 4
+		fi
+	fi
+	if [ -n "$NEWCN" ]; then
+		echo "$NEWCN" | grep -qs "^[[:alnum:]]*$"
+		if [ "$?" -ne 0 ]; then
+			echo "groupmod: \"$NEWCN\" is not a valid group name"
+			exit 3
+		else
+			search_group "cn" "$NEWCN"
+			if [ "$?" -eq 0 ]; then
+				echo "groupmod: \"$NEWCN\" is not a unique name"
+				exit 9
+			fi
+		fi
+	fi
+	[ -n "$GIDNUMBER" ] && COMMAND="dn: cn=$CN,$GROUPBASE\nreplace: gidNumber\ngidNumber: $GIDNUMBER\n"
+	[ -n "$NEWCN" ] && COMMAND="$COMMAND\ndn: cn=$CN,$GROUPBASE\nchangetype: modrdn\nnewrdn: cn=$NEWCN"
+	echo -e "$COMMAND" | $LDAPMODIFY > /dev/null
+}
+
+groupdel () {
+	if [ "$#" -ne 1 ]; then
+		print_usage
+		exit 2
+	else
+		CN="$1"
+	fi
+	search_group "cn" "$CN"
+	if [ "$?" -ne 0 ]; then
+		echo "groupdel: Group \"$CN\" does not exist"
+		exit 6
+	fi
+	$LDAPDELETE "cn=$CN,$GROUPBASE" > /dev/null
+}
+
+case "$1" in
+	useradd|usermod|userdel|groupadd|groupmod|groupdel)
+		ACTION="$1"
+		shift 1
+		$ACTION "$@"
+		;;
+	--version)
+		print_version
+		exit 0
+		;;
+	--help)
+		print_usage
+		exit 0
+		;;
+	*)
+		print_usage
+		exit 1
+		;;
+esac
+
+exit 0
