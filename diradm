@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix-like things in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.22 2004/12/09 13:55:21 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.23 2004/12/09 13:56:14 robbat2 Exp $
 #
 # Original Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 # Modifications Copyright (C) 2003,2004 by Robin Johnson <robbat2@gentoo.org> and
@@ -34,7 +34,7 @@ CONFIG="/etc/${CONFIG_FILENAME}"
 
 ##################### Don't touch anything below this line #####################
 
-VERSION='$Id: diradm,v 1.22 2004/12/09 13:55:21 robbat2 Exp $'
+VERSION='$Version$ $Date: 2004/12/09 13:56:14 $'
 
 if [ ! -r "${CONFIG}" ]; then
 	echo "Unable to open configuration file \"${CONFIG}\"!"
