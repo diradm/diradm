@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.2 2005/01/09 07:18:49 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.3 2005/01/09 08:05:09 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -150,7 +150,7 @@ useradd() {
 	fi
 	[ -z "${COMMENT}" ] && COMMENT="${LOGIN},,,"
 	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" = "yes" ]; then
-		if [ "$(whoami)" != "root" ]; then
+		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may create home directories"
 			exit 12
 		fi
@@ -258,10 +258,14 @@ useradd() {
 	if [ -n "${ADDTOGROUPS}" ]; then
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
+			append "delete: memberUid"
+			append "memberUid: ${LOGIN}\n"
 		done
 		for POSIXGROUP in ${ADDTOGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
+			append "add: memberUid"
+			append "memberUid: ${LOGIN}\n"
 		done
 	fi
 
@@ -406,7 +410,7 @@ usermod() {
 		fi
 	fi
 	if [ -n "${NEWLOGIN}" ]; then
-		echo "${NEWLOGIN}" | ${GREP} -qs "^[[:alnum:]]*$"
+		echo "${NEWLOGIN}" | ${GREP} -qs "^[[:alnum:]\.]*$"
 		if [ "$?" -ne 0 ]; then
 			echo "${modulename}: Invalid user name \"${NEWLOGIN}\""
 			exit 3
@@ -422,7 +426,7 @@ usermod() {
 		fi
 	fi
 	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" = "yes" ]; then
-		if [ "$(whoami)" != "root" ]; then
+		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may move home directories"
 			exit 12
 		fi
@@ -475,11 +479,16 @@ usermod() {
 	if [ -n "${ADDTOGROUPS}" ]; then
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
 		for POSIXGROUP in ${DELETEFROMGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
+			append "delete: memberUid"
+			append "memberUid: ${LOGIN}\n"
 		done
-		[ -n "${NEWLOGIN}" ] && LOGIN="${NEWLOGIN}"
+		activelogin="${LOGIN}"
+		[ -n "${NEWLOGIN}" ] && activelogin="${NEWLOGIN}"
 		for POSIXGROUP in ${ADDTOGROUPS}; do
-			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\nadd: memberUid\nmemberUid: ${LOGIN}\n"
+			append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}"
+			append "add: memberUid"
+			append "memberUid: ${activelogin}\n"
 		done
 	fi
 	append "${COMMAND_DN}"
@@ -498,7 +507,7 @@ usermod() {
 	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}"
 	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}"
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USER_BASEDN}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}"
+	[ -n "${NEWLOGIN}" ] && append "\ndn: uid=${LOGIN},${USER_BASEDN}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
 	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
 	runmodify
 	if [ "${MOVEHOMEDIR}" = "yes" ]; then
@@ -529,7 +538,7 @@ userdel() {
 		exit 6
 	fi
 	if [ "${REMOVEHOMEDIR}" = "yes" ]; then
-		if [ "$(whoami)" != "root" ]; then
+		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may remove home directories"
 			exit 12
 		fi
@@ -649,8 +658,8 @@ chage() {
 		LOGIN="${1}"
 	fi
 	ALLOWED=0
-	[ "x${LISTONLY}" == 'x1' -a `whoami` == "${LOGIN}" ] && ALLOWED=1
-	[ `whoami` == 'root' ] && ALLOWED=1
+	[ "x${LISTONLY}" == 'x1' -a `${WHOAMI}` == "${LOGIN}" ] && ALLOWED=1
+	[ `${WHOAMI}` == 'root' ] && ALLOWED=1
 	if [ ${ALLOWED} -ne 1 ]; then
 		#You must be root to change password aging information, or view it"
 		#for any user other than yourself."
