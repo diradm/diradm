@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.10 2003/07/14 10:58:06 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.11 2003/07/14 11:04:09 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -831,7 +831,7 @@ chsh() {
 	else
 		LOGIN="${1}"
 	fi
-
+	# TODO - FIXME!
 	OLDLOGINSHELL="getoldshell"
 	if [ -z "${LOGINSHELL}" ]; then
 		msg="Changing the login shell for ${LOGIN}\nEnter the new value, or press return for the default\n\tLogin Shell [${OLDLOGINSHELL}]: "
@@ -846,13 +846,13 @@ chsh() {
 
 chfn() {
 	[ -z "${modulename}" ] && modulename="chfn"
-	while getopts "s:" OPTION; do
+	while getopts "f:h:o:r:w:" OPTION; do
 		case "${OPTION}" in
 			f) FULLNAME="${OPTARG}";;
-			h) HOMEPH="${OPTARG}";;
+			h) HOMEPHONE="${OPTARG}";;
 			o) OTHER="${OPTARG}";;
-			r) ROOMNO="${OPTARG}";;
-			w) WORKPH="${OPTARG}";;
+			r) ROOMNUMBER="${OPTARG}";;
+			w) WORKPHONE="${OPTARG}";;
 		esac
 	done
 	shift $((${OPTIND} - 1))
@@ -863,9 +863,31 @@ chfn() {
 		LOGIN="${1}"
 	fi
 
-	[ -n "${HOMEPH}" ] && append "${COMMAND}"
-	
+	[ -n "${HOMEPH}" ] && append ""
+	# TODO
+	#FULLNAME="$(echo ${COMMENT} | cut -d, -f1)"
+	#ROOMNUMBER="$(echo ${COMMENT} | cut -d, -f2)"
+	#WORKPHONE="$(echo ${COMMENT} | cut -d, -f3)"
+	#HOMEPHONE="$(echo ${COMMENT} | cut -d, -f4)"
+	#FIRSTNAME="${FULLNAME// *}"
+	#SURNAME="${FULLNAME##* }"
+	#CN="${FIRSTNAME}"
+	echo "Not done yet!"
+	exit 99
 }
+
+chage() {
+	# TODO
+	echo "Not done yet! "
+	exit 99
+}
+
+gpasswd() {
+	# TODO
+	echo "Not done yet!"
+	exit 99
+}
+
 case "${1}" in
 	useradd|usermod|userdel|groupadd|groupmod|groupdel|chsh|chfn|chage|gpasswd)
 		ACTION="${1}"
