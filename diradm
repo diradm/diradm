@@ -5,7 +5,7 @@
 # diradm:	A tool for managing posix users and groups in a LDAP directory.
 #		It uses ldap[add|modify|delete] from the OpenLDAP project.
 #
-# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.12 2003/07/25 13:13:45 robbat2 Exp $
+# Version:	$Header: /code/convert/cvsroot/infrastructure/diradm/Attic/diradm,v 1.13 2003/07/29 23:43:07 robbat2 Exp $
 #
 # Copyright (C) 2003  Daniel Himler  <dan@hits.at>
 #
@@ -186,6 +186,7 @@ search_group() {
 append() {
 [ "x${*}" != "x" ] && COMMAND="${COMMAND}\n${*}"
 }
+
 append_attribute() {
 	local attrib="$1"
 	shift
@@ -202,6 +203,12 @@ runadd() {
 
 rundelete() {
 [ -n "${*}" ] && ${LDAPDELETE} "${*}" > /dev/null
+}
+
+samba_getdomainsid() {
+	net getlocalsid ${SAMBA_DOMAIN} 2>/dev/null |tail -n1 |cut -d: -f2- |xargs
+}
+samba_nextrid() {
 }
 
 Save some animals, eat a vegetarian
@@ -607,16 +614,16 @@ usermod () {
 	fi
 	COMMAND_DN="dn: uid=${LOGIN},${USERBASE}\n"
 	append "${COMMAND_DN}"
-	[ -n "${UIDNUMBER}" ] && append "replace: uidNumber\nuidNumber: ${UIDNUMBER}\n-\n"
-	[ -n "${GIDNUMBER}" ] && append "replace: gidNumber\ngidNumber: ${GIDNUMBER}\n-\n"
-	[ -n "${HOSTS}" ] && append "replace: host\n${HOSTS}\n-\n"
-	[ -n "${HOMEDIRECTORY}" ] && append "replace: homeDirectory\nhomeDirectory: ${HOMEDIRECTORY}\n-\n"
-	[ -n "${LOGINSHELL}" ] && append "replace: loginShell\nloginShell: ${LOGINSHELL}\n-\n"
+	[ -n "${UIDNUMBER}" ] && append_attrib "uidNumber" "${UIDNUMBER}\n-\n"
+	[ -n "${GIDNUMBER}" ] && append_attrib "gidNumber" "${GIDNUMBER}\n-\n"
+	[ -n "${HOSTS}" ] && append_attrib "replace: host\n${HOSTS}\n-\n"
+	[ -n "${HOMEDIRECTORY}" ] && append_attrib "homeDirectory" "${HOMEDIRECTORY}\n-\n"
+	[ -n "${LOGINSHELL}" ] && append_attrib "loginShell" "${LOGINSHELL}\n-\n"
 	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
-	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
-	[ -n "${SHADOWINACTIVE}" ] && append "replace: shadowInactive\nshadowInactive: ${SHADOWINACTIVE}\n-\n"
-	[ -n "${SHADOWEXPIRE}" ] && append "replace: shadowExpire\nshadowExpire: ${SHADOWEXPIRE}\n-\n"
-	[ -n "${USERPASSWORD}" ] && append "replace: userPassword\nuserPassword: ${USERPASSWORD}\n-\n"
+	[ -n "${COMMENT}" ] && append_attrib "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}\n-\n"
+	[ -n "${SHADOWINACTIVE}" ] && append_attrib "shadowInactive" "${SHADOWINACTIVE}\n-\n"
+	[ -n "${SHADOWEXPIRE}" ] && append_attrib "shadowExpire" "${SHADOWEXPIRE}\n-\n"
+	[ -n "${USERPASSWORD}" ] && append_attrib "userPassword" "${USERPASSWORD}\n-\n"
 	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
 	[ -n "${NEWLOGIN}" ] && append "dn: uid=${LOGIN},${USERBASE}\nchangetype: modrdn\nnewrdn: uid=${NEWLOGIN}\n"
 	if [ -n "${ADDTOGROUPS}" ]; then
