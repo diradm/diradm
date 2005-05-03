@@ -61,11 +61,25 @@ fi
 ])
 AC_SUBST([SED_EXTREGEXP],["$am_cv_sed_extended_regexp"])
 
+# we need the Base64 to encode/decode stuff in LDAP
+# as there is no way to do it in bash
+AC_PROG_PERL_MODULES(	[MIME::Base64], ,
+			AC_MSG_ERROR([MIME::Base64 required!]))
+
+# automount stuff
+AC_ENABLE(automount, ENABLE_AUTOMOUNT=yes, ENABLE_AUTOMOUNT=no)
+AC_SUBST(ENABLE_AUTOMOUNT)
+
+# automount stuff
+AC_ENABLE(irix, ENABLE_IRIX=yes, ENABLE_IRIX=no)
+AC_SUBST(ENABLE_IRIX)
+if test "x$ENABLE_IRIX" != "xno"; then
+	AC_MSG_WARN([Ensure you use the bundled irixpassword.schema on your LDAP server!])
+fi
+
 # samba stuff
 AC_ENABLE(samba, ENABLE_SAMBA=yes, ENABLE_SAMBA=no)
 AC_SUBST(ENABLE_SAMBA)
-AC_PROG_PERL_MODULES(	[MIME::Base64], ,
-			AC_MSG_ERROR([MIME::Base64 required!]))
 if test "x${ENABLE_SAMBA}" = "xyes"; then
 	AC_PROG_PERL_MODULES(	[Crypt::SmbHash], , 
 			AC_MSG_ERROR([Crypt::SmbHash required!]))
@@ -92,3 +106,5 @@ AC_CONFIG_FILES([src/diradm], [chmod +x src/diradm])
 AC_CONFIG_FILES([src/diradm-mkpasswd.pl], [chmod +x src/diradm-mkpasswd.pl])
 
 AC_OUTPUT
+
+# vim: ts=2 sw=2:
