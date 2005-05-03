@@ -12,3 +12,8 @@
 - Changed to a standard mail schema.
 - provide my irixAccount schema with diradm.
 - Fix useradd without password.
+
+2005-05-02: diradm-2.4
+- Merge applicable changes from upstream 1.3:
+  - allow '-' and '_' in user/group names, we already also allow '.').
+  - Our parsing of -h/-G is not a problem as we use bash instead of sed.

@@ -39,23 +39,40 @@ AC_PATH_PROGS_ERROR(STAT, stat)
 AC_PATH_PROGS_ERROR(DATE, date)
 AC_PATH_PROGS_ERROR(WHOAMI, whoami)
 AC_PATH_PROGS_ERROR(UNIQ, uniq)
-dnl ldap stuff now
+# ldap stuff now
 AC_PATH_PROGS_ERROR(LDAPSEARCH, ldapsearch)
 AC_PATH_PROGS_ERROR(LDAPADD, ldapadd)
 AC_PATH_PROGS_ERROR(LDAPMODIFY, ldapmodify)
 AC_PATH_PROGS_ERROR(LDAPDELETE, ldapdelete)
 
+# find correct extended-expression command for sed
+AC_CACHE_CHECK([for sed extended-regexp option],
+		[am_cv_sed_extended_regexp],[
+if test "x$am_cv_sed_extended_regexp" != "xno"; then
+	am_cv_sed_extended_regexp="no"
+	for i in E r; do
+		$SED -$i -e '1d' </dev/null >/dev/null 2>&1
+		if test $? -eq 0; then
+			am_cv_sed_extended_regexp="-$i"
+		fi
+	done
+	test "x$am_cv_sed_extended_regexp" == "xno" && AC_MSG_ERROR([No sed with extended-regexp support found!])
+fi
+])
+AC_SUBST([SED_EXTREGEXP],["$am_cv_sed_extended_regexp"])
 
+# samba stuff
 AC_ENABLE(samba, ENABLE_SAMBA=yes, ENABLE_SAMBA=no)
 AC_SUBST(ENABLE_SAMBA)
 AC_PROG_PERL_MODULES(	[MIME::Base64], ,
 			AC_MSG_ERROR([MIME::Base64 required!]))
-AC_PROG_PERL_MODULES(	[Crypt::SmbHash], , 
-			AC_MSG_ERROR([Crypt::SmbHash required!]))
 if test "x${ENABLE_SAMBA}" = "xyes"; then
+	AC_PROG_PERL_MODULES(	[Crypt::SmbHash], , 
+			AC_MSG_ERROR([Crypt::SmbHash required!]))
 	AC_PATH_PROGS_ERROR(SAMBA_NET, net)
 fi
 
+# output
 AC_CONFIG_FILES([
    Makefile
    README
