@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.4 2005/05/03 04:44:20 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.5 2005/05/03 20:46:58 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the common functions.
 
@@ -63,14 +63,14 @@ set_complement() {
 
 # eg: 
 # ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=100" cn
-# (returns 'users' on systems with that initial data in LDAP)
+# (returns 'username' on systems with that initial data in LDAP)
 ldap_search_getattr() {
 	basedn="${1}"
 	search="${2}"
 	attr="${3}"
 	regex="^${attr}:{1,2} "
 	[ -n "$DEBUG" ] && echo ${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr} 2>&1
-	${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr} | ${EGREP} "${regex}" | ${SEDEXT} -e "s/${regex}//"
+	${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr} | ${SEDEXT} -n -e "/${regex}/{s~${regex}~~ ; p}"
 }
 
 ldap_base64_decode() {
