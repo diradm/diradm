@@ -1,11 +1,11 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.host.sh.in,v 1.1 2005/01/09 07:05:14 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.host.sh.in,v 1.2 2005/05/03 20:46:31 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the host sub-system.
 
 hostadd() {
-	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostadd"
+
 	while getopts "e:i:a:" OPTION; do
 		case "${OPTION}" in
 			e) ETHERS="${OPTARG}";;
@@ -14,6 +14,7 @@ hostadd() {
 			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
+
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
@@ -21,7 +22,9 @@ hostadd() {
 	else
 		NAME="${1}"
 	fi
+
 	search_host "cn" "${NAME}"
+
 	if [ "$?" -eq 0 ]; then
 		echo "${modulename}: User \"${NAME}\" exists"
 		exit 9
@@ -58,7 +61,6 @@ hostadd() {
 }
 
 hostdel() {
-	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostdel"
 	if [ "${#}" -ne 1 ]; then
 		print_usage ${modulename}
@@ -80,7 +82,6 @@ hostdel() {
 }
 
 hostmod() {
-	# TODO: cleanup
 	[ -z "${modulename}" ] && modulename="hostmod"
 	if [ "${#}" -le 1 ]; then
 		print_usage ${modulename}
@@ -126,6 +127,7 @@ hostmod() {
 	# build correct data
 	ALIASES_ADD="$(set_complement "${ALIASES_ADD}" "${ALIASES_CURRENT} ${ALIASES_DELETE}")"
 	ALIASES_DELETE=$(set_intersection "${ALIASES_DELETE}" "${ALIASES_CURRENT}")
+
 	if [ -n "$(set_intersection "${ALIASES_DELETE}" "${NAME}")" ]; then
 		echo "${modulename}: Cannot delete primary name of ${NAME}! Use rename instead."
 		print_usage ${modulename}
@@ -166,8 +168,10 @@ hostmod() {
 			append_attrib_delete cn "${i}"
 		done
 	fi
-	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	[ -n "${NEWNAME}" ] && append "dn: cn=${NAME},${HOST_BASEDN}\nchangetype: modrdn\nnewrdn: cn=${NEWNAME}\n"
+	# check if we are doing anything
+	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
+
+	[ -n "${NEWNAME}" ] && append "\n\ndn: cn=${NAME},${HOST_BASEDN}\nchangetype: modrdn\nnewrdn: cn=${NEWNAME}\n"
 
 	#echo "${COMMAND}"
 	runmodify
