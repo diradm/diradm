@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.10 2005/05/03 09:03:37 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.11 2005/05/03 20:45:37 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -81,7 +81,7 @@ useradd() {
 			fi
 		fi
 	else
-		if [ "$USERGROUPS" = "no" ]; then
+		if [ "$USERGROUPS" == "no" ]; then
 			GIDNUMBER="${DEFAULT_GIDNUMBER}"
 		else
 			# that evil redhat thing of a group for every user
@@ -149,7 +149,7 @@ useradd() {
 		exit 3
 	fi
 	[ -z "${COMMENT}" ] && COMMENT="${LOGIN},,,"
-	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" = "yes" ]; then
+	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" == "yes" ]; then
 		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may create home directories"
 			exit 12
@@ -210,7 +210,7 @@ useradd() {
 	if [ -n "${USERPASSWORD}" ]; then
 		userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
 		irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
-		if [ "x${SAMBA}" = "xyes" ]; then
+		if [ "x${SAMBA}" == "xyes" ]; then
 			sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
 			sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
 		fi
@@ -245,7 +245,7 @@ useradd() {
 	fi
 	append "gecos: ${COMMENT}"
 
-	if [ "x${SAMBA}" = "xyes" -a -n "${SAMBADOMAINSID}" ]; then
+	if [ "x${SAMBA}" == "xyes" -a -n "${SAMBADOMAINSID}" ]; then
 		append "objectClass: sambaSamAccount"
 
 		let RID="2*${UIDNUMBER}+1000"
@@ -263,8 +263,7 @@ useradd() {
 		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
 		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
 	fi
-	# todo: config var for this
-	if [ "${IRIX}" = "yes" ]; then
+	if [ "${ENABLE_IRIX}" == "yes" -a "${IRIX}" == "yes" ]; then
 		# this is a custom objectclass!
 		append "objectClass: irixAccount"
 		append "irixPassword: {CRYPT}${irixPassword}"
@@ -290,13 +289,16 @@ useradd() {
 	#echo -e "${COMMAND}"
 	runmodify
 	
-	if [ "${CREATEHOMEDIR}" = "yes" ]; then
-		if [ "${USER_AUTOMOUNTHOME}" = "yes" ]; then
-			# add automount entry first
-			automountadd -d "${AUTOMOUNT_USERDESC}" -o "${AUTOMOUNT_OPTIONS}" "${AUTOMOUNT_USERMAP}" "${LOGIN}" "${AUTOMOUNT_USERDIRBASE}"
-		fi
+	if [ "${CREATEHOMEDIR}" == "yes" ]; then
 		# Create Homedir
-		targetdir="$(automount_hash "${AUTOMOUNT_USERDIRBASE}" "${LOGIN}")"
+		# make sure the functions are defined
+		. ${libexecdir}/diradm.automount.sh
+		targetdir="$(amhash "${AUTOMOUNT_USERDIRBASE}" "${LOGIN}")"
+		if [ "${USER_AUTOMOUNTHOME}" == "yes" ]; then
+			# add automount entry first
+			# create hashed dir path
+			amadd -d "${AUTOMOUNT_USERDESC}" -o "${AUTOMOUNT_OPTIONS_USER}" "${AUTOMOUNT_USERMAP}" "${LOGIN}" "${targetdir}"
+		fi
 		# strip NFS host to make local path
 		targetdir_no_nfs="${targetdir/*:}"
 		if [ ! -d "${HOMEDIRECTORY}" -a ! -d "${targetdir_no_nfs}" ]; then
@@ -305,7 +307,7 @@ useradd() {
 			chmod "${HOMEPERM}" "${targetdir_nfs}"
 			chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${targetdir_no_nfs}"
 		else
-			echo "Homedir of ${HOMEDIRECTORY} already exists from ${targetdir}"
+			echo "Homedir of ${HOMEDIRECTORY} already exists from ${targetdir}!"
 		fi
 	fi
 }
@@ -457,7 +459,7 @@ usermod() {
 	fi
 
 	# moving home directory
-	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" = "yes" ]; then
+	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" == "yes" ]; then
 		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may move home directories"
 			exit 12
@@ -502,13 +504,13 @@ usermod() {
 		sambaLMPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaLMPassword)"
 		irixPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" irixPassword)"
 		# add lock
-		if [ "${LOCKED}" = "yes" ]; then
+		if [ "${LOCKED}" == "yes" ]; then
 			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SEDEXT} -e 's/}[!]?/}!/')"
 			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SEDEXT} -e 's/^[!]?/!/')"
 			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SEDEXT} -e 's/^[!]?/!/')"
 			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SEDEXT} -e 's/}[!]?/}!/')"
 		# remove lock
-		elif [ "${LOCKED}" = "no" ]; then
+		elif [ "${LOCKED}" == "no" ]; then
 			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SEDEXT} -e 's/}!/}/')"
 			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SEDEXT} -e 's/^[!]//')"
 			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SEDEXT} -e 's/^[!]//')"
@@ -534,8 +536,8 @@ usermod() {
 	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}"
 	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}"
 	# if we haven't set anything so far, all of our changes are in other DNs
-	[ "${COMMAND}" = "${COMMAND_DN}" ] && unset COMMAND
-	
+	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
+	append "\n\n"	
 	# redo groups
 	if [ -n "${ADDTOGROUPS}" ]; then
 		DELETEFROMGROUPS="$(ldap_search_getattr "${GROUP_BASEDN}" "memberUid=${LOGIN}" cn)"
@@ -558,7 +560,7 @@ usermod() {
 
 	#echo -e ">>>${LINENO}\n${COMMAND}<<<${LINENO}"
 	runmodify
-	if [ "${MOVEHOMEDIR}" = "yes" ]; then
+	if [ "${MOVEHOMEDIR}" == "yes" ]; then
 		mv ${OLDHOMEDIRECTORY} ${HOMEDIRECTORY} > /dev/null 2>&1
 		chmod "${HOMEPERM}" "${HOMEDIRECTORY}"
 		chown -R "${UIDNUMBER}":"${GIDNUMBER}" "${HOMEDIRECTORY}"
@@ -585,7 +587,7 @@ userdel() {
 		echo "${modulename}: User \"${LOGIN}\" does not exist"
 		exit 6
 	fi
-	if [ "${REMOVEHOMEDIR}" = "yes" ]; then
+	if [ "${REMOVEHOMEDIR}" == "yes" ]; then
 		if [ "$(${WHOAMI})" != "root" ]; then
 			echo "${modulename}: Only root may remove home directories"
 			exit 12
@@ -599,7 +601,7 @@ userdel() {
 		append "dn: cn=${POSIXGROUP},${GROUP_BASEDN}\ndelete: memberUid\nmemberUid: ${LOGIN}\n"
 	done
 	runmodify
-	if [ "${REMOVEHOMEDIR}" = "yes" -a -d "${HOMEDIRECTORY}" ]; then
+	if [ "${REMOVEHOMEDIR}" == "yes" -a -d "${HOMEDIRECTORY}" ]; then
 		OWNER_UIDNUMBER="$(${STAT} "${HOMEDIRECTORY}" |
 			${GREP} "Uid:" |
 			${SED} "s/^.*Uid:.*(\(.*\)\/.*Gid:.*$/\1/" | tr -d " ")"
