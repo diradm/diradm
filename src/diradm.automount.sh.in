@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.automount.sh.in,v 1.1 2005/01/14 02:34:30 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.automount.sh.in,v 1.2 2005/05/03 09:03:37 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 
 # This contains all of the functions specific to the automount sub-system.
@@ -31,9 +31,13 @@ automountaddraw() {
 
 automountadd() {
 	[ -z "${modulename}" ] && modulename="automountadd"
-	while getopts "d:" OPTION; do
+
+	am_description=""
+	am_options=""	
+	while getopts "do:" OPTION; do
 		case "${OPTION}" in
-		d) DESCRIPTION="${OPTARG}" ;;
+		d) am_description="${OPTARG}" ;;
+		o) am_options="${OPTARG}" ;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
@@ -48,5 +52,5 @@ automountadd() {
 	fi
 	mapbasedn="ou=${1},${AUTOMOUNT_BASEDN}"
 
-	automountaddraw "${mapbasedn}" "${key}" "${AUTOMOUNT_OPTIONS}" "${src}" "${DESCRIPTION}"
+	automountaddraw "${mapbasedn}" "${key}" "${am_options}" "${src}" "${am_description}"
 }
