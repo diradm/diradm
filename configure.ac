@@ -10,7 +10,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT([diradm],
-        [2.3],
+        [2.4],
         [Robin Hugh Johnson robbat2@orbis-terrarum.net],
         [diradm])
 AC_CONFIG_AUX_DIR(config)
@@ -47,42 +47,49 @@ AC_PATH_PROGS_ERROR(LDAPDELETE, ldapdelete)
 
 # find correct extended-expression command for sed
 AC_CACHE_CHECK([for sed extended-regexp option],
-		[am_cv_sed_extended_regexp],[
-if test "x$am_cv_sed_extended_regexp" != "xno"; then
-	am_cv_sed_extended_regexp="no"
+		[ac_cv_sed_extended_regexp],[
+if test "x$ac_cv_sed_extended_regexp" != "xno"; then
+	ac_cv_sed_extended_regexp="no"
 	for i in E r; do
 		$SED -$i -e '1d' </dev/null >/dev/null 2>&1
 		if test $? -eq 0; then
-			am_cv_sed_extended_regexp="-$i"
+			ac_cv_sed_extended_regexp="-$i"
 		fi
 	done
-	test "x$am_cv_sed_extended_regexp" == "xno" && AC_MSG_ERROR([No sed with extended-regexp support found!])
+	test "x$ac_cv_sed_extended_regexp" == "xno" && AC_MSG_ERROR([No sed with extended-regexp support found!])
 fi
 ])
-AC_SUBST([SED_EXTREGEXP],["$am_cv_sed_extended_regexp"])
+AC_SUBST([SED_EXTREGEXP],["$ac_cv_sed_extended_regexp"])
 
 # we need the Base64 to encode/decode stuff in LDAP
 # as there is no way to do it in bash
-AC_PROG_PERL_MODULES(	[MIME::Base64], ,
-			AC_MSG_ERROR([MIME::Base64 required!]))
+AC_PROG_PERL_MODULES(	[MIME::Base64], , AC_MSG_ERROR([MIME::Base64 required!]))
 
 # automount stuff
-AC_ENABLE(automount, ENABLE_AUTOMOUNT=yes, ENABLE_AUTOMOUNT=no)
-AC_SUBST(ENABLE_AUTOMOUNT)
+AC_MSG_CHECKING(whether to enable Automount support)
+AC_ARG_ENABLE(automount, [Enable Automount support], [ac_cv_enable_automount="yes"], [ac_cv_enable_automount="no"]) 
+AC_MSG_RESULT([$ac_cv_enable_automount])
+AC_SUBST([ENABLE_AUTOMOUNT],["$ac_cv_enable_automount"])
+if test "x$ENABLE_AUTOMOUNT" != "xno"; then
+	AC_MSG_WARN([Ensure you use autofs.schema on your LDAP server!])
+fi
 
 # automount stuff
-AC_ENABLE(irix, ENABLE_IRIX=yes, ENABLE_IRIX=no)
-AC_SUBST(ENABLE_IRIX)
-if test "x$ENABLE_IRIX" != "xno"; then
+AC_MSG_CHECKING(whether to enable IRIX passwd support)
+AC_ARG_ENABLE(irixpasswd, [Enable IRIX passwd support], [ENABLE_IRIXPASSWD="yes"], [ENABLE_IRIXPASSWD="no"]) 
+AC_MSG_RESULT([$ENABLE_IRIXPASSWD])
+AC_SUBST(ENABLE_IRIXPASSWD)
+if test "x$ENABLE_IRIXPASSWD" != "xno"; then
 	AC_MSG_WARN([Ensure you use the bundled irixpassword.schema on your LDAP server!])
 fi
 
 # samba stuff
-AC_ENABLE(samba, ENABLE_SAMBA=yes, ENABLE_SAMBA=no)
+AC_MSG_CHECKING(whether to enable Samba support)
+AC_ARG_ENABLE(samba, [Enable Samba support], ENABLE_SAMBA=yes, ENABLE_SAMBA=no) 
+AC_MSG_RESULT([$ENABLE_SAMBA])
 AC_SUBST(ENABLE_SAMBA)
 if test "x${ENABLE_SAMBA}" = "xyes"; then
-	AC_PROG_PERL_MODULES(	[Crypt::SmbHash], , 
-			AC_MSG_ERROR([Crypt::SmbHash required!]))
+	AC_PROG_PERL_MODULES(	[Crypt::SmbHash], , AC_MSG_ERROR([Crypt::SmbHash required!]))
 	AC_PATH_PROGS_ERROR(SAMBA_NET, net)
 fi
 
