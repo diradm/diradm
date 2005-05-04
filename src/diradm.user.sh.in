@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.11 2005/05/03 20:45:37 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.12 2005/05/04 07:32:40 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -263,7 +263,7 @@ useradd() {
 		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
 		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
 	fi
-	if [ "${ENABLE_IRIX}" == "yes" -a "${IRIX}" == "yes" ]; then
+	if [ "${ENABLE_IRIXPASSWD}" == "yes" -a "${IRIX}" == "yes" ]; then
 		# this is a custom objectclass!
 		append "objectClass: irixAccount"
 		append "irixPassword: {CRYPT}${irixPassword}"
