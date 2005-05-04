@@ -101,6 +101,7 @@ AC_CONFIG_FILES([
    src/Makefile
    m4/Makefile
    src/diradm.conf
+   src/diradm.automount.sh
    src/diradm.check.sh
    src/diradm.common.sh
    src/diradm.group.sh
