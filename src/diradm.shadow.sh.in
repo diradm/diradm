@@ -1,0 +1,91 @@
+#!@FALSE@
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.1 2005/05/04 08:12:13 robbat2 Exp $
+# vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
+# This contains all of the functions specific to the passwd sub-system.
+
+chage() {
+	# TODO: complete this
+	LISTONLY="0"
+	[ -z "${modulename}" ] && modulename="chage"
+	while getopts "lm:M:W:I:E:d:" OPTION; do
+		case "${OPTION}" in
+			l) LISTONLY="1";;
+			m) MINDAYS="${OPTION}";;
+			M) MAXDAYS="${OPTION}";;
+			W) WARNDAYS="${OPTION}";;
+			I) INACTIVEDAYS="${OPTION}";;
+			E) ACCOUNTEXPIRY="${OPTION}";;
+			d) LASTCHANGE="${OPTION}";;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		LOGIN="${1}"
+	fi
+	ALLOWED=0
+	[ "x${LISTONLY}" == 'x1' -a `${WHOAMI}` == "${LOGIN}" ] && ALLOWED=1
+	[ `${WHOAMI}` == 'root' ] && ALLOWED=1
+	if [ ${ALLOWED} -ne 1 ]; then
+		#You must be root to change password aging information, or view it"
+		#for any user other than yourself."
+		echo "${modulename}: permission denied"
+		exit 1
+	fi
+	search_user "uid" "${LOGIN}"
+	if [ "$?" -ne 0 ]; then
+		echo "${modulename}: unknown user: ${LOGIN}"
+		exit 1
+	fi
+	if [ "x${LISTONLY}" == 'x1' ]; then
+		MINDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMin)
+		MAXDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMax)
+		WARNDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowWarning)
+		INACTIVEDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowInactive)
+		ACCOUNTEXPIRY=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowExpire)
+		LASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
+
+		echo -e "Minimum:\t${MINDAYS}"
+		echo -e "Maximum:\t${MAXDAYS}"
+		echo -e "Warning:\t${WARNDAYS}"
+		echo -e "Inactive:\t${INACTIVEDAYS}"
+		#echo -e "Last Change:\t${LASTCHANGE}" # raw
+		echo -e "Last Change:\t$(days_to_date ${LASTCHANGE} +'%b %d, %Y')"
+		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 ]; then
+			PASSWORDEXPIRY_STRING="Never"
+		else
+			PASSWORDEXPIRY_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS})) +'%b %d, %Y')"
+		fi
+		echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
+		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 -o ${INACTIVEDAYS} -le 0 ]; then
+			PASSWORDINACTIVE_STRING="Never"
+		else
+			PASSWORDINACTIVE_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS} + ${INACTIVEDAYS})) +'%b %d, %Y')"
+		fi
+		echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
+		if [ ${ACCOUNTEXPIRY} -le 0  ]; then
+			ACCOUNTEXPIRY_STRING="Never"
+		else
+			ACCOUNTEXPIRY_STRING="$(days_to_date ${ACCOUNTEXPIRY} +'%b %d, %Y')"
+		fi
+		echo -e "Account Expires:\t${ACCOUNTEXPIRY_STRING}"
+# shadowLastChange - The number of days (since January 1, 1970) since the password was last changed.
+# shadowMin - The number of days before password may be changed (0 indicates it may be changed at any time)
+# shadowMax - The number of days after which password must be changed (99999 indicates user can keep his or her password unchanged for many, many years)
+# shadowWarning - The number of days to warn user of an expiring password (7 for a full week)
+# shadowInactive - The number of days after password expires that account is disabled
+# shadowExpire - The number of days since January 1, 1970 that an account has been disabled
+# shadowFlag - A reserved field for possible future use
+		exit 0
+	fi
+	# TODO
+	echo "Not done yet! "
+	exit 99
+}
+
+passwd() {
+	# TODO: implement this
+	exit 99
+}

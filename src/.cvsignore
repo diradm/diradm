@@ -10,3 +10,6 @@ diradm.host.sh
 diradm.misc.sh
 diradm.samba.sh
 diradm.user.sh
+diradm.automount.sh
+diradm.shadow.sh
+superadduser.diradm
