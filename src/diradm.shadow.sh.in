@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.1 2005/05/04 08:12:13 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.2 2005/05/09 21:33:56 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the passwd sub-system.
 
@@ -10,12 +10,12 @@ chage() {
 	while getopts "lm:M:W:I:E:d:" OPTION; do
 		case "${OPTION}" in
 			l) LISTONLY="1";;
-			m) MINDAYS="${OPTION}";;
-			M) MAXDAYS="${OPTION}";;
-			W) WARNDAYS="${OPTION}";;
-			I) INACTIVEDAYS="${OPTION}";;
-			E) ACCOUNTEXPIRY="${OPTION}";;
-			d) LASTCHANGE="${OPTION}";;
+			m) MINDAYS="${OPTARG}";;
+			M) MAXDAYS="${OPTARG}";;
+			W) WARNDAYS="${OPTARG}";;
+			I) INACTIVEDAYS="${OPTARG}";;
+			E) ACCOUNTEXPIRY="${OPTARG}";;
+			d) LASTCHANGE="${OPTARG}";;
 		esac
 	done
 	shift $((${OPTIND} - 1))
@@ -86,6 +86,38 @@ chage() {
 }
 
 passwd() {
+	[ -z "${modulename}" ] && modulename="passwd"
+	MODE=""
+	while getopts "fsgrRxnwiludSe" OPTION; do
+		case "${OPTION}" in
+			# external stuff
+			f) MODE="chfn" ;;
+			s) MODE="chsh" ;;
+			x) MODE="chage" ; CHAGE_MAX="${OPTARG}" ;;
+			n) MODE="chage" ; CHAGE_MIN="${OPTARG}" ;;
+			w) MODE="chage" ; CHAGE_WARN="${OPTARG}" ;;
+			i) MODE="chage" ; CHAGE_INACTIVE="${OPTARG}" ;;
+			# our stuff
+			g) MODE="gpasswd" ; CMD="set" ;;
+			R) MODE="gpasswd" ; CMD="delete" ;;
+			r) MODE="gpasswd" ; CMD="restrict" ;;
+			l) MODE="passwd" ; CMD="lock" ;;
+			u) MODE="passwd" ; CMD="unlock" ;;
+			d) MODE="passwd" ; CMD="delete" ;;
+			*) print_usage ${modulename} ; exit 1 ;;
+		esac
+		case "${MODE}" in
+			chfn) break ;;
+			chsh) break ;;
+		esac
+	done
+	shift $((${OPTIND} - 1))
+	# TODO
+	case "${MODE}" in
+		chfn) break ;;
+		chsh) break ;;
+	esac
+
 	# TODO: implement this
 	exit 99
 }
