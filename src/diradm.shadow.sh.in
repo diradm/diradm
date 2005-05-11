@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.2 2005/05/09 21:33:56 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.3 2005/05/11 01:18:29 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the passwd sub-system.
 
@@ -7,6 +7,7 @@ chage() {
 	# TODO: complete this
 	LISTONLY="0"
 	[ -z "${modulename}" ] && modulename="chage"
+	unset OPTION OPTARG OPTIND
 	while getopts "lm:M:W:I:E:d:" OPTION; do
 		case "${OPTION}" in
 			l) LISTONLY="1";;
@@ -39,36 +40,36 @@ chage() {
 		echo "${modulename}: unknown user: ${LOGIN}"
 		exit 1
 	fi
-	if [ "x${LISTONLY}" == 'x1' ]; then
-		MINDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMin)
-		MAXDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMax)
-		WARNDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowWarning)
-		INACTIVEDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowInactive)
-		ACCOUNTEXPIRY=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowExpire)
-		LASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
+	OLDMINDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMin)
+	OLDMAXDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMax)
+	OLDWARNDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowWarning)
+	OLDINACTIVEDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowInactive)
+	OLDACCOUNTEXPIRY=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowExpire)
+	OLDLASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
 
-		echo -e "Minimum:\t${MINDAYS}"
-		echo -e "Maximum:\t${MAXDAYS}"
-		echo -e "Warning:\t${WARNDAYS}"
-		echo -e "Inactive:\t${INACTIVEDAYS}"
+	if [ "x${LISTONLY}" == 'x1' ]; then
+		echo -e "Minimum:\t${OLDMINDAYS}"
+		echo -e "Maximum:\t${OLDMAXDAYS}"
+		echo -e "Warning:\t${OLDWARNDAYS}"
+		echo -e "Inactive:\t${OLDINACTIVEDAYS}"
 		#echo -e "Last Change:\t${LASTCHANGE}" # raw
-		echo -e "Last Change:\t$(days_to_date ${LASTCHANGE} +'%b %d, %Y')"
-		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 ]; then
+		echo -e "Last Change:\t$(days_to_date ${OLDLASTCHANGE} +'%b %d, %Y')"
+		if [ ${OLDLASTCHANGE} -le 0 -o ${OLDMAXDAYS} -ge 10000 -o ${OLDMAXDAYS} -le 0 ]; then
 			PASSWORDEXPIRY_STRING="Never"
 		else
-			PASSWORDEXPIRY_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS})) +'%b %d, %Y')"
+			PASSWORDEXPIRY_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS})) +'%b %d, %Y')"
 		fi
 		echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
-		if [ ${LASTCHANGE} -le 0 -o ${MAXDAYS} -ge 10000 -o ${MAXDAYS} -le 0 -o ${INACTIVEDAYS} -le 0 ]; then
+		if [ ${OLDLASTCHANGE} -le 0 -o ${OLDMAXDAYS} -ge 10000 -o ${OLDMAXDAYS} -le 0 -o ${OLDINACTIVEDAYS} -le 0 ]; then
 			PASSWORDINACTIVE_STRING="Never"
 		else
-			PASSWORDINACTIVE_STRING="$(days_to_date $((${LASTCHANGE} + ${MAXDAYS} + ${INACTIVEDAYS})) +'%b %d, %Y')"
+			PASSWORDINACTIVE_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS} + ${OLDINACTIVEDAYS})) +'%b %d, %Y')"
 		fi
 		echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
-		if [ ${ACCOUNTEXPIRY} -le 0  ]; then
+		if [ ${OLDACCOUNTEXPIRY} -le 0  ]; then
 			ACCOUNTEXPIRY_STRING="Never"
 		else
-			ACCOUNTEXPIRY_STRING="$(days_to_date ${ACCOUNTEXPIRY} +'%b %d, %Y')"
+			ACCOUNTEXPIRY_STRING="$(days_to_date ${OLDACCOUNTEXPIRY} +'%b %d, %Y')"
 		fi
 		echo -e "Account Expires:\t${ACCOUNTEXPIRY_STRING}"
 # shadowLastChange - The number of days (since January 1, 1970) since the password was last changed.
@@ -80,15 +81,26 @@ chage() {
 # shadowFlag - A reserved field for possible future use
 		exit 0
 	fi
-	# TODO
-	echo "Not done yet! "
-	exit 99
+	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
+	append "${COMMAND_DN}"
+	isinteger "${LASTCHANGE}" || LASTCHANGE="$(date_to_days "${LASTCHANGE}")"
+	isinteger "${ACCOUNTEXPIRY}" || ACCOUNTEXPIRY="$(date_to_days "${ACCOUNTEXPIRY}")"
+	
+	[ -n "${LASTCHANGE}" -a "${LASTCHANGE}" -ne "${OLDLASTCHANGE}" ] && append_attrib_replace "shadowLastChange" "${LASTCHANGE}"
+	[ -n "${MINDAYS}" -a "${MINDAYS}" -ne "${OLDMINDAYS}" ] && append_attrib_replace "shadowMin" "${MINDAYS}"
+	[ -n "${MAXDAYS}" -a "${MAXDAYS}" -ne "${OLDMAXDAYS}" ] && append_attrib_replace "shadowMax" "${MAXDAYS}"
+	[ -n "${WARNDAYS}" -a "${WARNDAYS}" -ne "${OLDWARNDAYS}" ] && append_attrib_replace "shadowWarning" "${WARNDAYS}"
+	[ -n "${INACTIVEDAYS}" -a "${INACTIVEDAYS}" -ne "${OLDINACTIVEDAYS}" ] && append_attrib_replace "shadowInactive" "${INACTIVEDAYS}"
+	[ -n "${ACCOUNTEXPIRY}" -a "${ACCOUNTEXPIRY}" -ne "${OLDACCOUNTEXPIRY}" ] && append_attrib_replace "shadowExpire" "${ACCOUNTEXPIRY}"
+	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
+	runmodify
 }
 
 passwd() {
 	[ -z "${modulename}" ] && modulename="passwd"
 	MODE=""
-	while getopts "fsgrRxnwiludSe" OPTION; do
+	unset OPTION OPTARG OPTIND
+	while getopts "fsgrRx:n:w:i:ludSe" OPTION; do
 		case "${OPTION}" in
 			# external stuff
 			f) MODE="chfn" ;;
