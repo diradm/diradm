@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.5 2005/05/03 20:46:58 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.6 2005/05/11 01:02:08 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the common functions.
 
@@ -132,6 +132,7 @@ if [ -n "${DEBUG}" ]; then
 fi
 
 [ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPMODIFY_CMD} > /dev/null
+unset COMMAND
 }
 
 runadd() {
@@ -142,6 +143,7 @@ if [ -n "${DEBUG}" ]; then
 	echo -------
 fi
 [ -n "${COMMAND}" ] && echo -e "${COMMAND}" | ${LDAPADD_CMD} > /dev/null
+unset COMMAND
 }
 
 rundelete() {
@@ -152,6 +154,7 @@ if [ -n "${DEBUG}" ]; then
 	echo -------
 fi
 [ -n "${*}" ] && ${LDAPDELETE_CMD} "${*}" > /dev/null
+unset COMMAND
 }
 
 # Convert N days since Jan 1, 1970 to a date
