@@ -1,10 +1,11 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.13 2005/05/04 08:12:13 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.14 2005/05/11 01:04:15 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
 useradd() {
 	[ -z "${modulename}" ] && modulename="useradd"
+	unset OPTION OPTARG OPTIND
 	while getopts "u:og:G:h:d:s:rRc:mk:f:e:E:p:Si" OPTION; do
 		case "${OPTION}" in
 			u) UIDNUMBER="${OPTARG}";;
@@ -14,17 +15,17 @@ useradd() {
 			h) HOSTLIST="${OPTARG}";;
 			d) HOMEDIRECTORY="${OPTARG}";;
 			s) LOGINSHELL="${OPTARG}";;
-			c) COMMENT="${OPTARG}";;
-			m) CREATEHOMEDIR="yes";;
 			r) USERGROUPS="yes";;
 			R) USERGROUPS="no";;
+			c) COMMENT="${OPTARG}";;
+			m) CREATEHOMEDIR="yes";;
 			k) SKEL="${OPTARG}";;
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
 			E) EMAIL="${OPTARG}";;
 			p) USERPASSWORD="${OPTARG}";;
-			S) SAMBA="yes";;
-			i) IRIX="yes";;
+			S) [ "x$ENABLE_SAMBA" == "xyes" ] && SAMBA="yes";;
+			i) [ "x$ENABLE_IRIXPASSWD" == "xyes" ] && IRIX="yes";;
 			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
@@ -95,7 +96,7 @@ useradd() {
 			fi
 			# recursive, but bring in the code first
 			. ${libexec}/diradm.group.sh
-			groupadd "${LOGIN}"
+			groupadd -- "${LOGIN}"
 			if [ "$?" -ne 0 ]; then
 				echo "${modulename}: Failed to add group '${LOGIN}'."
 				exit 9
@@ -263,7 +264,7 @@ useradd() {
 		[ -n "${SAMBAPROFILEPREPEND}" ] && append "sambaProfilePath: ${SAMBAPROFILEPREPEND}\\\\${LOGIN}"
 		[ -n "${SAMBALOGONSCRIPT}" ] && append "sambaLogonScript: ${SAMBALOGONSCRIPT}"
 	fi
-	if [ "${ENABLE_IRIXPASSWD}" == "yes" -a "${IRIX}" == "yes" ]; then
+	if [ "x${IRIX}" == "xyes" ]; then
 		# this is a custom objectclass!
 		append "objectClass: irixAccount"
 		append "irixPassword: {CRYPT}${irixPassword}"
@@ -297,7 +298,7 @@ useradd() {
 		if [ "${USER_AUTOMOUNTHOME}" == "yes" ]; then
 			# add automount entry first
 			# create hashed dir path
-			amadd -d "${AUTOMOUNT_USERDESC}" -o "${AUTOMOUNT_OPTIONS_USER}" "${AUTOMOUNT_USERMAP}" "${LOGIN}" "${targetdir}"
+			amadd -d "${AUTOMOUNT_USERDESC}" -o "${AUTOMOUNT_OPTIONS_USERS}" -- "${AUTOMOUNT_USERMAP}" "${LOGIN}" "${targetdir}"
 		fi
 		# strip NFS host to make local path
 		targetdir_no_nfs="${targetdir/*:}"
@@ -319,7 +320,8 @@ usermod() {
 		echo "${modulename}: No flags given"
 		exit 2
 	fi
-	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LUS" OPTION; do
+	unset OPTION OPTARG OPTIND
+	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LUSi" OPTION; do
 		case "${OPTION}" in
 			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
@@ -337,7 +339,8 @@ usermod() {
 			p) if [ -n "${LOCKED}" ]; then print_usage ${modulename} ; exit 1; fi; USERPASSWORD="${2}";;
 			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="yes";;
 			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="no";;
-			S) SAMBA="yes";;
+			S) [ "x$ENABLE_SAMBA" == "xyes" ] && SAMBA="yes";;
+			i) [ "x$ENABLE_IRIXPASSWD" == "xyes" ] && IRIX="yes";;
 			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
@@ -569,6 +572,7 @@ usermod() {
 
 userdel() {
 	[ -z "${modulename}" ] && modulename="userdel"
+	unset OPTION OPTARG OPTIND
 	while getopts "r" OPTION; do
 		case "${OPTION}" in
 			r) REMOVEHOMEDIR="yes";;
@@ -616,6 +620,7 @@ userdel() {
 
 chsh() {
 	[ -z "${modulename}" ] && modulename="chsh"
+	unset OPTION OPTARG OPTIND
 	while getopts "s:" OPTION; do
 		case "${OPTION}" in
 			s) LOGINSHELL="${OPTARG}";;
@@ -637,13 +642,14 @@ chsh() {
 
 	# recursive behaviour is nice...
 	# But we only do the call if they are changing the shell
-	[ "${OLDLOGINSHELL}" != "${LOGINSHELL}" ] && usermod -s "${LOGINSHELL}" "${LOGIN}"
+	[ "${OLDLOGINSHELL}" != "${LOGINSHELL}" ] && usermod -s "${LOGINSHELL}" -- "${LOGIN}"
 }
 
 chfn() {
 	# TODO: complete this
 	# TODO: interactive mode is needed
 	[ -z "${modulename}" ] && modulename="chfn"
+	unset OPTION OPTARG OPTIND
 	while getopts "f:h:o:r:w:" OPTION; do
 		case "${OPTION}" in
 			f) FULLNAME="${OPTARG}";;
