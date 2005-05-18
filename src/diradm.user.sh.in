@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.15 2005/05/18 01:07:50 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.16 2005/05/18 22:57:07 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -619,7 +619,6 @@ userdel() {
 }
 
 chsh() {
-	# TODO: testing needed
 	[ -z "${modulename}" ] && modulename="chsh"
 	unset OPTION OPTARG OPTIND
 	while getopts "s:" OPTION; do
@@ -647,7 +646,6 @@ chsh() {
 }
 
 chfn() {
-	# TODO: testing needed
 	[ -z "${modulename}" ] && modulename="chfn"
 	unset OPTION OPTARG OPTIND
 	while getopts "f:h:o:r:w:" OPTION; do
@@ -668,15 +666,20 @@ chfn() {
 	fi
 	
 	OLD_FULLNAME="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "displayName"`"
+	OLD_GIVENNAME="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "givenName"`"
+	OLD_SN="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "sn"`"
+	OLD_CN="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "cn"`"
 	OLD_ROOMNUMBER="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "roomNumber"`"
 	OLD_WORKPHONE="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "telephoneNumber"`"
 	OLD_HOMEPHONE="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "homePhone"`"
 	OLD_GECOS="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "gecos"`"
 
 	# interactive time
+	delstr="field-delete-$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM"
 	if [ -z "${FULLNAME}${HOMEPHONE}${OTHER}${ROOMNUMBER}${WORKPHONE}" ]; then
 		echo "Changing user information for ${LOGIN}"
-		echo "Enter the new value, or press return for the default"
+		echo "Enter the new value, or press return for the default."
+		echo "Enter a single - to delete the current contents."
 		msg="\tFull Name [${OLD_FULLNAME}]: "
 		grabinteractiveinput "${msg}" FULLNAME
 		msg="\tRoom Number [${OLD_ROOMNUMBER}]: "
@@ -688,30 +691,51 @@ chfn() {
 		if [ "${UID}" -eq 0 ]; then
 			msg="\tOther [${OLD_OTHER}]: "
 			grabinteractiveinput "${msg}" OTHER
+			[ -z "${OTHER}" ] && OTHER="${OLD_OTHER}"
+			[ "${OTHER}" == "-" ] && OTHER="${delstr}"
 		fi
+		[ -z "${FULLNAME}" ] && FULLNAME="${OLD_FULLNAME}"
+		[ "${FULLNAME}" == "-" ] && FULLNAME="${delstr}"
+		[ -z "${ROOMNUMBER}" ] && ROOMNUMBER="${OLD_ROOMNUMBER}"
+		[ "${ROOMNUMBER}" == "-" ] && ROOMNUMBER="${delstr}"
+		[ -z "${WORKPHONE}" ] && WORKPHONE="${OLD_WORKPHONE}"
+		[ "${WORKPHONE}" == "-" ] && WORKPHONE="${delstr}"
+		[ -z "${HOMEPHONE}" ] && HOMEPHONE="${OLD_HOMEPHONE}"
+		[ "${HOMEPHONE}" == "-" ] && HOMEPHONE="${delstr}"
+	fi
+	
+	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
+	COMMAND=""
+	append "${COMMAND_DN}"
+
+	if [ "${FULLNAME}" == "${delstr}" ]; then
+		append_attrib_delete displayName "${OLD_FULLNAME}"
+		append_attrib_delete cn "${OLD_CN}"
+		append_attrib_delete sn "${OLD_SN}"
+		append_attrib_delete givenName "${OLD_GIVENNAME}"
+		unset FULLNAME
+	fi
+	[ "${ROOMNUMBER}" == "${delstr}" ] && unset ROOMNUMBER && append_attrib_delete roomNumber "${OLD_ROOMNUMBER}"
+	[ "${WORKPHONE}" == "${delstr}" ] && unset WORKPHONE && append_attrib_delete workPhone "${OLD_WORKPHONE}"
+	[ "${HOMEPHONE}" == "${delstr}" ] && unset HOMEPHONE && append_attrib_delete homePhone "${OLD_HOMEPHONE}"
+	[ "${OTHER}" == "${delstr}" ] && unset OTHER && append_attrib_delete other "${OLD_OTHER}"
+
+	if [ -n "${FULLNAME}" ]; then
+		GIVENNAME="${FULLNAME// *}"
+		CN="${GIVENNAME}"
+		SN="${FULLNAME##* }"
+		[ "${OLD_SN}" != "${SN}" ] && append_attrib_replace sn "${SN}"
+		[ "${OLD_GIVENNAME}" != "${GIVENNAME}" ] && append_attrib_replace givenName "${GIVENNAME}"
+		[ "${OLD_FULLNAME}" != "${FULLNAME}" ] && append_attrib_replace displayName "${FULLNAME}"
+		[ "${OLD_CN}" != "${CN}" ] && append_attrib_replace cn "${CN}"
 	fi
 	
 	GECOS="${FULLNAME},${ROOMNUMBER},${WORKPHONE},${HOMEPHONE},${OTHER}"
-	
-	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
-	append "${COMMAND_DN}"
-	if [ -n "${FULLNAME}" ]; then
-		FIRSTNAME="${FULLNAME// *}"
-		SURNAME="${FULLNAME##* }"
-		CN="${FIRSTNAME}"
-		OLD_FIRSTNAME="${OLD_FULLNAME// *}"
-		OLD_SURNAME="${OLD_FULLNAME##* }"
-		OLD_CN="${OLD_FIRSTNAME}"
-		[ "${OLD_SURNAME}" != "${SURNAME}" ] && append_attrib_replace sn "${SURNAME}"
-		[ "${OLD_CN}" != "${CN}" ] && append_attrib_replace cn "${CN}"
-		[ "${OLD_FIRSTNAME}" != "${FIRSTNAME}" ] && append_attrib_replace givenName "${FIRSTNAME}"
-		[ "${OLD_FULLNAME}" != "${FULLNAME}" ] && append_attrib_replace displayName "${FULLNAME}"
-	fi
+	[ -n "${ROOMNUMBER}" -a "${OLD_ROOMNUMBER}" != "${ROOMNUMBER}" ] && append_attrib_replace roomNumber "${ROOMNUMBER}"
+	[ -n "${HOMEPHONE}" -a "${OLD_HOMEPHONE}" != "${HOMEPHONE}" ] && append_attrib_replace homePhone "${HOMEPHONE}"
+	[ -n "${WORKPHONE}" -a "${OLD_WORKPHONE}" != "${WORKPHONE}" ] && append_attrib_replace telephoneNumber "${WORKPHONE}"
+	[ -n "${GECOS}" -a "${OLD_GECOS}" != "${GECOS}" ] && append_attrib_replace gecos "${GECOS}"
 
-	[ "${OLD_ROOMNUMBER}" != "${ROOMNUMBER}" ] && append_attrib_replace roomNumber "${ROOMNUMBER}"
-	[ "${OLD_HOMEPHONE}" != "${HOMEPHONE}" ] && append_attrib_replace homePhone "${HOMEPHONE}"
-	[ "${OLD_WORKPHONE}" != "${WORKPHONE}" ] && append_attrib_replace telephoneNumber "${WORKPHONE}"
-	[ "${OLD_GECOS}" != "${GECOS}" ] && append_attrib_replace gecos "${GECOS}"
 	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
 	runmodify
 }
