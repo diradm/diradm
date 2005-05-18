@@ -67,7 +67,7 @@ AC_PROG_PERL_MODULES(	[MIME::Base64], , AC_MSG_ERROR([MIME::Base64 required!]))
 
 # automount stuff
 AC_MSG_CHECKING(whether to enable Automount support)
-AC_ARG_ENABLE(automount, [Enable Automount support], [ac_cv_enable_automount="yes"], [ac_cv_enable_automount="no"]) 
+AC_ARG_ENABLE(automount, [  --enable-automount      Enable Automount support], [ac_cv_enable_automount="yes"], [ac_cv_enable_automount="no"]) 
 AC_MSG_RESULT([$ac_cv_enable_automount])
 AC_SUBST([ENABLE_AUTOMOUNT],["$ac_cv_enable_automount"])
 if test "x$ENABLE_AUTOMOUNT" != "xno"; then
@@ -76,7 +76,7 @@ fi
 
 # automount stuff
 AC_MSG_CHECKING(whether to enable IRIX passwd support)
-AC_ARG_ENABLE(irixpasswd, [Enable IRIX passwd support], [ENABLE_IRIXPASSWD="yes"], [ENABLE_IRIXPASSWD="no"]) 
+AC_ARG_ENABLE(irixpasswd, [  --enable-irixpasswd      Enable IRIX passwd support], [ENABLE_IRIXPASSWD="yes"], [ENABLE_IRIXPASSWD="no"]) 
 AC_MSG_RESULT([$ENABLE_IRIXPASSWD])
 AC_SUBST(ENABLE_IRIXPASSWD)
 if test "x$ENABLE_IRIXPASSWD" != "xno"; then
@@ -85,7 +85,7 @@ fi
 
 # samba stuff
 AC_MSG_CHECKING(whether to enable Samba support)
-AC_ARG_ENABLE(samba, [Enable Samba support], ENABLE_SAMBA=yes, ENABLE_SAMBA=no) 
+AC_ARG_ENABLE(samba, [  --enable-samba          Enable Samba support], [ENABLE_SAMBA="yes"], [ENABLE_SAMBA="no"]) 
 AC_MSG_RESULT([$ENABLE_SAMBA])
 AC_SUBST(ENABLE_SAMBA)
 if test "x${ENABLE_SAMBA}" = "xyes"; then
@@ -109,6 +109,7 @@ AC_CONFIG_FILES([
    src/diradm.misc.sh
    src/diradm.samba.sh
    src/diradm.user.sh
+   src/diradm.shadow.sh
 ])
 AC_CONFIG_FILES([src/diradm], [chmod +x src/diradm])
 AC_CONFIG_FILES([src/diradm-mkpasswd.pl], [chmod +x src/diradm-mkpasswd.pl])
