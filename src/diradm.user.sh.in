@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.14 2005/05/11 01:04:15 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.15 2005/05/18 01:07:50 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -151,7 +151,7 @@ useradd() {
 	fi
 	[ -z "${COMMENT}" ] && COMMENT="${LOGIN},,,"
 	if [ -n "${HOMEDIRECTORY}" -a "${CREATEHOMEDIR}" == "yes" ]; then
-		if [ "$(${WHOAMI})" != "root" ]; then
+		if [ "${UID}" -ne "0" ]; then
 			echo "${modulename}: Only root may create home directories"
 			exit 12
 		fi
@@ -463,7 +463,7 @@ usermod() {
 
 	# moving home directory
 	if [ -n "${HOMEDIRECTORY}" -a "${MOVEHOMEDIR}" == "yes" ]; then
-		if [ "$(${WHOAMI})" != "root" ]; then
+		if [ "${UID}" -ne 0 ]; then
 			echo "${modulename}: Only root may move home directories"
 			exit 12
 		fi
@@ -592,7 +592,7 @@ userdel() {
 		exit 6
 	fi
 	if [ "${REMOVEHOMEDIR}" == "yes" ]; then
-		if [ "$(${WHOAMI})" != "root" ]; then
+		if [ "${UID}" -ne 0 ]; then
 			echo "${modulename}: Only root may remove home directories"
 			exit 12
 		fi
@@ -619,6 +619,7 @@ userdel() {
 }
 
 chsh() {
+	# TODO: testing needed
 	[ -z "${modulename}" ] && modulename="chsh"
 	unset OPTION OPTARG OPTIND
 	while getopts "s:" OPTION; do
@@ -646,17 +647,16 @@ chsh() {
 }
 
 chfn() {
-	# TODO: complete this
-	# TODO: interactive mode is needed
+	# TODO: testing needed
 	[ -z "${modulename}" ] && modulename="chfn"
 	unset OPTION OPTARG OPTIND
 	while getopts "f:h:o:r:w:" OPTION; do
 		case "${OPTION}" in
-			f) FULLNAME="${OPTARG}";;
-			h) HOMEPHONE="${OPTARG}";;
-			o) OTHER="${OPTARG}";;
-			r) ROOMNUMBER="${OPTARG}";;
-			w) WORKPHONE="${OPTARG}";;
+			f) FULLNAME="${OPTARG}" ;;
+			h) HOMEPHONE="${OPTARG}" ;;
+			o) OTHER="${OPTARG}" ;;
+			r) ROOMNUMBER="${OPTARG}" ;;
+			w) WORKPHONE="${OPTARG}" ;;
 		esac
 	done
 	shift $((${OPTIND} - 1))
@@ -666,28 +666,52 @@ chfn() {
 	else
 		LOGIN="${1}"
 	fi
-
-	[ -n "${HOMEPH}" ] && append ""
-	#FULLNAME="$(echo ${COMMENT} | ${CUT} -d, -f1)"
-	#ROOMNUMBER="$(echo ${COMMENT} | ${CUT} -d, -f2)"
-	#WORKPHONE="$(echo ${COMMENT} | ${CUT} -d, -f3)"
-	#HOMEPHONE="$(echo ${COMMENT} | ${CUT} -d, -f4)"
 	
+	OLD_FULLNAME="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "displayName"`"
+	OLD_ROOMNUMBER="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "roomNumber"`"
+	OLD_WORKPHONE="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "telephoneNumber"`"
+	OLD_HOMEPHONE="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "homePhone"`"
+	OLD_GECOS="`ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" "gecos"`"
+
+	# interactive time
+	if [ -z "${FULLNAME}${HOMEPHONE}${OTHER}${ROOMNUMBER}${WORKPHONE}" ]; then
+		echo "Changing user information for ${LOGIN}"
+		echo "Enter the new value, or press return for the default"
+		msg="\tFull Name [${OLD_FULLNAME}]: "
+		grabinteractiveinput "${msg}" FULLNAME
+		msg="\tRoom Number [${OLD_ROOMNUMBER}]: "
+		grabinteractiveinput "${msg}" ROOMNUMBER
+		msg="\tWork Phone [${OLD_WORKPHONE}]: "
+		grabinteractiveinput "${msg}" WORKPHONE
+		msg="\tHome Phone [${OLD_HOMEPHONE}]: "
+		grabinteractiveinput "${msg}" HOMEPHONE
+		if [ "${UID}" -eq 0 ]; then
+			msg="\tOther [${OLD_OTHER}]: "
+			grabinteractiveinput "${msg}" OTHER
+		fi
+	fi
+	
+	GECOS="${FULLNAME},${ROOMNUMBER},${WORKPHONE},${HOMEPHONE},${OTHER}"
+	
+	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
+	append "${COMMAND_DN}"
 	if [ -n "${FULLNAME}" ]; then
 		FIRSTNAME="${FULLNAME// *}"
 		SURNAME="${FULLNAME##* }"
 		CN="${FIRSTNAME}"
-
+		OLD_FIRSTNAME="${OLD_FULLNAME// *}"
+		OLD_SURNAME="${OLD_FULLNAME##* }"
+		OLD_CN="${OLD_FIRSTNAME}"
+		[ "${OLD_SURNAME}" != "${SURNAME}" ] && append_attrib_replace sn "${SURNAME}"
+		[ "${OLD_CN}" != "${CN}" ] && append_attrib_replace cn "${CN}"
+		[ "${OLD_FIRSTNAME}" != "${FIRSTNAME}" ] && append_attrib_replace givenName "${FIRSTNAME}"
+		[ "${OLD_FULLNAME}" != "${FULLNAME}" ] && append_attrib_replace displayName "${FULLNAME}"
 	fi
-	[ -n "${SURNAME}" ] && append_attrib_replace sn "${SURNAME}"
-	[ -n "${FIRSTNAME}" ] && append_attrib_replace givenName "${FIRSTNAME}"
-	[ -n "${FULLNAME}" ] && append_attrib_replace displayName "${FULLNAME}"
-	[ -n "${ROOMNUMBER}" ] && append_attrib_replace roomNumber "${ROOMNUMBER}"
-	[ -n "${HOMEPHONE}" ] && append_attrib_replace homePhone "${HOMEPHONE}"
-	[ -n "${WORKPHONE}" ] && append_attrib_replace telephoneNumber "${WORKPHONE}"
-	append "gecos: ${COMMENT}"
-	append "\n\n"
 
-	echo "Not done yet!"
-	exit 99
+	[ "${OLD_ROOMNUMBER}" != "${ROOMNUMBER}" ] && append_attrib_replace roomNumber "${ROOMNUMBER}"
+	[ "${OLD_HOMEPHONE}" != "${HOMEPHONE}" ] && append_attrib_replace homePhone "${HOMEPHONE}"
+	[ "${OLD_WORKPHONE}" != "${WORKPHONE}" ] && append_attrib_replace telephoneNumber "${WORKPHONE}"
+	[ "${OLD_GECOS}" != "${GECOS}" ] && append_attrib_replace gecos "${GECOS}"
+	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
+	runmodify
 }
