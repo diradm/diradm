@@ -1,0 +1,10 @@
+This is a listing of the incomplete functionality in diradm.
+
+shadow stuff:
+- passwd cmd: chfn, chsh, chage, gpasswd, passwd modes.
+
+group stuff:
+- gpasswd cmd: admin and password functionality.
+
+Patches welcome to implement this stuff. The gpasswd things will be very
+difficult as they are not in any published LDAP schema I have found.
