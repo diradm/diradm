@@ -39,6 +39,7 @@ AC_PATH_PROGS_ERROR(STAT, stat)
 AC_PATH_PROGS_ERROR(DATE, date)
 AC_PATH_PROGS_ERROR(WHOAMI, whoami)
 AC_PATH_PROGS_ERROR(UNIQ, uniq)
+AC_PATH_PROGS_ERROR(SORT, sort)
 # ldap stuff now
 AC_PATH_PROGS_ERROR(LDAPSEARCH, ldapsearch)
 AC_PATH_PROGS_ERROR(LDAPADD, ldapadd)
@@ -85,7 +86,7 @@ fi
 
 # samba stuff
 AC_MSG_CHECKING(whether to enable Samba support)
-AC_ARG_ENABLE(samba, [  --enable-samba          Enable Samba support], [ENABLE_SAMBA="yes"], [ENABLE_SAMBA="no"]) 
+AC_ARG_ENABLE(samba, [  --enable-samba          Enable Samba support], [ENABLE_SAMBA="$enableval"], [ENABLE_SAMBA="no"]) 
 AC_MSG_RESULT([$ENABLE_SAMBA])
 AC_SUBST(ENABLE_SAMBA)
 if test "x${ENABLE_SAMBA}" = "xyes"; then
