@@ -1,4 +1,4 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.9 2005/01/09 12:44:40 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.10 2005/08/22 00:55:35 robbat2 Exp $
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -12,4 +12,4 @@ noinst_DATA = $(built_DOCS)
 EXTRA_DIST = configure Makefile.in diradm.spec.in diradm.spec reconf $(dist_DOCS)
 
 CLEANFILES = *~ *.swp
-DISTCLEANFILES = Makefile.in
+MAINTAINERCLEANFILES = Makefile.in

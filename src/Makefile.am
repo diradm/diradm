@@ -1,4 +1,4 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Makefile.am,v 1.9 2005/05/04 08:12:13 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Makefile.am,v 1.10 2005/08/22 00:55:35 robbat2 Exp $
 # Copyright (C) 2004 Robin Hugh Johnson <robbat2@orbis-terrarum.net>
 #  
 # This file is free software; as a special exception the author gives
@@ -18,3 +18,4 @@ CONFFILE = diradm.conf
 sbin_SCRIPTS = $(BINARY)
 libexec_SCRIPTS = $(HELPER) $(COMPONENTS)
 sysconf_DATA = $(CONFFILE)
+MAINTAINERCLEANFILES = Makefile.in
