@@ -1,3 +1,10 @@
+2005-08-22 00:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.22), "Exp", lines: +2 -2
+
+	ensure automount/irix configure stuff works right too.
+
 2005-08-22 00:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
