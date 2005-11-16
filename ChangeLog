@@ -1,3 +1,17 @@
+2005-11-16 23:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.24), "Exp", lines: +1 -1
+
+	minor version bump.
+
+2005-11-16 23:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/Makefile.am (1.11), "Exp", lines: +2 -2
+
+	Missed diradm.shadow.sh.in in distfile.
+
 2005-08-22 01:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
