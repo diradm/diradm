@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.19 2005/12/13 05:14:20 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.20 2005/12/13 05:24:10 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -96,9 +96,9 @@ done
 ##################### Don't touch anything below this line #####################
 
 # these are defined here as this is what we track primarily for bugs.
-CVS_REVISION='$Revision: 1.19 $'
-CVS_DATE='$Date: 2005/12/13 05:14:20 $'
-CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.19 2005/12/13 05:14:20 robbat2 Exp $'
+CVS_REVISION='$Revision: 1.20 $'
+CVS_DATE='$Date: 2005/12/13 05:24:10 $'
+CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.20 2005/12/13 05:24:10 robbat2 Exp $'
 # get the stripped versions
 CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
 CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
@@ -109,27 +109,28 @@ if [ ! -r "${CONFIG}" ]; then
 fi
 
 # filled by configure
-GREP="@GREP@"
-LDAPSEARCH="@LDAPSEARCH@"
-LDAPADD="@LDAPADD@"
-LDAPMODIFY="@LDAPMODIFY@"
-LDAPDELETE="@LDAPDELETE@"
-SED="@SED@"
-WHOAMI="@WHOAMI@"
-STAT="@STAT@"
-PERL="@PERL@"
 AWK="@AWK@"
-EGREP="@EGREP@"
-FGREP="@FGREP@"
-HEAD="@HEAD@"
-TAIL="@TAIL@"
-FALSE="@FALSE@"
 BASHSH="@BASHSH@"
-DATE="@DATE@"
 CUT="@CUT@"
-UNIQ="@UNIQ@"
+DATE="@DATE@"
+EGREP="@EGREP@"
+FALSE="@FALSE@"
+FGREP="@FGREP@"
+GREP="@GREP@"
+HEAD="@HEAD@"
+LDAPADD="@LDAPADD@"
+LDAPDELETE="@LDAPDELETE@"
+LDAPMODIFY="@LDAPMODIFY@"
+LDAPSEARCH="@LDAPSEARCH@"
+PERL="@PERL@"
 SAMBA_NET="@SAMBA_NET@"
+SED="@SED@"
 SEDEXT="@SED@ @SED_EXTREGEXP@"
+SORT="@SORT@"
+STAT="@STAT@"
+TAIL="@TAIL@"
+UNIQ="@UNIQ@"
+WHOAMI="@WHOAMI@"
 
 # bring in config file
 source "${CONFIG}"
