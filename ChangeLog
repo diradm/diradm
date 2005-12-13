@@ -1,3 +1,11 @@
+2005-12-13 07:21  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		.cvsignore (1.8), "Exp", lines: +1 -0;  commitid: 202f439e766b4567;
+		reconf (1.6), "Exp", lines: +1 -0;  commitid: 202f439e766b4567;
+
+	Clean up bootstrap build.
+
 2005-12-13 07:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
