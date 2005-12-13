@@ -24,3 +24,7 @@
 - Complete chage.
 - Seperate out automount stuff and make external commands.
 - chsh and chfn completed and tested.
+
+2005-12-13: diradm-2.7
+- All functionality completed, with the exception of gshadow (see KNOWN-BUGS).
+- Further feature requests welcome.
