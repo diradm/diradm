@@ -13,3 +13,4 @@ aclocal.m4
 config.cache
 diradm-*.tar.bz2
 diradm-*.tar.gz
+config
