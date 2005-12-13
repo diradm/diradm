@@ -1,0 +1,37 @@
+KNOWN BUGS
+stuff that isn't fixed yet, and probably won't be soon 
+(patches accepted)
+------------------------------------------------------
+In writing diradm, I hit into a number of roadblocks, primarily in places where
+LDAP never had some functionality that was present in POSIX, or the POSIX tools
+just plain sucked for what they had to do in an LDAP environment.
+
+Summary of broken stuff to avoid:
+---------------------------------
+gpasswd -a USER GROUP 
+gpasswd -d USER GROUP 
+gpasswd [-r -R] GROUP 
+passwd -g [-r -R] GROUP
+useradd -p PASS USER
+usermod -p PASS USER
+
+Details:
+--------
+1. LDAP makes no provision for POSIX group passwords. This is /etc/gshadow. It
+also includes group administrators.  I've yet to see a schema or tool that
+supports this. Until then, I can't write this functionality. The relevant
+parts of 'diradm passwd' and 'diradm gpasswd' will just give you errors until
+then. If you do know of this functionality, I'd love to hear from you, as I'd
+like to use them in LDAP myself. The other functionality of gpasswd to add and
+remove members from groups does work in diradm, so don't despair.
+
+2. POSIX doesn't support the concept of multiple incompatible password hashes.
+One of the nice things about LDAP is that you can store multiple password hash
+formats, for all those incompatible systems. In my production environment for
+diradm-2, we had the following: Linux (MD5 crypt), IRIX (DES crypt), Windows
+(LM hash, NT hash), clear-text (for CRAM-MD5 and similar authentications that need the cleartext as the salt is dynamic).
+POSIX provides the commands 'usermod -p PASS' and 'useradd -p PASS', where it
+EXPECTS that the password is pre-hashed. If it's pre-hashed, I can't generate
+the other hashes! I've implemented -p as per POSIX in diradm, but I strongly
+recommend you stay away from it, unless you're certain you don't use multiple
+password hashes.
