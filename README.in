@@ -6,8 +6,7 @@ TODO: write this
 For documentation, please see the files in the doc subdirectory.
 For building and installation instructions please see the INSTALL file.
 
-If you have a problem, please email robbat2@orbis-terrarum.net the complete
-output (including the commands as you ran them) from:
+diradm not behaving? See DEBUGGING.
 
-diradm check
-DEBUG=1 diradm (your command here)
+There are a number of pieces of unfinished functionality in this package still.
+Please see KNOWN-BUGS for a discussion on them.
