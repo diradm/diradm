@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.group.sh.in,v 1.5 2005/05/11 01:02:56 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.group.sh.in,v 1.6 2005/12/13 06:34:37 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the group sub-system.
 
@@ -140,8 +140,8 @@ groupdel() {
 }
 
 gpasswd() {
-	# TODO: set admin
-	# TODO: password mode
+	# TODO: gshadow - group administrators
+	# TODO: gshadow - group passwords
 	[ -z "${modulename}" ] && modulename="gpasswd"
 	PASSWD_SET=0
 	MEMBERS_ADD=''
@@ -151,9 +151,9 @@ gpasswd() {
 	while getopts "rRa:d:A:M:" OPTION; do
 		case "${OPTION}" in
 			r) if [ -n "$MODE_PASSWD" ]; then print_usage ${modulename} ; exit 1 ; fi
-				MODE_PASSWD=1 PASSWD_SET=1 PASSWD='' ; echo TODO! ; exit 99 ;;
+				MODE_PASSWD=1 PASSWD_SET=1 PASSWD='' ; gpasswd_admin_error ; exit 99 ;;
 			R) if [ -n "$MODE_PASSWD" ]; then print_usage ${modulename} ; exit 1 ; fi
-				MODE_PASSWD=1 PASSWD_SET=1 PASSWD="!" ; echo TODO! ; exit 99 ;;
+				MODE_PASSWD=1 PASSWD_SET=1 PASSWD="!" ; gpasswd_admin_error ; exit 99 ;;
 			a) MODE_MEMBER=1 MEMBERS_ADD="${OPTARG//,/ }";;
 			d) MODE_MEMBER=1 MEMBERS_DELETE="${OPTARG//,/ }";;
 			M) MODE_MEMBER=1 MEMBERS_SET="${OPTARG//,/ }";;
@@ -181,7 +181,7 @@ gpasswd() {
 	append "${COMMAND_DN}"
 	append "changetype: modify"
 
-	# TODO: -R/-r/passwd/ADMIN
+	# TODO: gshadow - -R/-r/passwd/ADMIN implementation
 
 	MEMBERS_CURRENT="$(ldap_search_getattr ${GROUP_BASEDN} "cn=${GROUP}" memberUid)"
 	#echo MC:$MEMBERS_CURRENT
@@ -223,7 +223,7 @@ gpasswd() {
 }
 
 gpasswd_admin_error() {
-	echo "So you want to set a group administrator..."
+	echo "So you want to set a group administrator or a group password..."
 	echo "Unfortuntely you won't be able to do that"
 	echo "As there is NO place for it in any schema"
 	echo "Please contact me (Robin) if you do have a"
