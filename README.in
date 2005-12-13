@@ -1,10 +1,20 @@
 Welcome to @PACKAGE@ @VERSION@.
 
-TODO: write this
+diradm-2* is based on an older package of the same name, which is available
+here: http://www.hits.at/diradm/.
 
-@PACKAGE@ is free software. Please see the file COPYING for details.
-For documentation, please see the files in the doc subdirectory.
-For building and installation instructions please see the INSTALL file.
+This new version is a rewrite in the same style of the older version,
+incorporating significant new functionality, and changes across the board. It
+now presents a near complete suite of POSIX management tools (like the linux
+'shadow' package) aimed at providing all functionality to change
+/etc/{shadow,group,passwd,hosts,ethers} style data in LDAP.
+
+Additionally, there are some features intended for larger networks:
+- support for all Samba user attributes.
+- Samba domain host management.
+- support for automount/autofs maps.
+- support for multiple password hashes
+- email attribute on users.
 
 diradm not behaving? See DEBUGGING.
 
