@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.misc.sh.in,v 1.2 2005/05/03 20:46:07 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.misc.sh.in,v 1.3 2005/12/13 06:19:52 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the host sub-system.
 
@@ -39,7 +39,7 @@ print_usage_sub() {
 	chage)
 	echo " diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]"
 	echo "              [-E expiredate] [-W warndays] LOGIN"
-	echo " diradm chage -l LOGIN"
+	echo " diradm chage [-l|-S] LOGIN"
 	;;
 	gpasswd)
 	echo " diradm gpasswd GROUP"
@@ -48,6 +48,12 @@ print_usage_sub() {
 	echo " diradm gpasswd -R GROUP"
 	echo " diradm gpasswd -r GROUP"
 	echo " diradm gpasswd [-A USER,...] [-M USER,...] GROUP"
+	;;
+	passwd)
+	echo " diradm passwd [-f -s] USER"
+	echo " diradm passwd [-g] [-r -R] GROUP"
+	echo " diradm passwd [-x max] [-n min] [-w warn] [-i inact] USER"
+	echo " diradm passwd [-l -u -d -S -e] USER"
 	;;
 	smbhostadd)
 	echo " diradm smbhostadd [-r RID] HOST"
@@ -97,7 +103,7 @@ print_usage() {
 	[ -n "$*" ] && list="$@"
 	echo "Usage:"
 	if [ -z "$list" -o "$list" == "_all" ]; then
-		list="useradd _ usermod _ userdel _ groupadd groupmod groupdel _ chsh _ chfn _ chage _ gpasswd _ hostadd hostmod hostdel"
+		list="useradd _ usermod _ userdel _ groupadd groupmod groupdel _ chsh _ chfn _ chage _ gpasswd _ passwd _ hostadd hostmod hostdel"
 		[ "$ENABLE_SAMBA" == "yes" ] && list="${list} _ smbhostadd smbhostdel"
 		[ "$ENABLE_AUTOMOUNT" == "yes" ] && list="${list} _ amadd amdel"
 		list="${list} _ check version help _"
