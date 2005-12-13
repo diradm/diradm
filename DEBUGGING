@@ -1,0 +1,5 @@
+If you have a problem, please email robbat2@orbis-terrarum.net the complete
+output (including the commands as you ran them) from:
+
+diradm check 
+DEBUG=1 diradm (your command here)
