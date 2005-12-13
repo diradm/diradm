@@ -2,3 +2,41 @@ Thanks to:
 ----------
 Andreas de Pretis  <andreas@depretis.at>:
 useradd -h, home directory stuff.
+
+Klavs Klavsen <kl@vsen.dk>:
+Debugging in Denmark. Linux and FreeBSD patches.
+
+Gordon Pritchard <gordonp@sfu.ca>:
+Putting up with my development of diradm on the TechBC research network, to
+make everybodies life easier.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+No thanks to (yes, this is rant):
+---------------------------------
+ACS/OTS @ SFU Burnaby: 
+Not all of you, just a select few in Management that canned my account during
+the development of diradm. While checking to see to  see that diradm would
+would on Solaris, I  reported that your out of date Solaris shellbox had an
+unlocked getent command, that made all passwords public on the machine, and
+also to all public LDAP queries from outside the university. 
+
+In return, you barred me from my work with SFU for some time, forever damaging
+my opinions of the management practices of SFU.
+
+I've got the last laugh now, as the release of 2.7 is the first time that
+diradm should actually work on IRIX, and I've only fixed it because I don't
+hold anything against those in ACS/OTS that actually get any work done.
