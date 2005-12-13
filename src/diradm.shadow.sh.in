@@ -1,16 +1,18 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.6 2005/05/18 22:58:29 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.7 2005/12/13 06:21:39 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the passwd sub-system.
 
 chage() {
 	# TODO: test me!
 	LISTONLY="0"
+	BRIEF="0"
 	[ -z "${modulename}" ] && modulename="chage"
 	unset OPTION OPTARG OPTIND
 	while getopts "lm:M:W:I:E:d:" OPTION; do
 		case "${OPTION}" in
-			l) LISTONLY="1";;
+			l) LISTONLY="1" ; BRIEF="0" ;;
+			S) LISTONLY="1" ; BRIEF="1" ;;
 			m) MINDAYS="${OPTARG}";;
 			M) MAXDAYS="${OPTARG}";;
 			W) WARNDAYS="${OPTARG}";;
@@ -48,30 +50,34 @@ chage() {
 	OLDLASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
 
 	if [ "x${LISTONLY}" == 'x1' ]; then
-		echo -e "Minimum:\t${OLDMINDAYS}"
-		echo -e "Maximum:\t${OLDMAXDAYS}"
-		echo -e "Warning:\t${OLDWARNDAYS}"
-		echo -e "Inactive:\t${OLDINACTIVEDAYS}"
-		#echo -e "Last Change:\t${LASTCHANGE}" # raw
-		echo -e "Last Change:\t$(days_to_date ${OLDLASTCHANGE} +'%b %d, %Y')"
 		if [ ${OLDLASTCHANGE} -le 0 -o ${OLDMAXDAYS} -ge 10000 -o ${OLDMAXDAYS} -le 0 ]; then
 			PASSWORDEXPIRY_STRING="Never"
 		else
 			PASSWORDEXPIRY_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS})) +'%b %d, %Y')"
 		fi
-		echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
 		if [ ${OLDLASTCHANGE} -le 0 -o ${OLDMAXDAYS} -ge 10000 -o ${OLDMAXDAYS} -le 0 -o ${OLDINACTIVEDAYS} -le 0 ]; then
 			PASSWORDINACTIVE_STRING="Never"
 		else
 			PASSWORDINACTIVE_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS} + ${OLDINACTIVEDAYS})) +'%b %d, %Y')"
 		fi
-		echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
 		if [ ${OLDACCOUNTEXPIRY} -le 0  ]; then
 			ACCOUNTEXPIRY_STRING="Never"
 		else
 			ACCOUNTEXPIRY_STRING="$(days_to_date ${OLDACCOUNTEXPIRY} +'%b %d, %Y')"
 		fi
-		echo -e "Account Expires:\t${ACCOUNTEXPIRY_STRING}"
+		if [ "x${BRIEF}" == "x0" ]; then
+			echo -e "Last password Change:\t$(days_to_date ${OLDLASTCHANGE} +'%b %d, %Y')"
+			echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
+			echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
+			echo -e "Account Expires:\t${ACCOUNTEXPIRY_STRING}"
+			echo -e "Minimum number of days between password change:\t${OLDMINDAYS}"
+			echo -e "Maximum number of days between password change:\t${OLDMAXDAYS}"
+			echo -e "Number of days of warning before password expires:\t${OLDWARNDAYS}"
+			#echo -e "Inactive:\t${OLDINACTIVEDAYS}"
+			#echo -e "Last Change:\t${LASTCHANGE}" # raw
+		else 
+			echo "${USER} ${STATUS} (days_to_date ${OLDLASTCHANGE} +'%m/%d/%Y') ${OLDMINDAYS} ${OLDMAXDAYS} ${OLDWARNDAYS} ${OLDINACTIVEDAYS}"
+		fi
 # shadowLastChange - The number of days (since January 1, 1970) since the password was last changed.
 # shadowMin - The number of days before password may be changed (0 indicates it may be changed at any time)
 # shadowMax - The number of days after which password must be changed (99999 indicates user can keep his or her password unchanged for many, many years)
@@ -97,11 +103,13 @@ chage() {
 }
 
 passwd() {
+	ORIGINAL_ARGS="$@"
 	# TODO: complete this!
 	[ -z "${modulename}" ] && modulename="passwd"
 	MODE=""
 	unset OPTION OPTARG OPTIND
 	while getopts "fsgrRx:n:w:i:ludSep:" OPTION; do
+		CURRENT_MODE="${MODE}"
 		case "${OPTION}" in
 			# external stuff
 			f) MODE="chfn" ;;
@@ -110,27 +118,60 @@ passwd() {
 			n) MODE="chage" ; CHAGE_MIN="${OPTARG}" ;;
 			w) MODE="chage" ; CHAGE_WARN="${OPTARG}" ;;
 			i) MODE="chage" ; CHAGE_INACTIVE="${OPTARG}" ;;
+			e) MODE="chage" ; CHAGE_LASTCHANGE="0"  ;;
+			S) MODE="chage" ; CMD="status" ;;
+			l) MODE="passwd" ; CMD="lock" ;;
+			u) MODE="passwd" ; CMD="unlock" ;;
+			d) MODE="passwd" ; CMD="set" ; PASSWD="" ;;
+			p) MODE="passwd" ; CMD="set" ; PASSWD="${OPTARG}" ;;
 			# our stuff
 			g) MODE="gpasswd" ; CMD="set" ;;
 			R) MODE="gpasswd" ; CMD="delete" ;;
 			r) MODE="gpasswd" ; CMD="restrict" ;;
-			l) MODE="passwd" ; CMD="lock" ;;
-			u) MODE="passwd" ; CMD="unlock" ;;
-			d) MODE="passwd" ; CMD="delete" ;;
-			p) MODE="passwd" ; PASSWD="${OPTARG}" ;;
 			*) print_usage ${modulename} ; exit 1 ;;
 		esac
-		case "${MODE}" in
-			chfn) break ;;
-			chsh) break ;;
-		esac
+		if [ -n "${CURRENT_MODE}" -a "${MODE}" != "${CURRENT_MODE}" ]; then
+			echo "${modulename}: Conflicting modes"
+			exit 3
+		fi
 	done
 	shift $((${OPTIND} - 1))
-	# TODO
-	case "${MODE}" in
-		chfn) break ;;
-		chsh) break ;;
-	esac
+	# chsh/chfn are both from diradm.user
+	if [ "x${MODE}" = "xchfn" -o "x${MODE}" = "xchsh" ]; then
+		source ${libexec}/diradm.user.sh
+		${MODE}
+		exit $?
+	fi
+	# chage is from diradm.shadow (this file)
+	if [ "x${MODE}" = "xchage" ]; then
+		args=""
+		[ -n "${CHAGE_MIN}" ] && args="${args} -m ${CHAGE_MIN}"
+		[ -n "${CHAGE_MAX}" ] && args="${args} -M ${CHAGE_MAX}"
+		[ -n "${CHAGE_WARN}" ] && args="${args} -W ${CHAGE_WARN}"
+		[ -n "${CHAGE_INACTIVE}" ] && args="${args} -I ${CHAGE_INACTIVE}"
+		[ -n "${CHAGE_LASTCHANGE}" ] && args="${args} -d ${CHAGE_MIN}"
+		# disable changes if we are displaying status
+		[ "x${CMD}" = "xstatus" ] && args="-S"
+		chage ${args}
+		exit $?
+	fi
+	if [ "x${MODE}" = "passwd" ]; then
+		source ${libexec}/diradm.user.sh
+		args=""
+		case ${CMD} in
+			lock) args="${args} -L" ;;
+			unlock) args="${args} -U" ;;
+			set) args="${args} -p '${PASSWD}'" ;;
+		esac
+		usermod ${args}
+		exit $?
+	fi
+	if [ "x${MODE}" = "gpasswd" ]; then
+		echo "${modulename}: Unfortuntely group passwords are not support by"
+		echo "LDAP so far as my research indicates. If this is incorrect"
+		echo "please email the author some reference material."
+		exit 99
+	fi
 
 	# TODO: implement this
 	exit 99
