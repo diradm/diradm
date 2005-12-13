@@ -1,3 +1,31 @@
+2005-12-13 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		Makefile.am (1.12), "Exp", lines: +2 -2;  commitid: 27d9439e82744567;
+
+	update Makefile.
+
+2005-12-13 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.10), "Exp", lines: +4 -0;  commitid: 27a6439e82624567;
+
+	update NEWS.
+
+2005-12-13 08:10  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		TODO (1.2), "Exp", lines: +3 -7;  commitid: 26f3439e81f84567;
+
+	Clean up TODO.
+
+2005-12-13 08:10  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		Makefile.am (1.11), "Exp", lines: +2 -2;  commitid: 26df439e81f04567;
+
+	Add KNOWN-BUGS to doc list.
+
 2005-12-13 07:21  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
