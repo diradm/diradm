@@ -4,3 +4,18 @@ See KNOWN-BUGS.
 
 The only remaining TODO stuff is lots more testing, and future feature
 requests.
+
+src/diradm.group.sh.in:
+- gshadow functionality:
+	- group administrators
+	- group passwords
+	- -R/-r/passwd/ADMIN implementation
+src/diradm.group.sh.in:143:	# TODO: gshadow - group administrators
+src/diradm.group.sh.in:144:	# TODO: gshadow - group passwords
+src/diradm.group.sh.in:184:	# TODO: gshadow - -R/-r/passwd/ADMIN implementation
+src/diradm.shadow.sh.in:112:	# TODO: gshadow functionality
+
+Testing needed:
+src/diradm.shadow.sh.in:144:	# TODO is this always safe?
+src/diradm.user.sh.in:85:			## TODO: TEST THIS
+
