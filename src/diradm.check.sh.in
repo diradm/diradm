@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.check.sh.in,v 1.4 2005/12/13 05:24:35 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.check.sh.in,v 1.5 2006/06/06 19:08:24 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 
 # This contains all of the functions specific to the check sub-system.
@@ -25,18 +25,23 @@ check() {
 	done
 }
 
-check_self() {
-	DEPENDENCIES="${AWK} ${BASHSH} ${CUT} ${DATE} ${EGREP} ${FALSE} ${FGREP} ${GREP} ${HEAD} ${LDAPADD} ${LDAPDELETE} ${LDAPMODIFY} ${LDAPSEARCH} ${PERL} ${SED} ${SEDEXT} ${SORT} ${STAT} ${TAIL} ${UNIQ} ${WHOAMI}"
-	if [ "x$ENABLE_SAMBA" == "xyes" ]; then
-		DEPENDENCIES="${DEPENDENCIES} ${SAMBA_NET}"
+check_self_dep() {
+	DEPENDENCY="$@"
+	echo "Testing ${DEPENDENCY}"
+	if [ ! -x "${DEPENDENCY// *}" ]; then
+		echo "Cannot find \"${DEPENDENCY}\"!"
+		exit 1
 	fi
-	for DEPENDENCY in ${DEPENDENCIES}; do
-		echo "Testing ${DEPENDENCY}"
-		if [ ! -x "${DEPENDENCY}" ]; then
-			echo "Cannot find \"${DEPENDENCY}\"!"
-			exit 1
-		fi
+}
+
+check_self() {
+	for d in "${AWK}" "${BASHSH}" "${CUT}" "${DATE}" "${EGREP}" "${FALSE}" "${FGREP}" "${GREP}" "${HEAD}" "${LDAPADD}" "${LDAPDELETE}" "${LDAPMODIFY}" "${LDAPSEARCH}" "${PERL}" "${SED}" "${SEDEXT}" "${SORT}" "${STAT}" "${TAIL}" "${UNIQ}" "${WHOAMI}"; do
+		check_self_dep "$d" || exit 1
 	done
+	if [ "x$ENABLE_SAMBA" == "xyes" ]; then
+		check_self_dep "${SAMBA_NET}"
+	fi
+	
 	echo "Validating diradm-mkpasswd"
 	${MKPASSWD} 1>/dev/null
 	if [ $? -ne 1 ]; then
