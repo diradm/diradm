@@ -28,3 +28,12 @@
 2005-12-13: diradm-2.7
 - All functionality completed, with the exception of gshadow (see KNOWN-BUGS).
 - Further feature requests welcome.
+
+2006-06-06: diradm-2.8
+- Cleanups for bash-3
+- Fixes where user shadow data may have had errors in LDAP
+- Fixed check testcases for sed -r.
+- Cleanup of LDIF deletion code
+- usage message for passwd.
+- .spec file cleanup for RPM users.
+- Cleanup of keyword tracker code.
