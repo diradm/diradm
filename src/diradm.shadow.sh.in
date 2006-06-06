@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.8 2005/12/13 06:34:37 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.9 2006/06/06 19:08:38 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the passwd sub-system.
 
@@ -42,29 +42,35 @@ chage() {
 		exit 1
 	fi
 	OLDMINDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMin)
+	[[ -z "${OLDMINDAYS}" ]] && OLDMINDAYS=0
 	OLDMAXDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowMax)
+	[[ -z "${OLDMAXDAYS}" ]] && OLDMAXDAYS=0
 	OLDWARNDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowWarning)
+	[[ -z "${OLDWARNDAYS}" ]] && OLDWARNDAYS=0
 	OLDINACTIVEDAYS=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowInactive)
+	[[ -z "${OLDINACTIVEDAYS}" ]] && OLDINACTIVEDAYS=0
 	OLDACCOUNTEXPIRY=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowExpire)
+	[[ -z "${OLDACCOUNTEXPIRY}" ]] && OLDACCOUNTEXPIRY=0
 	OLDLASTCHANGE=$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" shadowLastChange)
+	[[ -z "${OLDLASTCHANGE}" ]] && OLDLASTCHANGE=0
 
-	if [ "x${LISTONLY}" == 'x1' ]; then
+	if [[ "x${LISTONLY}" == 'x1' ]]; then
 		if [ ${OLDLASTCHANGE} -le 0 -o ${OLDMAXDAYS} -ge 10000 -o ${OLDMAXDAYS} -le 0 ]; then
 			PASSWORDEXPIRY_STRING="Never"
 		else
-			PASSWORDEXPIRY_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS})) +'%b %d, %Y')"
+			PASSWORDEXPIRY_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS})) '+%b %d, %Y')"
 		fi
 		if [ ${OLDLASTCHANGE} -le 0 -o ${OLDMAXDAYS} -ge 10000 -o ${OLDMAXDAYS} -le 0 -o ${OLDINACTIVEDAYS} -le 0 ]; then
 			PASSWORDINACTIVE_STRING="Never"
 		else
-			PASSWORDINACTIVE_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS} + ${OLDINACTIVEDAYS})) +'%b %d, %Y')"
+			PASSWORDINACTIVE_STRING="$(days_to_date $((${OLDLASTCHANGE} + ${OLDMAXDAYS} + ${OLDINACTIVEDAYS})) '+%b %d, %Y')"
 		fi
-		if [ ${OLDACCOUNTEXPIRY} -le 0  ]; then
+		if [[ ${OLDACCOUNTEXPIRY} -le 0  ]]; then
 			ACCOUNTEXPIRY_STRING="Never"
 		else
 			ACCOUNTEXPIRY_STRING="$(days_to_date ${OLDACCOUNTEXPIRY} +'%b %d, %Y')"
 		fi
-		if [ "x${BRIEF}" == "x0" ]; then
+		if [[ "x${BRIEF}" == "x0" ]]; then
 			echo -e "Last password Change:\t$(days_to_date ${OLDLASTCHANGE} +'%b %d, %Y')"
 			echo -e "Password Expires:\t${PASSWORDEXPIRY_STRING}"
 			echo -e "Password Inactive:\t${PASSWORDINACTIVE_STRING}"
@@ -104,7 +110,7 @@ chage() {
 passwd() {
 	ORIGINAL_ARGS="$@"
 	# TODO: gshadow functionality
-	[ -z "${modulename}" ] && modulename="passwd"
+	[[ -z "${modulename}" ]] && modulename="passwd"
 	MODE=""
 	unset OPTION OPTARG OPTIND
 	while getopts "fsgrRx:n:w:i:ludSep:" OPTION; do
