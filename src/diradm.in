@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.21 2006/06/06 19:46:21 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.22 2006/06/06 19:50:45 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -95,14 +95,6 @@ done
 
 ##################### Don't touch anything below this line #####################
 
-# these are defined here as this is what we track primarily for bugs.
-CVS_REVISION='$Revision: 1.21 $'
-CVS_DATE='$Date: 2006/06/06 19:46:21 $'
-CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.21 2006/06/06 19:46:21 robbat2 Exp $'
-# get the stripped versions
-CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
-CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
-
 if [ ! -r "${CONFIG}" ]; then
 	echo "Unable to open configuration file \"${CONFIG}\"!"
 	exit 1
@@ -159,7 +151,7 @@ commands_user="useradd usermod userdel chsh chfn chage passwd"
 commands_group="groupadd groupmod groupdel gpasswd"
 commands_samba="smbhostadd smbhostdel"
 commands_host="hostadd hostdel hostmod"
-commands_misc="help version check _revision _date _header"
+commands_misc="help version check _header"
 commands_automount="amadd amdel"
 valid_commands="${commands_user} ${commands_group} ${commands_host} ${commands_misc}"
 [ "$ENABLE_SAMBA" == "yes" ] && valid_commands="${valid_commands} ${commands_samba}"
