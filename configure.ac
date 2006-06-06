@@ -9,13 +9,10 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AC_PREREQ(2.59)
-AC_INIT([diradm],
-        [2.7],
-        [Robin Hugh Johnson robbat2@orbis-terrarum.net],
-        [diradm])
+AC_INIT([diradm],[2.7],[robbat2-diradm@orbis-terrarum.net],[diradm])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR(m4)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([dist-bzip2 foreign])
 
 AC_SYS_INTERPRETER 
