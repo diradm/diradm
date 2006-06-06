@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.20 2005/12/13 05:24:10 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.21 2006/06/06 19:46:21 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -96,9 +96,9 @@ done
 ##################### Don't touch anything below this line #####################
 
 # these are defined here as this is what we track primarily for bugs.
-CVS_REVISION='$Revision: 1.20 $'
-CVS_DATE='$Date: 2005/12/13 05:24:10 $'
-CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.20 2005/12/13 05:24:10 robbat2 Exp $'
+CVS_REVISION='$Revision: 1.21 $'
+CVS_DATE='$Date: 2006/06/06 19:46:21 $'
+CVS_HEADER='$Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.21 2006/06/06 19:46:21 robbat2 Exp $'
 # get the stripped versions
 CVS_REVISION="${CVS_REVISION% *}" ; CVS_REVISION="${CVS_REVISION/* }"
 CVS_DATE="${CVS_DATE#* }" ; DATE="${CVS_DATE% *}"
@@ -155,7 +155,7 @@ LDAPADD_CMD="${LDAPADD} ${ADMINOPTIONS}"
 LDAPMODIFY_CMD="${LDAPMODIFY} -c ${ADMINOPTIONS}"
 LDAPDELETE_CMD="${LDAPDELETE} ${ADMINOPTIONS}"
 
-commands_user="useradd usermod userdel chsh chfn chage"
+commands_user="useradd usermod userdel chsh chfn chage passwd"
 commands_group="groupadd groupmod groupdel gpasswd"
 commands_samba="smbhostadd smbhostdel"
 commands_host="hostadd hostdel hostmod"
@@ -191,7 +191,6 @@ if [ -n "${ACTION}" ]; then
 else
 	help
 	exit 1
-
 fi
 
 # should not ever reach this point
