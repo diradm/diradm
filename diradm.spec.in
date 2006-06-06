@@ -26,7 +26,7 @@ Requires: /usr/bin/ldapadd
 Requires: /usr/bin/ldapdelete
 Requires: /usr/bin/ldapmodify
 Requires: /usr/bin/ldapsearch
-Requires: /usr/bin/sed
+Requires: /bin/sed
 Requires: /usr/bin/stat
 Requires: /usr/bin/tail
 Requires: /usr/bin/perl 
@@ -66,5 +66,14 @@ rm -rf $RPM_BUILD_ROOT
 %files
 /usr/libexec/diradm-mkpasswd.pl
 /usr/sbin/diradm
+/usr/libexec/diradm.automount.sh
+/usr/libexec/diradm.check.sh
+/usr/libexec/diradm.common.sh
+/usr/libexec/diradm.group.sh
+/usr/libexec/diradm.host.sh
+/usr/libexec/diradm.misc.sh
+/usr/libexec/diradm.samba.sh
+/usr/libexec/diradm.shadow.sh
+/usr/libexec/diradm.user.sh
 %config /etc/diradm.conf
 %doc INSTALL AUTHORS COPYING ChangeLog THANKS README
