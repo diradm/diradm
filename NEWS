@@ -37,3 +37,6 @@
 - usage message for passwd.
 - .spec file cleanup for RPM users.
 - Cleanup of keyword tracker code.
+
+2006-06-06: diradm-2.8.1
+- ignore trailing search types in ldap.conf - ?one, ?sub etc.

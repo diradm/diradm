@@ -1,3 +1,18 @@
+2006-06-06 20:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.12), "Exp", lines: +3 -0;  commitid: 229b4485e1ba4567;
+		configure.ac (1.28), "Exp", lines: +1 -1;  commitid: 229b4485e1ba4567;
+
+	2.8.1 release.
+
+2006-06-06 20:11  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.13), "Exp", lines: +8 -1;  commitid: 20cf4485e1654567;
+
+	ignore trailing ? search types.
+
 2006-06-06 19:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
