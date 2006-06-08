@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.10 2006/06/06 19:17:35 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.11 2006/06/08 21:16:25 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the common functions.
 
@@ -69,7 +69,8 @@ ldap_search_getattr() {
 	search="${2}"
 	attr="${3}"
 	regex="^${attr}:{1,2} "
-	#[ -n "$DEBUG" ] && echo ${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr} 2>&1
+	# TODO: turn this off again before 
+	[[ -n "$DEBUG" ]] && echo "ldap_search_getattr: basedn=${basedn} search=${search} attr=${attr}"  2>&1
 	${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr} | ${SEDEXT} -n -e "/${regex}/{s~${regex}~~ ; p}"
 }
 
@@ -192,8 +193,9 @@ isinteger() {
 
 # Find a free UID to use
 usernextfreeuid() {
+	uidlist="$(ldap_search_getattr "${USER_BASEDN}" "(uidNumber=*)" "uidNumber" | ${SORT} -rng)"
 	# we do NOT do UID recycling at all, our code used to, but it turns out to be really slow
-	for i in $(ldap_search_getattr "${USER_BASEDN}" "(uidNumber=*)" "uidNumber" | ${SORT} -rng) ; do
+	for i in ${uidlist} ; do
 		if [ ${i} -lt ${UIDNUMBERMAX} -a ${i} -gt ${UIDNUMBERMIN} ]; then
 			echo ${i}
 			return 0
