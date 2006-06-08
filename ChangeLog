@@ -1,3 +1,88 @@
+2006-06-08 22:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.14), "Exp", lines: +1 -0;  commitid: 66784488a5394567;
+
+	news item.
+
+2006-06-08 22:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.13), "Exp", lines: +34 -29;  commitid: 65fb4488a50b4567;
+
+	NEWS file.
+
+2006-06-08 22:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.30), "Exp", lines: +1 -1;  commitid: 64064488a45a4567;
+
+	bump version.
+
+2006-06-08 21:43  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		DEVELOPMENT (1.2), "Exp", lines: +7 -5;  commitid: 594744889a1e4567;
+
+	add reconf note.
+
+2006-06-08 21:42  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.29), "Exp", lines: +15 -9;  commitid: 58fc448899e24567;
+
+	add chown/chmod to configure.ac.
+
+2006-06-08 21:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/superadduser.diradm.in (1.4), "Exp", lines: +12 -10;  commitid: 586e448899324567;
+
+	Clean up chown/chmod and fix a case where chmod might not have had
+	permissions.
+
+2006-06-08 21:39  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.user.sh.in (1.20), "Exp", lines: +5 -5;  commitid: 58204488991c4567;
+
+	chown/chmod.
+
+2006-06-08 21:39  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.in (1.23), "Exp", lines: +3 -1;  commitid: 57ff4488990c4567;
+
+	add chown/chmod.
+
+2006-06-08 21:22  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		TODO (1.4), "Exp", lines: +2 -0;  commitid: 55094488951e4567;
+
+	usermod note.
+
+2006-06-08 21:20  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		DEVELOPMENT (1.1)
+
+	Add general development instructions.
+
+2006-06-08 21:16  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.common.sh.in (1.11), "Exp", lines: +5 -3;  commitid: 5063448893a94567;
+
+	Add debugging for usernextfreeuid.
+
+2006-06-06 23:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.14), "Exp", lines: +5 -5;  commitid: 505f4486126b4567;
+
+	fix handling of ?*.
+
 2006-06-06 20:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
