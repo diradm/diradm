@@ -1,0 +1,10 @@
+Diradm does contain a mode to enable it to be used actively for developing,
+without having to install.
+
+1. Grab the tarball or a CVS checkout
+2. Unpack
+3. ./configure --enable-automount --enable-irixpasswd --enable-samba # customize as needed
+4. cd src
+5. libexecdir=. sysconfdir/etc ./diradm ...
+5b. Change the sysconfdir variable to '.' if you want to use the config file in the current directory.
+6. If you want to change something, edit the corresponding .in file and run make.
