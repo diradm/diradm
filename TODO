@@ -19,3 +19,5 @@ Testing needed:
 src/diradm.shadow.sh.in:144:	# TODO is this always safe?
 src/diradm.user.sh.in:85:			## TODO: TEST THIS
 
+src/diradm.user.sh.in:
+- usermod is missing support for adding/removing samba and irix data!
