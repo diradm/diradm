@@ -3,8 +3,10 @@ without having to install.
 
 1. Grab the tarball or a CVS checkout
 2. Unpack
-3. ./configure --enable-automount --enable-irixpasswd --enable-samba # customize as needed
-4. cd src
-5. libexecdir=. sysconfdir/etc ./diradm ...
-5b. Change the sysconfdir variable to '.' if you want to use the config file in the current directory.
-6. If you want to change something, edit the corresponding .in file and run make.
+3. If using a CVS checkout, run ./reconf
+4. ./configure --enable-automount --enable-irixpasswd --enable-samba # customize as needed
+5. cd src
+6. libexecdir=. sysconfdir/etc ./diradm ...
+7. Change the sysconfdir variable to '.' if you want to use the config file in the current directory.
+8. If you want to change something, edit the corresponding .in file and run make.
+9. For more debugging output, run with DEBUG=1 in your environment.
