@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.22 2006/06/06 19:50:45 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.23 2006/06/08 21:39:24 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -103,6 +103,8 @@ fi
 # filled by configure
 AWK="@AWK@"
 BASHSH="@BASHSH@"
+CHMOD="@CHMOD@"
+CHOWN="@CHOWN@"
 CUT="@CUT@"
 DATE="@DATE@"
 EGREP="@EGREP@"
