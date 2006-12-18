@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.host.sh.in,v 1.4 2006/06/06 19:17:35 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.host.sh.in,v 1.5 2006/12/18 08:28:24 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the host sub-system.
 
@@ -9,9 +9,9 @@ hostadd() {
 	unset OPTION OPTARG OPTIND
 	while getopts "e:i:a:" OPTION; do
 		case "${OPTION}" in
-			e) ETHERS="${OPTARG}";;
-			i) IPS="${OPTARG}";;
-			a) ALIASES="${OPTARG}";;
+			e) ETHERS="${OPTARG//,/ } ${ETHERS}";;
+			i) IPS="${OPTARG//,/ } ${IPS}";;
+			a) ALIASES="${OPTARG//,/ } ${ALIASES}";;
 			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
@@ -40,18 +40,18 @@ hostadd() {
 
 	if [ -n "${ETHERS}" ]; then
 		append "objectClass: ieee802device"
-		for i in ${ETHERS//, }; do
+		for i in ${ETHERS}; do
 			append "macAddress: ${i}"
 		done
 	fi
 	if [ -n "${IPS}" ]; then
 		append "objectClass: ipHost"
-		for i in ${IPS//, /}; do
+		for i in ${IPS}; do
 			append "ipHostNumber: ${i}"
 		done
 	fi
 	if [ -n "${ALIASES}" ]; then
-		for i in ${ALIASES//,/ }; do
+		for i in ${ALIASES}; do
 			append "cn: ${i}"
 		done
 	fi
@@ -111,21 +111,47 @@ hostmod() {
 		echo "${modulename}: Host \"${NAME}\" does not exist"
 		exit 6
 	fi
-	COMMAND_DN="dn: cn=${NAME},${HOST_BASEDN}"
+	OBJECT_DN="cn=${NAME},${HOST_BASEDN}"
+	COMMAND_DN="dn: ${OBJECT_DN}"
 	append "${COMMAND_DN}"
 	append "changetype: modify"
-	ETHERS_CURRENT="$(ldap_search_getattr ${HOST_BASEDN} "cn=${NAME}" macAddress)"
-	IPS_CURRENT="$(ldap_search_getattr ${HOST_BASEDN} "cn=${NAME}" ipHostNumber)"
-	ALIASES_CURRENT="$(ldap_search_getattr ${HOST_BASEDN} "cn=${NAME}" cn)"
+
+	# get existing data
+	ETHERS_CURRENT="$(ldap_search_getattr ${OBJECT_DN} "cn=${NAME}" macAddress)"
+	IPS_CURRENT="$(ldap_search_getattr ${OBJECT_DN} "cn=${NAME}" ipHostNumber)"
+	ALIASES_CURRENT="$(ldap_search_getattr ${OBJECT_DN} "cn=${NAME}" cn)"
+	#if [ -n "${DEBUG}" ]; then
+	#	echo "Initial data"
+	#	echo "Ethers-cur: ${ETHERS_CURRENT}"
+	#	echo "Ethers-add: ${ETHERS_ADD}"
+	#	echo "Ethers-del: ${ETHERS_DELETE}"
+	#	echo "IPs-cur: ${IPS_CURRENT}"
+	#	echo "IPs-add: ${IPS_ADD}"
+	#	echo "IPs-del: ${IPS_DELETE}"
+	#	echo "Aliases-cur: ${ALIASES_CURRENT}"
+	#	echo "Aliases-add: ${ALIASES_ADD}"
+	#	echo "Aliases-del: ${ALIASES_DELETE}"
+	#fi
+
 	# build correct data
-	ETHERS_ADD="$(set_complement "${ETHERS_ADD}" "${ETHERS_CURRENT} ${ETHERS_DELETE}")"
+	ETHERS_ADD="$(set_complement "${ETHERS_ADD} ${ETHERS_CURRENT}" "${ETHERS_CURRENT} ${ETHERS_DELETE}")"
 	ETHERS_DELETE=$(set_intersection "${ETHERS_DELETE}" "${ETHERS_CURRENT}")
 	# build correct data
-	IPS_ADD="$(set_complement "${IPS_ADD}" "${IPS_CURRENT} ${IPS_DELETE}")"
+	IPS_ADD="$(set_complement "${IPS_ADD} ${IPS_CURRENT}" "${IPS_CURRENT} ${IPS_DELETE}")"
 	IPS_DELETE=$(set_intersection "${IPS_DELETE}" "${IPS_CURRENT}")
 	# build correct data
-	ALIASES_ADD="$(set_complement "${ALIASES_ADD}" "${ALIASES_CURRENT} ${ALIASES_DELETE}")"
+	ALIASES_ADD="$(set_complement "${ALIASES_ADD} ${ALIASES_CURRENT}" "${ALIASES_CURRENT} ${ALIASES_DELETE}")"
 	ALIASES_DELETE=$(set_intersection "${ALIASES_DELETE}" "${ALIASES_CURRENT}")
+
+	#if [ -n "${DEBUG}" ]; then
+	#	echo "Final data"
+	#	echo "Ethers-add: ${ETHERS_ADD}"
+	#	echo "Ethers-del: ${ETHERS_DELETE}"
+	#	echo "IPs-add: ${IPS_ADD}"
+	#	echo "IPs-del: ${IPS_DELETE}"
+	#	echo "Aliases-add: ${ALIASES_ADD}"
+	#	echo "Aliases-del: ${ALIASES_DELETE}"
+	#fi
 
 	if [ -n "$(set_intersection "${ALIASES_DELETE}" "${NAME}")" ]; then
 		echo "${modulename}: Cannot delete primary name of ${NAME}! Use rename instead."
@@ -134,8 +160,8 @@ hostmod() {
 	fi
 
 	if [ -n "${ETHERS_ADD}" ]; then
-		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ieee802device" \
-			|| append_attrib_add objectClass "ieee802device"
+		search_attr "${OBJECT_DN}" "(objectClass=ieee802Device)" "objectClass: ieee802Device" \
+			|| append_attrib_add objectClass "ieee802Device"
 		for i in ${ETHERS_ADD}; do
 			append_attrib_add macAddress "${i}"
 		done
@@ -146,7 +172,7 @@ hostmod() {
 		done
 	fi
 	if [ -n "${IPS_ADD}" ]; then
-		search_attr "${HOST_BASEDN}" "(cn=${NAME})" "objectClass: ipHost" \
+		search_attr "${OBJECT_DN}" "(objectClass=ipHost)" "objectClass: ipHost" \
 			|| append_attrib_add objectClass "ipHost"
 		for i in ${IPS_ADD}; do
 			append_attrib_add ipHostNumber "${i}"
