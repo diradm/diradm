@@ -1,0 +1,45 @@
+# vim: ts=4 sw=4:
+
+proc slapd_start {} {
+	send_user "slapd_start\n"
+	global configdir configfile
+	set configdir [absolute "[pwd]/testsuite/config-slapd"]
+	regsub -all "/" "$configdir/" "%2f" sock
+	set configfile "$configdir/slapd.conf"
+	set sock "ldapi://${sock}slapd.sock"
+	setenv LDAPURI sock
+	set olddir [pwd]
+	cd $configdir
+	set in [open [concat "|/usr/lib/openldap/slapd -h $sock -f slapd.conf"] r]
+	cd $olddir
+}
+
+proc slapd_exit {} {
+	send_user "slapd_exit\n"
+	global configdir configfile
+	set pidfile "$configdir/slapd.pid"
+	set in [open $pidfile r]
+	gets $in line
+	set pid [lindex $line 0]
+	send_user "Stopping slapd, pid=$pid\n"
+	catch "exec kill $pid"
+}
+
+
+proc ldapinit { } {
+	send_user "ldapinit\n"
+	global configdir configfile
+	file delete -force $configdir/db/dc=example
+	file delete -force $configdir/db/dc=example.ldif
+	set olddir [pwd]
+	cd $configdir
+	send_user "tmp=[pwd]\n"
+	set cmd "slapadd -f slapd.conf -l ldapdump"
+	set fl [open "|$cmd"]
+	set data [read $fl]
+	if {[catch {close $fl} err]} {
+		puts "slapadd failed: $err"
+		exit 1
+	}
+	cd $olddir
+}

@@ -1,0 +1,64 @@
+dn: dc=example
+objectClass: dcObject
+objectClass: organization
+dc: example
+o: Testcase
+description: Testcase DB
+
+dn: cn=Manager,dc=example
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: Manager
+description: Directory Manager
+userPassword: secret
+
+dn: ou=passwd,dc=example
+objectClass: organizationalUnit
+ou: passwd
+description: /etc/passwd,/etc/shadow data
+
+dn: ou=group,dc=example
+objectClass: organizationalUnit
+ou: group
+description: /etc/group data
+
+dn: ou=hosts,dc=example
+objectClass: organizationalUnit
+ou: hosts
+description: /etc/hosts,/etc/ethers data
+
+dn: ou=services,dc=example
+objectClass: organizationalUnit
+ou: services
+description: /etc/services data
+
+dn: ou=protocols,dc=example
+objectClass: organizationalUnit
+ou: protocols
+description: /etc/protocols data
+
+dn: ou=rpc,dc=example
+objectClass: organizationalUnit
+ou: rpc
+description: /etc/rpc data
+
+dn: ou=networks,dc=example
+objectClass: organizationalUnit
+ou: networks
+description: /etc/networks,/etc/netmasks data
+
+dn: ou=netgroup,dc=example
+objectClass: organizationalUnit
+ou: netgroup
+description: /etc/netgroup data
+
+dn: ou=ethers,dc=example
+objectClass: organizationalUnit
+ou: ethers
+description: /etc/ethers data
+
+dn: ou=aliases,dc=example
+objectClass: organizationalUnit
+ou: aliases
+description: /etc/aliases data
+
