@@ -12,11 +12,11 @@
 rm -f config.cache
 mkdir -p config
 echo "- aclocal."
-aclocal-1.9 -I m4
+aclocal -I m4
 echo "- autoconf."
-autoconf-2.59
+autoconf
 echo "- autoheader."
-autoheader-2.59 --warnings all
+autoheader --warnings all
 echo "- automake."
-automake-1.9 --add-missing --copy
+automake --add-missing --copy
 exit
