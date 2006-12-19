@@ -1,0 +1,6 @@
+*.log
+*.sum
+site.bak
+Makefile.in
+site.exp
+Makefile

@@ -1,0 +1,42 @@
+# vim: ts=4 sw=4:
+
+proc ldapinit { datafile } {
+	#verbose	"test" 1
+	#pass "true"
+	#[ ldapadd $datafile ]
+}
+
+proc diradm-test-pass { subdir testname params } {
+	set nshort "$subdir/[file $tail $test]"
+	set bname "[file rootname [file tail $nshort]]"
+	catch { file delete "$bname.txt" }
+	set tmp [diradm $params]
+	if { $tmp == 0 } {
+		set tmp [ diff "$bname.txt" "$bname.tst" ]
+		if { $tmp == 0 } {
+			pass "$nshort $params LDAP comparision"
+		} elseif { $tmp == 1 } {
+			fail "$nshort $params LDAP comparision"
+		} else {
+			fail "$nshort $params LDAP comparision"
+		}
+	} else {
+		fail "$nshort $params LDAP comparision (direct)"
+	}
+	file delete "$bname.txt"
+}
+
+ldapinit { foo }
+
+proc diradm_exit {} {}
+proc diradm_version {} {}
+
+proc foo_start {} {
+	#spawn ${examplename}
+	#expect {
+	#	-re "" {}
+	#}
+}
+
+# Start the program running we want to test
+foo_start
