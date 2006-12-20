@@ -1,21 +1,65 @@
 # vim: ts=4 sw=4:
 
-load_lib "testsuite/config-slapd/slapd.exp"
+proc cmd-run { dir args } {
+    if { [llength $args] == 0} {
+	set executable $args
+    } else {
+    	set arglist [split $args " "]
+	set executable [string trimleft [lindex $arglist 0] "\{"]
+	set params [lrange $arglist 1 end]
+	set params [string trimleft "$params" "\{"]
+	set params [string trimright "$params" "\}"]
+	set params [string trimright "$params" "\\"]
+    }
+    #verbose "args=$args"
+    #verbose "arglist=$arglist"
+    set binname [file tail $executable]
+    verbose "Starting $executable $params" 1
+
+    set olddir [pwd]
+    cd $dir
+    set fl [open [concat "|$executable" $params]]
+    cd $olddir
+    set data [read $fl]
+    dumpvars
+    if {[catch {close $fl} err]} {
+        puts "$binname $params failed: $err"
+	# clean up after the command!
+	diradm_exit
+	exit 1
+    }
+    return $data
+}
 
 
 proc diradm_start {} {
-	send_user "diradm_start\n"
+	verbose "diradm_start"
+	slapd_setup
+	slapd_exit
 	slapd_start
 	ldapinit
+	
+	global configdir DIRADM
+	set srcdir "[pwd]/src"
+	setenv libexecdir $srcdir
+	setenv sysconfdir $srcdir
+	setenv "NSS_LDAP_CONF" $configdir/ldap.conf
+	setenv "BINDPASS" "secret"
+	set DIRADM $srcdir/diradm
 }
 
 proc diradm_exit {} {
-	send_user "diradm_exit\n"
+	verbose "diradm_exit"
 	slapd_exit
 }
 proc diradm_version {} {
-	send_user "diradm version\n"
+	global DIRADM
+	puts "$DIRADM"
+	set tmp [cmd-run [pwd] "$DIRADM version"]
+	puts $tmp
 }
+
+load_lib "testsuite/config-slapd/slapd.exp"
 
 # Start the program running we want to test
 diradm_start
