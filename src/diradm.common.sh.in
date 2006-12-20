@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.12 2006/12/18 08:28:08 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.13 2006/12/20 09:01:32 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the common functions.
 
@@ -193,7 +193,9 @@ isinteger() {
 
 # Find a free UID to use
 usernextfreeuid() {
-	uidlist="$(ldap_search_getattr "${USER_BASEDN}" "(uidNumber=*)" "uidNumber" | ${SORT} -rng)"
+	uidlist="$(ldap_search_getattr "${USER_BASEDN}" "(uidNumber=*)" "uidNumber" | ${SORT} -rg)"
+	# if nothing was returned, the next number up is ours
+	[ -z "${uidlist}" ] && uidlist="$((${UIDNUMBERMIN}+1))"
 	# we do NOT do UID recycling at all, our code used to, but it turns out to be really slow
 	for i in ${uidlist} ; do
 		if [ ${i} -lt ${UIDNUMBERMAX} -a ${i} -gt ${UIDNUMBERMIN} ]; then
