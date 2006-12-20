@@ -24,9 +24,9 @@ proc cmd-run { dir args } {
     dumpvars
     if {[catch {close $fl} err]} {
         puts "$binname $params failed: $err"
-	# clean up after the command!
-	diradm_exit
-	exit 1
+		# clean up after the command!
+		#diradm_exit
+		quit
     }
     return $data
 }
