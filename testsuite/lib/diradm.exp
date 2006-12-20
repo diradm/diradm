@@ -1,39 +1,54 @@
-# vim: ts=4 sw=4:
+# vim: ts=4 sw=4 expandtab:
 
-proc diradm-run { testname params } {
-	global configdir
-	set srcdir "[pwd]/src"
-	setenv libexecdir $srcdir
-	setenv sysconfdir $srcdir
-	setenv NSS_LDAP_CONF $configdir/ldap.conf
-	set cmd "$srcdir/diradm"
-	set fl [open "|$cmd $params"]
+proc diradm-run-_diradm { testname params } {
+	global configdir DIRADM
+	set cmd "$DIRADM $params"
+	verbose "Running $cmd"
+	set fl [open "|$cmd"]
 	set data [read $fl]
 	if {[catch {close $fl} err]} {
+		perror "$testname diradm failure"
 		puts "diradm failed: $err\n"
-		return 0
+        return 0
 	}
-	return 1
+    return 1
 }
 
-proc diradm-test-pass { subdir testname params } {
-	set nshort "$subdir/[file $tail $test]"
+proc diradm-run-_ldapcmp { subdir testname params } {
+	set nshort "$subdir/[file tail $testname]"
 	set bname "[file rootname [file tail $nshort]]"
-	catch { file delete "$bname.txt" }
-	set tmp [diradm $params]
-	if { $tmp == 0 } {
-		set tmp [ diff "$bname.txt" "$bname.tst" ]
-		if { $tmp == 0 } {
-			pass "$nshort $params LDAP comparision"
-		} elseif { $tmp == 1 } {
-			fail "$nshort $params LDAP comparision"
-		} else {
-			fail "$nshort $params LDAP comparision"
+	catch { file delete "$nshort.txt" }
+	set tmp [ grep "$nshort.tst" "^dn: .*" line ]
+	if ![string match "" $tmp] {
+		foreach i $tmp {
+			regsub "^\[\[:digit:\]\]+\[\[:space:\]\]+dn:\[\[:space:\]\]+" "$i" "" dn
+			verbose "dn=$dn" 1
+			set cmd "ldapsearch -b $dn -LLL -D cn=Manager,dc=example -w secret"
+			set fl [open "|$cmd"]
+			set data [read $fl]
+			if {[catch {close $fl} err]} {
+				perror "$testname ldapsearch failure"
+				puts "ldapsearch failed: $err\n"
+			}
+			set fl [open "$nshort.txt" w]
+			puts -nonewline $fl $data
+			flush $fl
+			close $fl
 		}
-	} else {
-		fail "$nshort $params LDAP comparision (direct)"
 	}
-	file delete "$bname.txt"
+
+	set tmp [ diff "$nshort.txt" "$nshort.tst" ]
+    if { $tmp == 1 } {
+		pass "$testname LDAP validation"
+	} elseif { $tmp == 0 } {
+		fail "$testname LDAP validation"
+	} else {
+		fail "$testname LDAP validation"
+	}
 }
-
-
+proc diradm-test { subdir testname params } {
+    verbose "diradm-test"
+    if [ diradm-run-_diradm $testname $params ] {
+        diradm-run-_ldapcmp $subdir $testname $params
+	}
+}
