@@ -1,0 +1,4 @@
+load_lib "testsuite/lib/diradm.exp"
+
+#  diradm hostadd [-i IP,... ] [-e MAC,... ] [-a ALIAS,... ] HOST
+diradm-test "testsuite/diradm.common" "hostadd-1" "hostadd -i 192.168.1.1 -e 00:00:00:00:00:11 -a bar foo"
