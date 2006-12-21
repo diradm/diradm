@@ -1,0 +1,24 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm groupmod [-g GID [-o]] [-n NEWNAME ] GROUP
+
+set type group
+set command groupmod
+set basedn "ou=group,dc=example"
+set n 1
+
+set gn groupmod1
+set params "-g 701 $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-add" "groupadd $params" "cn=$gn,$basedn"
+set params "-g 702 $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-renumber" "$command $params" "cn=$gn,$basedn"
+
+set gn groupmod2
+set params "-g 703 $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-renumber-dupe-add" "groupadd $params" "cn=$gn,$basedn"
+set params "-o -g 702 $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-renumber-dupe" "$command $params" "cn=$gn,$basedn"
+
+set newgn groupmod3
+set params "-n $newgn $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-rename" "$command $params" "cn=$newgn,$basedn"

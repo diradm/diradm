@@ -1,0 +1,20 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm groupadd [-g GID [-o]] GROUP
+
+set type group
+set command groupadd
+set basedn "ou=group,dc=example"
+set n 1
+
+set gn group1
+set params "$gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-basic" "$command $params" "cn=$gn,$basedn"
+
+set gn group2
+set params "-g 6001 $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-gid" "$command $params" "cn=$gn,$basedn"
+
+set gn group3
+set params "-g 6001 -o $gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-giddupe" "$command $params" "cn=$gn,$basedn"

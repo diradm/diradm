@@ -1,0 +1,17 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm groupdel GROUP
+
+set type group
+set command groupdel
+set basedn "ou=group,dc=example"
+set n 1
+
+set gn groupdel1
+set params "$gn"
+
+# no need to edit this line
+diradm-test "testsuite/diradm.$type" "$command-$n-add" "groupadd $params" "cn=$gn,$basedn"
+if [ diradm-run-_diradm	"$command-$n-del" "$command $gn" ] {
+	diradm-test "testsuite/diradm.$type" "$command-$n-readd" "groupadd $params" "cn=$gn,$basedn"
+}
