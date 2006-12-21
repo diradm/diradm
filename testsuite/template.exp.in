@@ -1,0 +1,11 @@
+load_lib "testsuite/lib/diradm.exp"
+
+_DESC_
+
+set type _GROUP_
+set command _COMMAND_
+set n _NUM_
+set params _PARAMS_
+
+# no need to edit this line
+diradm-test "testsuite/diradm.$type" "$command-$n" "$command $params"
