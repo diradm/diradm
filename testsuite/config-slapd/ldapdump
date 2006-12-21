@@ -62,3 +62,11 @@ objectClass: organizationalUnit
 ou: aliases
 description: /etc/aliases data
 
+dn: ou=AutoFS,dc=example
+objectClass: organizationalUnit
+ou: AutoFS
+description: AutoFS data
+
+dn: ou=test,ou=AutoFS,dc=example
+objectClass: automountMap
+ou: test
