@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.host.sh.in,v 1.5 2006/12/18 08:28:24 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.host.sh.in,v 1.6 2006/12/21 02:28:17 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the host sub-system.
 
@@ -15,6 +15,10 @@ hostadd() {
 			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
+
+	ETHERS="$(set_unique "${ETHERS}")"
+	IPS="$(set_unique "${IPS}")"
+	ALIASES="$(set_unique "${ALIASES}")"
 
 	shift $((${OPTIND} - 1))
 	if [ "${#}" -ne 1 ]; then
@@ -69,13 +73,12 @@ hostdel() {
 	else
 		NAME="${1}"
 	fi
-	NAME_DOLLAR="${NAME}\$"
-	search_host "cn" "${NAME_DOLLAR}"
+	search_host "cn" "${NAME}"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Host \"${NAME}\" does not exist"
 		exit 6
 	fi
-	append_dn_delete "cn=${NAME_DOLLAR},${HOST_BASEDN}"
+	append_dn_delete "cn=${NAME},${HOST_BASEDN}"
 	runmodify
 }
 
@@ -106,6 +109,14 @@ hostmod() {
 	else
 		NAME="${1}"
 	fi
+
+	ETHERS_ADD="$(set_unique "${ETHERS_ADD}")"
+	IPS_ADD="$(set_unique "${IPS_ADD}")"
+	ALIASES_ADD="$(set_unique "${ALIASES_ADD}")"
+	ETHERS_DELETE="$(set_unique "${ETHERS_DELETE}")"
+	IPS_DELETE="$(set_unique "${IPS_DELETE}")"
+	ALIASES_DELETE="$(set_unique "${ALIASES_DELETE}")"
+
 	search_host "cn" "${NAME}"
 	if [ "$?" -ne 0 ]; then
 		echo "${modulename}: Host \"${NAME}\" does not exist"
@@ -136,12 +147,15 @@ hostmod() {
 	# build correct data
 	ETHERS_ADD="$(set_complement "${ETHERS_ADD} ${ETHERS_CURRENT}" "${ETHERS_CURRENT} ${ETHERS_DELETE}")"
 	ETHERS_DELETE=$(set_intersection "${ETHERS_DELETE}" "${ETHERS_CURRENT}")
+	ETHERS_FINAL_COUNT=$(($(echo $ETHERS_ADD $ETHERS_CURRENT | ${WC} -w)-$(echo $ETHERS_DELETE | ${WC} -w)))
 	# build correct data
 	IPS_ADD="$(set_complement "${IPS_ADD} ${IPS_CURRENT}" "${IPS_CURRENT} ${IPS_DELETE}")"
 	IPS_DELETE=$(set_intersection "${IPS_DELETE}" "${IPS_CURRENT}")
+	IPS_FINAL_COUNT=$(($(echo $IPS_ADD $IPS_CURRENT | ${WC} -w)-$(echo $IPS_DELETE | ${WC} -w)))
 	# build correct data
 	ALIASES_ADD="$(set_complement "${ALIASES_ADD} ${ALIASES_CURRENT}" "${ALIASES_CURRENT} ${ALIASES_DELETE}")"
 	ALIASES_DELETE=$(set_intersection "${ALIASES_DELETE}" "${ALIASES_CURRENT}")
+	ALIASES_FINAL_COUNT=$(($(echo $ALIASES_ADD $ALIASES_CURRENT | ${WC} -w)-$(echo $ALIASES_DELETE | ${WC} -w)))
 
 	#if [ -n "${DEBUG}" ]; then
 	#	echo "Final data"
@@ -170,6 +184,9 @@ hostmod() {
 		for i in ${ETHERS_DELETE}; do
 			append_attrib_delete macAddress "${i}"
 		done
+		if [ $ETHERS_FINAL_COUNT -eq 0 ]; then
+			append_attrib_delete objectClass "ieee802Device"
+		fi
 	fi
 	if [ -n "${IPS_ADD}" ]; then
 		search_attr "${OBJECT_DN}" "(objectClass=ipHost)" "objectClass: ipHost" \
@@ -182,6 +199,9 @@ hostmod() {
 		for i in ${IPS_DELETE}; do
 			append_attrib_delete ipHostNumber "${i}"
 		done
+		if [ $IPS_FINAL_COUNT -eq 0 ]; then
+			append_attrib_delete objectClass "ipHost"
+		fi
 	fi
 	if [ -n "${ALIASES_ADD}" ]; then
 		for i in ${ALIASES_ADD}; do
