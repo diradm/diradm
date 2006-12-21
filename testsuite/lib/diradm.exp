@@ -8,9 +8,12 @@ proc diradm-run-_diradm { testname params } {
 	set data [read $fl]
 	if {[catch {close $fl} err]} {
 		fail "$testname diradm failure"
-		send_user "diradm failed: $err\n"
+		send_user "diradm failed: $err\n$data\n"
         return 0
 	}
+    if {[string length "$data"] > 0} {
+        send_user "diradm output: $err\n$data\n"
+    }
     return 1
 }
 
@@ -20,13 +23,13 @@ proc diradm-run-_ldapcmp { subdir testname params dnlist } {
 	catch { file delete "$nshort.txt" }
     set data "No result"
         foreach dn $dnlist {
-			verbose "dn=$dn" 1
+			verbose "dn=$dn"
 			set cmd "ldapsearch -b $dn -LLL -D cn=Manager,dc=example -w secret"
 			set fl [open "|$cmd"]
 			set data [read $fl]
 			if {[catch {close $fl} err]} {
-				#perror "$testname ldapsearch failure"
-				send_user "ldapsearch failed: $err\n"
+				perror "$testname ldapsearch failure"
+				send_user "ldapsearch failed: $err\n$data\n"
 			}
 		}
     set fl [open "$nshort.txt" a+]
