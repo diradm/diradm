@@ -23,7 +23,7 @@ proc cmd-run { dir args } {
     set data [read $fl]
     dumpvars
     if {[catch {close $fl} err]} {
-        puts "$binname $params failed: $err"
+        send_user "$binname $params failed: $err\n"
 		# clean up after the command!
 		#diradm_exit
 		quit
@@ -45,6 +45,7 @@ proc diradm_start {} {
 	setenv sysconfdir $srcdir
 	setenv "NSS_LDAP_CONF" $configdir/ldap.conf
 	setenv "BINDPASS" "secret"
+	setenv "UIDNUMBERMIN" 20000
 	set DIRADM $srcdir/diradm
 }
 
@@ -54,9 +55,9 @@ proc diradm_exit {} {
 }
 proc diradm_version {} {
 	global DIRADM
-	puts "$DIRADM"
+	send_user "$DIRADM\n"
 	set tmp [cmd-run [pwd] "$DIRADM version"]
-	puts $tmp
+	send_user "$tmp\n"
 }
 
 load_lib "testsuite/config-slapd/slapd.exp"
