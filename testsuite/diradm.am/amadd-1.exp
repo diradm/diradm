@@ -1,0 +1,29 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm amadd [ -o mount-options,... ] [ -O ] [ -d DESC ] 
+#              MAPNAME MAPKEY SOURCE
+
+set type am
+set command amadd
+set basedn "ou=AutoFS,dc=example"
+set n 1
+
+set map test
+set src "209.87.56.240:/export/users/0"
+set opts "-rw,async,noatime,nosuid,nodev,intr,nolock,soft,tcp,rsize=32768,wsize=32768,nfsvers=3,vers=3,retry=1,acregmin=15,acregmax=120,acdirmin=60,acdirmax=120"
+
+set key user-defaultopt
+set params "-O $map $key $src"
+diradm-test "testsuite/diradm.$type" "$command-$n-defaultopt" "$command $params" "cn=$key,ou=$map,$basedn"
+
+set key user-defaultopt-description
+set params "-d {description of key} -O $map $key $src"
+diradm-test "testsuite/diradm.$type" "$command-$n-defaultopt-description" "$command $params" "cn=$key,ou=$map,$basedn"
+
+set key user-customopt
+set params "-o {$opts} $map $key $src"
+diradm-test "testsuite/diradm.$type" "$command-$n-customopt" "$command $params" "cn=$key,ou=$map,$basedn"
+
+set key user-customopt-description
+set params "-d {description of key} -o {$opts} $map $key $src"
+diradm-test "testsuite/diradm.$type" "$command-$n-customopt-description" "$command $params" "cn=$key,ou=$map,$basedn"

@@ -1,0 +1,19 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm amdel MAPNAME MAPKEY
+
+set type am
+set command amdel
+set basedn "ou=AutoFS,dc=example"
+set n 1
+
+set map test
+set key user
+set src "209.87.56.240:/export/users/0"
+set params "-O $map $key $src"
+
+# no need to edit this line
+diradm-test "testsuite/diradm.$type" "$command-$n-add" "amadd $params" "cn=$key,ou=$map,$basedn"
+if [ diradm-run-_diradm	"$command-$n-del" "$command $map $key" ] {
+	diradm-test "testsuite/diradm.$type" "$command-$n-readd" "amadd $params" "cn=$key,ou=$map,$basedn"
+}

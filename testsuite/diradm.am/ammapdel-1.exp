@@ -1,0 +1,17 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm ammapdel MAPNAME
+
+set type am
+set command ammapdel
+set basedn "ou=AutoFS,dc=example"
+set n 1
+
+set map "testmap"
+set params "$map"
+
+# no need to edit this line
+diradm-test "testsuite/diradm.$type" "$command-$n-add" "ammapadd $params" "ou=$map,$basedn"
+if [ diradm-run-_diradm	"$command-$n-del" "$command $map" ] {
+	diradm-test "testsuite/diradm.$type" "$command-$n-readd" "ammapadd $params" "ou=$map,$basedn"
+}
