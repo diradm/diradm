@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.automount.sh.in,v 1.5 2006/06/06 19:17:35 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.automount.sh.in,v 1.6 2006/12/21 12:49:11 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 
 # This contains all of the functions specific to the automount sub-system.
@@ -53,6 +53,12 @@ amadd() {
 	fi
 	mapbasedn="ou=${map},${AUTOMOUNT_BASEDN}"
 
+	search_attr "${AUTOMOUNT_BASEDN}" "(&(ou=${map})(objectclass=automountMap))" "ou: ${map}" 
+	if [ $? -ne 0 ]; then
+		echo "${modulename}: Automount map \"${map}\" does not exist" 1>&2
+		exit 9
+	fi
+
 	amaddraw "${mapbasedn}" "${key}" "${am_options}" "${src}" "${am_description}"
 }
 
@@ -68,5 +74,45 @@ amdel() {
 	fi
 	mapbasedn="ou=${map},${AUTOMOUNT_BASEDN}"
 	append_dn_delete "cn=${key},${mapbasedn}"
+	runmodify
+}
+
+ammapadd() {
+	[ -z "${modulename}" ] && modulename="ammapadd"
+
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		map="$1"
+	fi
+	mapbasedn="ou=${map},${AUTOMOUNT_BASEDN}"
+	
+	search_attr "${AUTOMOUNT_BASEDN}" "(&(ou=${map})(objectclass=automountMap))" "ou: ${map}" 2>/dev/null
+	if [ $? -eq 0 ]; then
+		echo "${modulename}: Automount map \"${map}\" exists"
+		exit 9
+	fi
+	
+	append "dn: ${mapbasedn}"
+	append "changetype: add"
+	append "objectClass: automountMap"
+	append "ou: ${map}"
+	append "\n\n"
+	runmodify
+}
+
+ammapdel() {
+	[ -z "${modulename}" ] && modulename="amdel"
+
+	if [ "${#}" -ne 1 ]; then
+		print_usage ${modulename}
+		exit 2
+	else
+		map="$1"
+		key="$2"
+	fi
+	mapbasedn="ou=${map},${AUTOMOUNT_BASEDN}"
+	append_dn_delete "${mapbasedn}"
 	runmodify
 }

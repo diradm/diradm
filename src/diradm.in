@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.24 2006/12/21 02:27:33 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.25 2006/12/21 12:49:11 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -155,7 +155,7 @@ commands_group="groupadd groupmod groupdel gpasswd"
 commands_samba="smbhostadd smbhostdel"
 commands_host="hostadd hostdel hostmod"
 commands_misc="help version check _header"
-commands_automount="amadd amdel"
+commands_automount="amadd amdel ammapadd ammapdel"
 valid_commands="${commands_user} ${commands_group} ${commands_host} ${commands_misc}"
 [ "$ENABLE_SAMBA" == "yes" ] && valid_commands="${valid_commands} ${commands_samba}"
 [ "$ENABLE_AUTOMOUNT" == "yes" ] && valid_commands="${valid_commands} ${commands_automount}"
@@ -175,7 +175,7 @@ case ${ACTION} in
 	groupadd|groupmod|groupdel|gpasswd) source ${libexecdir}/diradm.group.sh ;;
 	smbhostadd|smbhostdel) source ${libexecdir}/diradm.samba.sh ;;
 	hostadd|hostdel|hostmod) source ${libexecdir}/diradm.host.sh  ;;
-	amadd|amdel) source ${libexecdir}/diradm.automount.sh ;;
+	amadd|amdel|ammapadd|ammapdel) source ${libexecdir}/diradm.automount.sh ;;
 	check) source ${libexecdir}/diradm.check.sh ;;
 esac
 # now run it
