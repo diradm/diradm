@@ -1,4 +1,4 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.15 2006/12/20 01:29:21 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.16 2006/12/21 02:29:14 robbat2 Exp $
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -16,4 +16,4 @@ MAINTAINERCLEANFILES = Makefile.in
 
 AUTOMAKE_OPTIONS = dejagnu
 
-RUNTESTDEFAULTFLAGS = --tool diradm --srcdir $$srcdir/testsuite
+RUNTESTDEFAULTFLAGS = --tool diradm --srcdir $$srcdir/testsuite -a
