@@ -104,7 +104,6 @@ AC_CONFIG_FILES([
    README
    diradm.spec
    src/Makefile
-   testsuite/Makefile
    m4/Makefile
    src/diradm.conf
    src/diradm.automount.sh
