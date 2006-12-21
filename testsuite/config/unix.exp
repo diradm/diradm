@@ -36,8 +36,8 @@ proc diradm_start {} {
 	verbose "diradm_start"
 	slapd_setup
 	slapd_exit
-	slapd_start
 	ldapinit
+	slapd_start
 	
 	global configdir DIRADM
 	set srcdir "[pwd]/src"
@@ -46,6 +46,10 @@ proc diradm_start {} {
 	setenv "NSS_LDAP_CONF" $configdir/ldap.conf
 	setenv "BINDPASS" "secret"
 	setenv "UIDNUMBERMIN" 20000
+	global verbose
+	if { $verbose > 0 } {
+		setenv DEBUG 1
+	}
 	set DIRADM $srcdir/diradm
 }
 
