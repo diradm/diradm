@@ -1,4 +1,40 @@
 load_lib "testsuite/lib/diradm.exp"
 
-#  diradm hostadd [-i IP,... ] [-e MAC,... ] [-a ALIAS,... ] HOST
-diradm-test "testsuite/diradm.common" "hostadd-1" "hostadd -i 192.168.1.1 -e 00:00:00:00:00:11 -a bar foo"
+# diradm hostadd [-i IP,... ] [-e MAC,... ] [-a ALIAS,... ] HOST
+
+set type host
+set command hostadd
+set basedn "ou=hosts,dc=example"
+set n 1
+
+set hostname "myhost"
+set params "$hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-simple" "$command $params" "cn=$hostname,$basedn"
+
+set hostname "foo"
+set params "-i 192.168.1.1 -e 00:00:00:00:00:11 -a bar $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-complex" "$command $params" "cn=$hostname,$basedn"
+
+set hostname multi-addressed-box
+set params "-i 192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-address" "$command $params" "cn=$hostname,$basedn"
+
+set hostname multi-ethered-box
+set params "-e 00:00:00:00:00:11,00:0c:6e:02:3c:ed,00:00:00:00:00:00 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-ether" "$command $params" "cn=$hostname,$basedn"
+
+set hostname multi-aliased-box
+set params "-a alias1,alias2,alias3 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-alias" "$command $params" "cn=$hostname,$basedn"
+
+set hostname duped-addresses
+set params "-i 192.168.1.1,192.168.1.1 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-address-dupe" "$command $params" "cn=$hostname,$basedn"
+
+set hostname duped-ethers
+set params "-e 00:00:00:00:00:11,00:00:00:00:00:11 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-ether-dupe" "$command $params" "cn=$hostname,$basedn"
+
+set hostname duped-aliases
+set params "-a alias1,alias1 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-alias-dupe" "$command $params" "cn=$hostname,$basedn"

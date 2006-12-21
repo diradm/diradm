@@ -1,0 +1,27 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm hostmod [-i add-IP,... ] [-I del-IP,... ] [-e add-MAC,... ]
+#                [-E del-MAC,... ] [-a add-ALIAS,... ]
+#                [-A del-ALIAS,... ] [-n NEWNAME ] HOST
+
+set type host
+set command hostmod
+set basedn "ou=hosts,dc=example"
+set n 1
+set hostname myhostmod
+
+# reuse the create test
+set params ""
+diradm-test "testsuite/diradm.$type" "$command-$n-initial-add" "hostadd $hostname" "cn=$hostname,$basedn"
+
+set params "-i 192.168.1.1,192.168.1.2 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-add-address" "$command $params" "cn=$hostname,$basedn"
+
+set params "-i 192.168.1.3,192.168.1.3,192.168.1.2 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-add-address-dupe" "$command $params" "cn=$hostname,$basedn"
+
+set params "-I 192.168.1.1,192.168.1.2 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-del-address" "$command $params" "cn=$hostname,$basedn"
+
+set params "-I 192.168.1.3,192.168.1.3,192.168.1.2 $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-del-address-dupe" "$command $params" "cn=$hostname,$basedn"

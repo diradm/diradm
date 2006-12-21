@@ -1,0 +1,17 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm hostdel HOST
+
+set type host
+set command hostdel
+set basedn "ou=hosts,dc=example"
+set n 1
+set hostname "myhostdel"
+
+# can't test easily that deletion worked, since ldapsearch -b would fail
+# instead we create, then delete manually, then create again
+# the second create would fail
+diradm-test "testsuite/diradm.$type" "$command-$n-add" "hostadd $hostname" "cn=$hostname,$basedn"
+if [ diradm-run-_diradm	"$command-$n-del" "$command $hostname" ] {
+	diradm-test "testsuite/diradm.$type" "$command-$n-readd" "hostadd $hostname" "cn=$hostname,$basedn"
+}
