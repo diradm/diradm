@@ -25,3 +25,7 @@ diradm-test "testsuite/diradm.$type" "$command-$n-del-address" "$command $params
 
 set params "-I 192.168.1.3,192.168.1.3,192.168.1.2 $hostname"
 diradm-test "testsuite/diradm.$type" "$command-$n-del-address-dupe" "$command $params" "cn=$hostname,$basedn"
+
+set newhostname "myhostmod2"
+set params "-n $newhostname $hostname"
+diradm-test "testsuite/diradm.$type" "$command-$n-rename" "$command $params" "cn=$newhostname,$basedn"
