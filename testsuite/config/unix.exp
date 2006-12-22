@@ -43,9 +43,10 @@ proc diradm_start {} {
 	set srcdir "[pwd]/src"
 	setenv libexecdir $srcdir
 	setenv sysconfdir $srcdir
-	setenv "NSS_LDAP_CONF" $configdir/ldap.conf
-	setenv "BINDPASS" "secret"
-	setenv "UIDNUMBERMIN" 20000
+	setenv NSS_LDAP_CONF $configdir/ldap.conf
+	setenv BINDPASS "secret"
+	setenv UIDNUMBERMIN 20000
+	setenv SAMBADOMAINSID "S-1-5-21-3721693875-1545016702-1248474524"
 	global verbose
 	if { $verbose > 0 } {
 		setenv DEBUG 1
