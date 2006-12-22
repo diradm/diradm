@@ -1,0 +1,16 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm smbhostadd [-r RID] HOST
+
+set type smb
+set command smbhostadd
+set basedn "ou=Computers,dc=example"
+set n 1
+
+set name testhost1
+set params "$name"
+diradm-test "testsuite/diradm.$type" "$command-$n" "$command $params" "uid=$name\$,$basedn"
+
+set name testhost2
+set params "-r 100005 $name"
+diradm-test "testsuite/diradm.$type" "$command-$n-rid" "$command $params" "uid=$name\$,$basedn"

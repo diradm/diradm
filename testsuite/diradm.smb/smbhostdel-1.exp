@@ -1,0 +1,15 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm smbhostdel HOST
+
+set type smb
+set command smbhostdel
+set basedn "ou=Computers,dc=example"
+set n 1
+
+set name testdelhost
+# no need to edit this line
+diradm-test "testsuite/diradm.$type" "$command-$n-add" "smbhostadd $name" "uid=$name\$,$basedn"
+if [ diradm-run-_diradm	"$command-$n-del" "$command $name" ] {
+	diradm-test "testsuite/diradm.$type" "$command-$n-readd" "smbhostadd $name" "uid=$name\$,$basedn"
+}
