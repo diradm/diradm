@@ -62,6 +62,11 @@ objectClass: organizationalUnit
 ou: aliases
 description: /etc/aliases data
 
+dn: ou=Computers,dc=example
+objectClass: organizationalUnit
+ou: Computers
+description: Samba data
+
 dn: ou=AutoFS,dc=example
 objectClass: organizationalUnit
 ou: AutoFS
