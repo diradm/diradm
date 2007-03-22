@@ -1,3 +1,10 @@
+2007-03-22 22:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.user.sh.in (1.25), "Exp", lines: +3 -3;  commitid: t1B3qeMg4Wfgn8bs;
+
+	Fix CRYPT prefix on password lines during usermod replace.
+
 2007-03-22 21:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
