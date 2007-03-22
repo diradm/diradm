@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.15 2007/03/22 17:20:43 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.16 2007/03/22 21:03:05 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the common functions.
 
@@ -87,7 +87,11 @@ ldap_search_getattr() {
 }
 
 ldap_base64_decode() {
-	echo "$*" | ${PERL} -MMIME::Base64 -e 'print(decode_base64(<STDIN>));'
+	#echo "$*" | ${PERL} -MMIME::Base64 -e 'print(decode_base64(<STDIN>));'
+	echo "$*" | ${PERL} -MMIME::Base64 -e '$p = ""; while(<STDIN>) { chomp ; $p .= $_; } print(decode_base64($p));'
+}
+ldap_base64_encode() {
+	echo "$*" | ${PERL} -MMIME::Base64 -e '$p = ""; while(<STDIN>) { chomp ; $p .= $_; } print(encode_base64($p));'
 }
 
 search_attr() {
@@ -125,13 +129,28 @@ append_attrib_replace() {
 	append "replace: ${attrib}"
 	append "${attrib}: ${*}"
 	append "-"
-
+}
+append_attrib_replace_base64() {
+	local attrib="$1"
+	shift
+	local value="$(ldap_base64_encode "${*}")"
+	append "replace: ${attrib}"
+	append "${attrib}:: ${value}"
+	append "-"
 }
 append_attrib_add() {
 	local attrib="$1"
 	shift
 	append "add: ${attrib}"
 	append "${attrib}: ${*}"
+	append "-"
+}
+append_attrib_add_base64() {
+	local attrib="$1"
+	shift
+	local value="$(ldap_base64_encode "${*}")"
+	append "add: ${attrib}"
+	append "${attrib}: ${value}"
 	append "-"
 }
 append_attrib_delete() {
