@@ -115,6 +115,7 @@ AC_CONFIG_FILES([
    src/diradm.samba.sh
    src/diradm.user.sh
    src/diradm.shadow.sh
+   src/superadduser.diradm
 ])
 AC_CONFIG_FILES([src/diradm], [chmod +x src/diradm])
 AC_CONFIG_FILES([src/diradm-mkpasswd.pl], [chmod +x src/diradm-mkpasswd.pl])

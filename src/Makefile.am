@@ -1,4 +1,4 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Makefile.am,v 1.11 2005/11/16 23:31:55 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/Makefile.am,v 1.12 2007/03/22 16:28:09 robbat2 Exp $
 # Copyright (C) 2004 Robin Hugh Johnson <robbat2@orbis-terrarum.net>
 #  
 # This file is free software; as a special exception the author gives
@@ -10,7 +10,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 BINARY = diradm #superadduser.diradm
 HELPER = diradm-mkpasswd.pl
-COMPONENTS = diradm.check.sh  diradm.common.sh  diradm.group.sh  diradm.host.sh  diradm.misc.sh  diradm.samba.sh  diradm.user.sh diradm.shadow.sh diradm.automount.sh
+COMPONENTS = diradm.check.sh  diradm.common.sh  diradm.group.sh  diradm.host.sh  diradm.misc.sh  diradm.samba.sh  diradm.user.sh diradm.shadow.sh diradm.automount.sh superadduser.diradm
 CONFFILE = diradm.conf
 #BUILT_SOURCES = diradm.sh diradm-mkpasswd.pl diradm.conf
 #diradm_SOURCES = diradm.sh
