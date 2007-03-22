@@ -1,15 +1,18 @@
 Thanks to:
 ----------
-Andreas de Pretis  <andreas@depretis.at>:
-useradd -h, home directory stuff.
-
-Klavs Klavsen <kl@vsen.dk>:
-Debugging in Denmark. Linux and FreeBSD patches.
-
-Gordon Pritchard <gordonp@sfu.ca>:
+Gordon Pritchard <gordonp _ sfu _ ca>:
 Putting up with my development of diradm on the TechBC research network, to
 make everybodies life easier.
 
+Andreas de Pretis  <andreas _ depretis _ at>:
+useradd -h, home directory stuff.
+
+Klavs Klavsen <kl _ vsen _ dk>:
+Debugging in Denmark. Linux and FreeBSD patches.
+
+Keith Hightower <khightower _ merkleinc _ com>:
+For being willing to work through the problems more than many other users that
+simply said "It doesn't work, wahaa, I'm leaving".
 
 
 
@@ -17,22 +20,15 @@ make everybodies life easier.
 
 
 
-
-
-
-
-
-
-
-
-No thanks to (yes, this is rant):
----------------------------------
+No thanks to (yes, this is a rant):
+-----------------------------------
 ACS/OTS @ SFU Burnaby: 
 Not all of you, just a select few in Management that canned my account during
 the development of diradm. While checking to see to  see that diradm would
-would on Solaris, I  reported that your out of date Solaris shellbox had an
-unlocked getent command, that made all passwords public on the machine, and
-also to all public LDAP queries from outside the university. 
+would on Solaris, I privately reported to your secure channels that your out of
+date Solaris shellbox had an unlocked 'getent shadow' command, that made all
+passwords public on the machine, and also to all public LDAP queries from
+outside the university. 
 
 In return, you barred me from my work with SFU for some time, forever damaging
 my opinions of the management practices of SFU.
