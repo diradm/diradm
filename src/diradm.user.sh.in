@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.22 2007/03/22 16:32:41 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.23 2007/03/22 17:25:34 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -23,7 +23,7 @@ useradd() {
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
 			E) EMAIL="${OPTARG}";;
-			p) USERPASSWORD="${OPTARG}";;
+			p) userPassword_Plain="${OPTARG}";;
 			S) [ "x$ENABLE_SAMBA" == "xyes" ] && SAMBA="yes";;
 			i) [ "x$ENABLE_IRIXPASSWD" == "xyes" ] && IRIX="yes";;
 			*) print_usage ${modulename} ; exit 1;;
@@ -200,16 +200,16 @@ useradd() {
 	append "uid: ${LOGIN}"
 	# impossible passwords
 	userPasswordCrypt='$1$i4iLNNDN$2hEIZ6f5qgBBQfTuxtI4P1' 
-	sambaNTPassword='00000000000000000000000000000000'
-	sambaLMPassword='00000000000000000000000000000000'
-	irixPassword='KeZ0hbbaVDnSU'
+	userPassword_SambaNT='00000000000000000000000000000000'
+	userPassword_SambaLM='00000000000000000000000000000000'
+	userPassword_Irix='KeZ0hbbaVDnSU'
 	# now set the real password
-	if [ -n "${USERPASSWORD}" ]; then
-		userPasswordCrypt="$(${MKPASSWD} -m ${USERPASSWORD})"
-		irixPassword="$(${MKPASSWD} -i ${USERPASSWORD})"
+	if [ -n "${userPassword_Plain}" ]; then
+		userPasswordCrypt="$(${MKPASSWD} -m ${userPassword_Plain})"
+		userPassword_Irix="$(${MKPASSWD} -i ${userPassword_Plain})"
 		if [ "x${SAMBA}" == "xyes" ]; then
-			sambaNTPassword="$(${MKPASSWD} -n ${USERPASSWORD})"
-			sambaLMPassword="$(${MKPASSWD} -l ${USERPASSWORD})"
+			userPassword_SambaNT="$(${MKPASSWD} -n ${userPassword_Plain})"
+			userPassword_SambaLM="$(${MKPASSWD} -l ${userPassword_Plain})"
 		fi
 	fi
 	append "userPassword: {CRYPT}${userPasswordCrypt}"
@@ -252,8 +252,8 @@ useradd() {
 		append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-${DEFAULT_SAMBAGID}"
 		append "sambaAcctFlags: [UX         ]"
 		append "sambaPwdCanChange: 0"
-		append "sambaNTPassword: ${sambaNTPassword}"
-		append "sambaLMPassword: ${sambaLMPassword}"
+		append "sambaNTPassword: ${userPassword_SambaNT}"
+		append "sambaLMPassword: ${userPassword_SambaLM}"
 		append "sambaPwdLastSet: $(${DATE} -u +%s)";
 		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
 		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\\\${LOGIN}"
@@ -263,7 +263,7 @@ useradd() {
 	if [ "x${IRIX}" == "xyes" ]; then
 		# this is a custom objectclass!
 		append "objectClass: irixAccount"
-		append "irixPassword: {CRYPT}${irixPassword}"
+		append "irixPassword: {CRYPT}${userPassword_Irix}"
 	fi
 	append "\n\n"
 	
@@ -332,9 +332,9 @@ usermod() {
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
 			E) EMAIL="${OPTARG}";;
-			p) if [ -n "${LOCKED}" ]; then print_usage ${modulename} ; exit 1; fi; USERPASSWORD="${2}";;
-			L) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="yes";;
-			U) if [ -n "${LOCKED}" -o -n "${USERPASSWORD}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="no";;
+			p) if [ -n "${LOCKED}" ]; then print_usage ${modulename} ; exit 1; fi; userPassword_Plain="${2}";;
+			L) if [ -n "${LOCKED}" -o -n "${userPassword_Plain}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="yes";;
+			U) if [ -n "${LOCKED}" -o -n "${userPassword_Plain}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="no";;
 			S) [ "x$ENABLE_SAMBA" == "xyes" ] && SAMBA="yes";;
 			i) [ "x$ENABLE_IRIXPASSWD" == "xyes" ] && IRIX="yes";;
 			*) print_usage ${modulename} ; exit 1;;
@@ -499,21 +499,21 @@ usermod() {
 		# grab data
 		OLDPASSWORDENCODED="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword)"
 		OLDPASSWORD="$(ldap_base64_decode "${OLDPASSWORDENCODED}")"
-		sambaNTPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaNTPassword)"
-		sambaLMPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" sambaLMPassword)"
-		irixPassword="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" irixPassword)"
+		userPassword_SambaNT="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword_SambaNT)"
+		userPassword_SambaLM="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword_SambaLM)"
+		userPassword_Irix="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword_Irix)"
 		# add lock
 		if [ "${LOCKED}" == "yes" ]; then
-			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SEDEXT} -e 's/}[!]?/}!/')"
-			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SEDEXT} -e 's/^[!]?/!/')"
-			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SEDEXT} -e 's/^[!]?/!/')"
-			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SEDEXT} -e 's/}[!]?/}!/')"
+			userPassword_Crypt="$(echo "${OLDPASSWORD}" | ${SEDEXT} -e 's/}[!]?/}!/')"
+			[ -n "${userPassword_SambaNT}" ] && userPassword_SambaNT="$(echo "${userPassword_SambaNT}" | ${SEDEXT} -e 's/^[!]?/!/')"
+			[ -n "${userPassword_SambaLM}" ] && userPassword_SambaLM="$(echo "${userPassword_SambaLM}" | ${SEDEXT} -e 's/^[!]?/!/')"
+			[ -n "${userPassword_Irix}" ] && userPassword_Irix="$(echo "${userPassword_Irix}" | ${SEDEXT} -e 's/}[!]?/}!/')"
 		# remove lock
 		elif [ "${LOCKED}" == "no" ]; then
-			USERPASSWORD="$(echo "${OLDPASSWORD}" | ${SEDEXT} -e 's/}!/}/')"
-			[ -n "${sambaNTPassword}" ] && sambaNTPassword="$(echo "${sambaNTPassword}" | ${SEDEXT} -e 's/^[!]//')"
-			[ -n "${sambaLMPassword}" ] && sambaLMPassword="$(echo "${sambaLMPassword}" | ${SEDEXT} -e 's/^[!]//')"
-			[ -n "${irixPassword}" ] && irixPassword="$(echo "${irixPassword}" | ${SEDEXT} -e 's/}!/}/')"
+			userPassword_Crypt="$(echo "${OLDPASSWORD}" | ${SEDEXT} -e 's/}!/}/')"
+			[ -n "${userPassword_SambaNT}" ] && userPassword_SambaNT="$(echo "${userPassword_SambaNT}" | ${SEDEXT} -e 's/^[!]//')"
+			[ -n "${userPassword_SambaLM}" ] && userPassword_SambaLM="$(echo "${userPassword_SambaLM}" | ${SEDEXT} -e 's/^[!]//')"
+			[ -n "${userPassword_Irix}" ] && userPassword_Irix="$(echo "${userPassword_Irix}" | ${SEDEXT} -e 's/}!/}/')"
 		fi
 	fi
 
@@ -530,10 +530,10 @@ usermod() {
 	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}"
 	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
 	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
-	[ -n "${USERPASSWORD}" ] && append_attrib_replace "userPassword" "${USERPASSWORD}"
-	[ -n "${sambaNTPassword}" ] && append_attrib_replace "sambaNTPassword" "${sambaNTPassword}"
-	[ -n "${sambaLMPassword}" ] && append_attrib_replace "sambaLMPassword" "${sambaLMPassword}"
-	[ -n "${irixPassword}" ] && append_attrib_replace "irixPassword" "${irixPassword}"
+	[ -n "${userPassword_Crypt}" ] && append_attrib_replace "userPassword" "${userPassword_Crypt}"
+	[ -n "${userPassword_SambaNT}" ] && append_attrib_replace "sambaNTPassword" "${userPassword_SambaNT}"
+	[ -n "${userPassword_SambaLM}" ] && append_attrib_replace "sambaLMPassword" "${userPassword_SambaLM}"
+	[ -n "${userPassword_Irix}" ] && append_attrib_replace "irixPassword" "${userPassword_Irix}"
 	# if we haven't set anything so far, all of our changes are in other DNs
 	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
 	append "\n\n"	
