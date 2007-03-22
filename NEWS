@@ -1,5 +1,14 @@
 2007-03-22: diradm-2.9
 - Base64 encoding of passwords
+- Public release of testsuite.
+- Many bugfixes thanks to testsuite
+- ammap support
+
+2006-12-14: diradm-2.8.4 (private release)
+- even more testsuite
+
+2006-09-01: diradm-2.8.3 (private release)
+- development of testsuite
 
 2006-06-08: diradm-2.8.2
 - Debugging release, with some extra debug stuff turned on.
