@@ -1,12 +1,15 @@
+2007-03-22: diradm-2.9
+- Base64 encoding of passwords
+
 2006-06-08: diradm-2.8.2
 - Debugging release, with some extra debug stuff turned on.
 - Bug with chown/chmod in superadduser fixed.
 - Bug with ?* introduced in 2.8.1 fixed.
 
-2006-06-06: diradm-2.8.1
+2006-06-06: diradm-2.8.1 (private release)
 - ignore trailing search types in ldap.conf - ?one, ?sub etc.
 
-2006-06-06: diradm-2.8
+2006-06-06: diradm-2.8 (private release)
 - Cleanups for bash-3
 - Fixes where user shadow data may have had errors in LDAP
 - Fixed check testcases for sed -r.
@@ -15,7 +18,7 @@
 - .spec file cleanup for RPM users.
 - Cleanup of keyword tracker code.
 
-2005-12-13: diradm-2.7
+2005-12-13: diradm-2.7 (private release)
 - All functionality completed, with the exception of gshadow (see KNOWN-BUGS).
 - Further feature requests welcome.
 
