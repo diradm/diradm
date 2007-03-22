@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.24 2007/03/22 21:05:10 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.25 2007/03/22 22:05:32 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -530,10 +530,10 @@ usermod() {
 	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}"
 	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
 	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
-	[ -n "${userPassword_Crypt}" ] && append_attrib_replace_base64 "userPassword" "${userPassword_Crypt}"
+	[ -n "${userPassword_Crypt}" ] && append_attrib_replace_base64 "userPassword" "{CRYPT}${userPassword_Crypt}"
 	[ -n "${userPassword_SambaNT}" ] && append_attrib_replace_base64 "sambaNTPassword" "${userPassword_SambaNT}"
 	[ -n "${userPassword_SambaLM}" ] && append_attrib_replace_base64 "sambaLMPassword" "${userPassword_SambaLM}"
-	[ -n "${userPassword_Irix}" ] && append_attrib_replace_base64 "irixPassword" "${userPassword_Irix}"
+	[ -n "${userPassword_Irix}" ] && append_attrib_replace_base64 "irixPassword" "{CRYPT}${userPassword_Irix}"
 	# if we haven't set anything so far, all of our changes are in other DNs
 	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
 	append "\n\n"	
