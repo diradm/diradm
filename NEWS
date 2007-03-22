@@ -1,3 +1,6 @@
+2007-03-22: diradm-2.9.1
+- last minute bug with usermod not prefixing passwords during replacement.
+
 2007-03-22: diradm-2.9
 - Base64 encoding of passwords
 - Public release of testsuite.
