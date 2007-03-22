@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.misc.sh.in,v 1.7 2006/12/21 12:49:11 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.misc.sh.in,v 1.8 2007/03/22 17:20:12 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the host sub-system.
 
@@ -60,7 +60,6 @@ print_usage_sub() {
 		;;
 		passwd)
 		echo " diradm passwd [-f -s] USER"
-		echo " diradm passwd [-g] [-r -R] GROUP"
 		echo " diradm passwd [-x max] [-n min] [-w warn] [-i inact] USER"
 		echo " diradm passwd [-l -u -d -S -e] USER"
 		;;
