@@ -1,3 +1,25 @@
+2007-03-22 21:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.16), "Exp", lines: +9 -0;  commitid: HHT3BpSKcsDFc8bs;
+
+	finish releasenotes.
+
+2007-03-22 21:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.15), "Exp", lines: +6 -3;  commitid: VDKIEkjChryhb8bs;
+
+	add release notes.
+
+2007-03-22 21:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.36), "Exp", lines: +8 -1;  commitid: fsmOm1ZjnYqeb8bs;
+		Makefile.am (1.17), "Exp", lines: +2 -2;  commitid: rt1bHpVCeOmnb8bs;
+
+	Add testsuite to build system.
+
 2007-03-22 21:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Added:
