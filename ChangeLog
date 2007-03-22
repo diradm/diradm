@@ -1,3 +1,17 @@
+2007-03-22 22:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		NEWS (1.17), "Exp", lines: +3 -0;  commitid: g7VW0MN5gSvio8bs;
+
+	document last minute change.
+
+2007-03-22 22:06  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.37), "Exp", lines: +1 -1;  commitid: Vvga9zJECeWGn8bs;
+
+	bump to 2.9.1.
+
 2007-03-22 22:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
