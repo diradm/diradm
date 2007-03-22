@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.21 2007/03/22 16:29:23 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.22 2007/03/22 16:32:41 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -301,7 +301,7 @@ useradd() {
 		if [ ! -d "${HOMEDIRECTORY}" -a ! -d "${targetdir_no_nfs}" ]; then
 			echo "Making Homedir stored in ${targetdir}, available as ${HOMEDIRECTORY}"
 			cp -ra "${SKEL}" "${targetdir_no_nfs}" >/dev/null
-			${CHMOD} "${HOMEPERM}" "${targetdir_nfs}"
+			${CHMOD} "${HOMEPERM}" "${targetdir_no_nfs}"
 			${CHOWN} -R "${UIDNUMBER}":"${GIDNUMBER}" "${targetdir_no_nfs}"
 		else
 			echo "Homedir of ${HOMEDIRECTORY} already exists from ${targetdir}!"
