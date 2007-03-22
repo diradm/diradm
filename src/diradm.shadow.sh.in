@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.11 2007/03/22 16:29:23 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.shadow.sh.in,v 1.12 2007/03/22 17:21:20 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the passwd sub-system.
 
@@ -109,7 +109,6 @@ chage() {
 
 passwd() {
 	ORIGINAL_ARGS="$@"
-	# TODO: gshadow functionality
 	[[ -z "${modulename}" ]] && modulename="passwd"
 	MODE=""
 	unset OPTION OPTARG OPTIND
@@ -129,20 +128,17 @@ passwd() {
 			u) MODE="passwd" ; CMD="unlock" ;;
 			d) MODE="passwd" ; CMD="set" ; PASSWD="" ;;
 			p) MODE="passwd" ; CMD="set" ; PASSWD="${OPTARG}" ;;
-			# our stuff
-			g) MODE="gpasswd" ; CMD="set" ;;
-			R) MODE="gpasswd" ; CMD="delete" ;;
-			r) MODE="gpasswd" ; CMD="restrict" ;;
 			*) print_usage ${modulename} ; exit 1 ;;
 		esac
 		if [ -n "${CURRENT_MODE}" -a "${MODE}" != "${CURRENT_MODE}" ]; then
 			echo "${modulename}: Conflicting modes"
+			print_usage ${MODE} ${CURRENT_MODE}
 			exit 3
 		fi
 	done
 	shift $((${OPTIND} - 1))
 	# TODO is this always safe?
-	if [ "${#}" -ne 1 ]; then
+	if [ "${#}" -ne 1 -o -z "${MODE}" ]; then
 		print_usage ${modulename}
 		exit 2
 	fi
@@ -176,12 +172,6 @@ passwd() {
 		esac
 		usermod ${args}
 		exit $?
-	fi
-	if [ "x${MODE}" = "gpasswd" ]; then
-		echo "${modulename}: Unfortuntely group passwords are not support by"
-		echo "LDAP so far as my research indicates. If this is incorrect"
-		echo "please email the author some reference material."
-		exit 99
 	fi
 	
 	echo "You shouldn't have gotten here. Please report this bug. ${FUNCNAME}:${LINENO}"
