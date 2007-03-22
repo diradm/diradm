@@ -1,8 +1,8 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.16 2006/12/21 02:29:14 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.17 2007/03/22 21:30:53 robbat2 Exp $
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = m4 src
+SUBDIRS = m4 src testsuite
 dist_DOCS = AUTHORS COPYING ChangeLog THANKS CHANGES.prefork README.prefork irixpassword.schema KNOWN-BUGS
 # built from README.in
 built_DOCS = README
