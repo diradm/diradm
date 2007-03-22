@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.check.sh.in,v 1.5 2006/06/06 19:08:24 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.check.sh.in,v 1.6 2007/03/22 16:28:51 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 
 # This contains all of the functions specific to the check sub-system.
@@ -43,7 +43,7 @@ check_self() {
 	fi
 	
 	echo "Validating diradm-mkpasswd"
-	${MKPASSWD} 1>/dev/null
+	${MKPASSWD} -i foo 1>/dev/null
 	if [ $? -ne 1 ]; then
 		echo "${MKPASSWD} failed!"
 		exit 1
