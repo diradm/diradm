@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.group.sh.in,v 1.6 2005/12/13 06:34:37 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.group.sh.in,v 1.7 2007/03/22 17:24:18 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the group sub-system.
 
@@ -143,21 +143,24 @@ gpasswd() {
 	# TODO: gshadow - group administrators
 	# TODO: gshadow - group passwords
 	[ -z "${modulename}" ] && modulename="gpasswd"
+	PASSWD_REMOVE_MARKER="___remove___${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
 	PASSWD_SET=0
+	MODE_PASSWD=0
+	MODE_MEMBER=1
 	MEMBERS_ADD=''
 	MEMBERS_DELETE=''
 	MEMBERS_SET=''
 	unset OPTION OPTARG OPTIND
 	while getopts "rRa:d:A:M:" OPTION; do
 		case "${OPTION}" in
-			r) if [ -n "$MODE_PASSWD" ]; then print_usage ${modulename} ; exit 1 ; fi
-				MODE_PASSWD=1 PASSWD_SET=1 PASSWD='' ; gpasswd_admin_error ; exit 99 ;;
-			R) if [ -n "$MODE_PASSWD" ]; then print_usage ${modulename} ; exit 1 ; fi
-				MODE_PASSWD=1 PASSWD_SET=1 PASSWD="!" ; gpasswd_admin_error ; exit 99 ;;
+			r) if [ "$MODE_PASSWD" -eq 1 ]; then print_usage ${modulename} ; exit 1 ; fi
+				MODE_PASSWD=1 PASSWD_SET=1 PASSWD="${PASSWD_REMOVE_MARKER}" ;;
+			R) if [ "$MODE_PASSWD" -eq 1 ]; then print_usage ${modulename} ; exit 1 ; fi
+				MODE_PASSWD=1 PASSWD_SET=1 PASSWD="!" ;;
 			a) MODE_MEMBER=1 MEMBERS_ADD="${OPTARG//,/ }";;
 			d) MODE_MEMBER=1 MEMBERS_DELETE="${OPTARG//,/ }";;
 			M) MODE_MEMBER=1 MEMBERS_SET="${OPTARG//,/ }";;
-			A) MODE_MEMBER=1 ADMINS="${OPTARG//,/ }" ; gpasswd_admin_error ; exit 99 ;;
+			A) MODE_MEMBER=1 ADMINS="${OPTARG//,/ }" NOT_IMPLEMENTED=1 ;;
 			*) print_usage ${modulename} ; exit 1;;
 		esac
 	done
@@ -168,12 +171,30 @@ gpasswd() {
 	else
 		GROUP="${1}"
 	fi
+	if [ "${MODE_PASSWD}" -eq 0 -a "${MODE_MEMBERS}" -eq 0 ]; then
+		MODE_PASSWD=1
+	fi
+
+	# cannot set password and member
+	if [ "${MODE_PASSWD}" -eq 1 -a "${MODE_MEMBERS}" -eq 1 ]; then
+			print_usage ${modulename} 
+			exit 2
+	fi
+
 	# cannot set and add/delete together
-	if [ -n "$MEMBERS_SET" ]; then
+	if [ "${MODE_MEMBERS}" -eq 1 -a -n "$MEMBERS_SET" ]; then
 		if [ -n "$MEMBERS_ADD" -o -n "$MEMBERS_DELETE" ]; then 
 			print_usage ${modulename} 
 			exit 2
 		fi
+	fi
+
+	# ok, these operations really aren't available, so we error here but they
+	# are actually implemented below, in a fashion that is ready for schema
+	# support
+	if [ "${NOT_IMPLEMENTED}" -eq 1 ]; then
+			gpasswd_admin_error
+			exit 99
 	fi
 	
 	
@@ -184,8 +205,11 @@ gpasswd() {
 	# TODO: gshadow - -R/-r/passwd/ADMIN implementation
 
 	MEMBERS_CURRENT="$(ldap_search_getattr ${GROUP_BASEDN} "cn=${GROUP}" memberUid)"
-	#echo MC:$MEMBERS_CURRENT
-	#echo MS:$MEMBERS_SET
+	# remove duplicates
+	MEMBERS_SET="$(set_unique "${MEMBERS_SET}")"
+	MEMBERS_ADD="$(set_unique "${MEMBERS_ADD}")"
+	MEMBERS_DELETE="$(set_unique "${MEMBERS_DELETE}")"
+
 	# if we are doing SET mode, then we do it differently
 	if [ -n "${MEMBERS_SET}" ]; then
 		# MEMBERS_DELETE = MEMBERS_CURRENT - MEMBERS_SET
@@ -199,8 +223,6 @@ gpasswd() {
 		# select members to delete so we don't get LDAP errors
 		MEMBERS_DELETE="$(set_intersection "${MEMBERS_CURRENT}" "${MEMBERS_DELETE}")"
 	fi
-	#echo MD:$MEMBERS_DELETE
-	#echo MA:$MEMBERS_ADD
 		
 	if [ -n "${MEMBERS_ADD}" ]; then
 		for i in ${MEMBERS_ADD}; do
@@ -215,6 +237,20 @@ gpasswd() {
 			append "memberUid: ${i}"
 			append "-"
 		done
+	fi
+
+	if [ "$PASSWD_SET" -eq 1 ]; then
+		if [ "x${PASSWD}" != "x${PASSWD_REMOVE_MARKER}" ]; then
+			grpPasswordCrypt="$(${MKPASSWD} -m ${PASSWD})"
+			p="${grpPasswordCrypt}"
+			if [ "x${IRIX}" == "xyes" ]; then
+				grpPasswordIrix="$(${MKPASSWD} -i ${PASSWD})"
+				p="${grpPasswordIrix}"
+			fi
+			append_attrib_replace "userPassword" "{CRYPT}${p}"
+		else
+			append_attrib_delete "userPassword"
+		fi
 	fi
 
 	# check if we should do anything
