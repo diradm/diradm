@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.group.sh.in,v 1.7 2007/03/22 17:24:18 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.group.sh.in,v 1.8 2007/03/22 21:03:49 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the group sub-system.
 
@@ -242,12 +242,11 @@ gpasswd() {
 	if [ "$PASSWD_SET" -eq 1 ]; then
 		if [ "x${PASSWD}" != "x${PASSWD_REMOVE_MARKER}" ]; then
 			grpPasswordCrypt="$(${MKPASSWD} -m ${PASSWD})"
-			p="${grpPasswordCrypt}"
+			append_attrib_replace_base64 "userPassword" "{CRYPT}${grpPasswordCrypt}"
 			if [ "x${IRIX}" == "xyes" ]; then
 				grpPasswordIrix="$(${MKPASSWD} -i ${PASSWD})"
-				p="${grpPasswordIrix}"
+				append_attrib_replace_base64 "irixPassword" "{CRYPT}${grpPasswordIrix}"
 			fi
-			append_attrib_replace "userPassword" "{CRYPT}${p}"
 		else
 			append_attrib_delete "userPassword"
 		fi
