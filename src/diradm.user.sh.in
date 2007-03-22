@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.23 2007/03/22 17:25:34 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.24 2007/03/22 21:05:10 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -199,20 +199,20 @@ useradd() {
 	append "objectClass: inetOrgperson"
 	append "uid: ${LOGIN}"
 	# impossible passwords
-	userPasswordCrypt='$1$i4iLNNDN$2hEIZ6f5qgBBQfTuxtI4P1' 
+	userPassword_Crypt='$1$i4iLNNDN$2hEIZ6f5qgBBQfTuxtI4P1' 
 	userPassword_SambaNT='00000000000000000000000000000000'
 	userPassword_SambaLM='00000000000000000000000000000000'
 	userPassword_Irix='KeZ0hbbaVDnSU'
 	# now set the real password
 	if [ -n "${userPassword_Plain}" ]; then
-		userPasswordCrypt="$(${MKPASSWD} -m ${userPassword_Plain})"
+		userPassword_Crypt="$(${MKPASSWD} -m ${userPassword_Plain})"
 		userPassword_Irix="$(${MKPASSWD} -i ${userPassword_Plain})"
 		if [ "x${SAMBA}" == "xyes" ]; then
 			userPassword_SambaNT="$(${MKPASSWD} -n ${userPassword_Plain})"
 			userPassword_SambaLM="$(${MKPASSWD} -l ${userPassword_Plain})"
 		fi
 	fi
-	append "userPassword: {CRYPT}${userPasswordCrypt}"
+	append "userPassword:: $(ldap_base64_encode "{CRYPT}${userPassword_Crypt}")"
 	append "uidNumber: ${UIDNUMBER}"
 	append "gidNumber: ${GIDNUMBER}"
 	append "cn: ${CN}"
@@ -252,8 +252,8 @@ useradd() {
 		append "sambaPrimaryGroupSID: ${SAMBADOMAINSID}-${DEFAULT_SAMBAGID}"
 		append "sambaAcctFlags: [UX         ]"
 		append "sambaPwdCanChange: 0"
-		append "sambaNTPassword: ${userPassword_SambaNT}"
-		append "sambaLMPassword: ${userPassword_SambaLM}"
+		append "sambaNTPassword:: $(ldap_base64_encode "${userPassword_SambaNT}")"
+		append "sambaLMPassword:: $(ldap_base64_encode "${userPassword_SambaLM}")"
 		append "sambaPwdLastSet: $(${DATE} -u +%s)";
 		[ -n "${SAMBADRIVE}" ] && append "sambaHomeDrive: ${SAMBADRIVE}"
 		[ -n "${SAMBAPATHPREPEND}" ] && append "sambaHomePath: ${SAMBAPATHPREPEND}\\\\${LOGIN}"
@@ -263,7 +263,7 @@ useradd() {
 	if [ "x${IRIX}" == "xyes" ]; then
 		# this is a custom objectclass!
 		append "objectClass: irixAccount"
-		append "irixPassword: {CRYPT}${userPassword_Irix}"
+		append "irixPassword:: $(ldap_base64_encode "{CRYPT}${userPassword_Irix}")"
 	fi
 	append "\n\n"
 	
@@ -530,10 +530,10 @@ usermod() {
 	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}"
 	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
 	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
-	[ -n "${userPassword_Crypt}" ] && append_attrib_replace "userPassword" "${userPassword_Crypt}"
-	[ -n "${userPassword_SambaNT}" ] && append_attrib_replace "sambaNTPassword" "${userPassword_SambaNT}"
-	[ -n "${userPassword_SambaLM}" ] && append_attrib_replace "sambaLMPassword" "${userPassword_SambaLM}"
-	[ -n "${userPassword_Irix}" ] && append_attrib_replace "irixPassword" "${userPassword_Irix}"
+	[ -n "${userPassword_Crypt}" ] && append_attrib_replace_base64 "userPassword" "${userPassword_Crypt}"
+	[ -n "${userPassword_SambaNT}" ] && append_attrib_replace_base64 "sambaNTPassword" "${userPassword_SambaNT}"
+	[ -n "${userPassword_SambaLM}" ] && append_attrib_replace_base64 "sambaLMPassword" "${userPassword_SambaLM}"
+	[ -n "${userPassword_Irix}" ] && append_attrib_replace_base64 "irixPassword" "${userPassword_Irix}"
 	# if we haven't set anything so far, all of our changes are in other DNs
 	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
 	append "\n\n"	
