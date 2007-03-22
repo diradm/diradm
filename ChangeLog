@@ -1,3 +1,40 @@
+2007-03-22 21:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		testsuite/config/.cvsignore (1.1)
+		testsuite/config/Makefile.am (1.1)
+		testsuite/config-slapd/.cvsignore (1.1)
+		testsuite/config-slapd/Makefile.am (1.1)
+		testsuite/diradm.am/Makefile.am (1.1)
+		testsuite/diradm.host/Makefile.am (1.1)
+		testsuite/diradm.smb/Makefile.am (1.1)
+		testsuite/lib/.cvsignore (1.1)
+		testsuite/lib/Makefile.am (1.1)
+	Changed:
+		testsuite/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+		testsuite/Makefile.am (1.3), "Exp", lines: +3 -2;  commitid: BeNFbYxEtQ4Ra8bs;
+		testsuite/config-slapd/db/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+		testsuite/diradm.am/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+		testsuite/diradm.group/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+		testsuite/diradm.host/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+		testsuite/diradm.smb/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+
+	Add testsuite to build system.
+
+2007-03-22 21:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		THANKS (1.4), "Exp", lines: +14 -18;  commitid: 6OPkXBy17hxD68bs;
+
+	Update the THANKS file for a new person, and grammar in the rant.
+
+2007-03-22 21:11  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		DEBUGGING (1.2), "Exp", lines: +6 -2;  commitid: hZYGgUp7Z53Q48bs;
+
+	Add debug warnings.
+
 2007-03-22 21:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
