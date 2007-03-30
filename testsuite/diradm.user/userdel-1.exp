@@ -1,0 +1,14 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm userdel [-r] LOGIN
+
+set type user
+set command userdel
+set basedn "ou=passwd,dc=example"
+
+# no need to edit this line
+set username userdel1
+diradm-test "testsuite/diradm.$type" "$command-$n-basic" "useradd -u 45500 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
+if [ diradm-run-_diradm	"$command-$n-del" "$command $username" ] {
+	diradm-test "testsuite/diradm.$type" "$command-$n-readd" "useradd -u 45500 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
+}

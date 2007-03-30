@@ -1,0 +1,15 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]
+
+set type user
+set command usermod
+set basedn "ou=passwd,dc=example"
+set n 1
+
+# no need to edit this line
+#set params _PARAMS_
+set username usermod1
+diradm-test "testsuite/diradm.$type" "$command-$n-initial-add" "useradd -u 44500 -g 100 -d /home/$username -s /bin/sh -p password $username" "uid=$username,$basedn"
+
+#diradm-test "testsuite/diradm.$type" "$command-$n-initial-add" "$command $params"

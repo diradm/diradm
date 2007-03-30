@@ -1,0 +1,26 @@
+dn: uid=useradd5,ou=passwd,dc=example
+objectClass: top
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: useradd5
+userPassword:: e0NSWVBUfWFiSm5nZ3hoQi95V0k=
+uidNumber: 43504
+gidNumber: 100
+cn: useradd5
+homeDirectory: /home/useradd5
+loginShell: /bin/sh
+shadowLastChange: 13602
+shadowInactive: -1
+shadowExpire: -1
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+shadowFlag: 0
+sn: useradd5
+givenName: useradd5
+displayName: useradd5
+mail: bob@test.com
+gecos: useradd5,,,
+

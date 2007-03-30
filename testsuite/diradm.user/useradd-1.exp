@@ -1,0 +1,33 @@
+load_lib "testsuite/lib/diradm.exp"
+
+# diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]
+#                [-d home] [-s shell] [-c comment] [-m [-k template]]
+#                [-f inactive] [-e expire] [-p passwd] [-E email] LOGIN
+
+set type user
+set command useradd
+set basedn "ou=passwd,dc=example"
+set groupdn "ou=group,dc=example"
+set n 1
+
+# no need to edit this line
+set username useradd1
+diradm-test "testsuite/diradm.$type" "$command-$n-basic" "$command -u 43500 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
+
+set username useradd2
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-groups" "$command -u 43501 -g 100 -G root,bin,adm -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn" 
+
+set username useradd3
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-groups-numeric" "$command -u 43502 -g 100 -G 0,1,4 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
+
+set username useradd4
+diradm-test "testsuite/diradm.$type" "$command-$n-redhat" "$command -r -u 43503 -G 0,1,4 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn cn=$username,$groupdn"
+
+set username useradd5
+diradm-test "testsuite/diradm.$type" "$command-$n-email" "useradd -u 43504 -g 100 -d /home/$username -s /bin/sh -p password$username -E bob@test.com $username" "uid=$username,$basedn"
+
+set username useradd6
+diradm-test "testsuite/diradm.$type" "$command-$n-comment" "useradd -u 43505 -g 100 -d /home/$username -s /bin/sh -p password$username -c \"bob the tester,,,\" $username" "uid=$username,$basedn"
+
+set username useradd7
+diradm-test "testsuite/diradm.$type" "$command-$n-shadow" "$command -u 43506 -f 1024 -e 2009-03-31 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"

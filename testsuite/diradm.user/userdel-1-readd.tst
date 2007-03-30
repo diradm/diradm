@@ -1,0 +1,25 @@
+dn: uid=userdel1,ou=passwd,dc=example
+objectClass: top
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: userdel1
+userPassword:: e0NSWVBUfWFiSm5nZ3hoQi95V0k=
+uidNumber: 45500
+gidNumber: 100
+cn: userdel1
+homeDirectory: /home/userdel1
+loginShell: /bin/sh
+shadowLastChange: 13602
+shadowInactive: -1
+shadowExpire: -1
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+shadowFlag: 0
+sn: userdel1
+givenName: userdel1
+displayName: userdel1
+gecos: userdel1,,,
+
