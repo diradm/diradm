@@ -1,5 +1,5 @@
 #!@PERL@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm-mkpasswd.pl.in,v 1.3 2005/05/04 07:32:59 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm-mkpasswd.pl.in,v 1.4 2007/03/30 09:03:27 robbat2 Exp $
 # @PACKAGE@ @VERSION@
 use autouse Crypt::SmbHash => qw(lmhash nthash ntlmgen);
 #use warnings;
@@ -41,10 +41,12 @@ my $salt;
 
 if( $ARGV[0] =~ /-m/ ) {    
 	$salt = generatesalt( '$1$%.8s$' );
+	$salt = $ENV{'DIRADM_FORCE_SALT'} if $ENV{'DIRADM_FORCE_SALT'};
 	$salt = $ARGV[2] if $ARGV[2];
 	print  crypt( $passwd, $salt ) ;
 } elsif( $ARGV[0] =~ /-i/ ) { 
-	$salt = generatesalt;
+	$salt = generatesalt( '%.2s' );
+	$salt = $ENV{'DIRADM_FORCE_SALT'} if $ENV{'DIRADM_FORCE_SALT'};
 	$salt = $ARGV[2] if $ARGV[2];
 	print  crypt( $passwd, $salt ) ;
 } elsif( $ARGV[0] =~ /-n/ and "@ENABLE_SAMBA@" eq "yes") { 
