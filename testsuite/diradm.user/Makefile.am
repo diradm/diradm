@@ -1,1 +1,1 @@
-EXTRA_DIST = useradd-1.exp useradd-1.tst userdel-1.exp userdel-1.tst usermod-1.exp usermod-1.tst
+EXTRA_DIST = .cvsignore useradd-1-additional-groups-numeric.tst useradd-1-additional-groups.tst useradd-1-basic.tst useradd-1-comment.tst useradd-1-email.tst useradd-1-redhat.tst useradd-1-shadow.tst useradd-1.exp useradd-1.tst userdel-1-basic.tst userdel-1-readd.tst userdel-1.exp userdel-1.tst usermod-1-initial-add.tst usermod-1.exp usermod-1.tst

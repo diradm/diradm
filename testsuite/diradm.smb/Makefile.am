@@ -1,1 +1,1 @@
-EXTRA_DIST = Makefile.am smbhostadd-1-rid.tst smbhostadd-1-rid.txt smbhostadd-1.exp smbhostadd-1.tst smbhostadd-1.tst.orig smbhostadd-1.tst.rej smbhostadd-1.txt smbhostdel-1-add.tst smbhostdel-1-add.txt smbhostdel-1-readd.tst smbhostdel-1-readd.txt smbhostdel-1.exp smbhostdel-1.tst
+EXTRA_DIST = .cvsignore smbhostadd-1-rid.tst smbhostadd-1.exp smbhostadd-1.tst smbhostdel-1-add.tst smbhostdel-1-readd.tst smbhostdel-1.exp smbhostdel-1.tst
