@@ -18,3 +18,8 @@ diradm-test "testsuite/diradm.$type" "$command-$n-gid" "$command $params" "cn=$g
 set gn group3
 set params "-g 6001 -o $gn"
 diradm-test "testsuite/diradm.$type" "$command-$n-giddupe" "$command $params" "cn=$gn,$basedn"
+
+set gn group4
+setenv GIDNUMBERMIN "7000"
+set params "$gn"
+diradm-test "testsuite/diradm.$type" "$command-$n-basic-gidnumbermin" "$command $params" "cn=$gn,$basedn"

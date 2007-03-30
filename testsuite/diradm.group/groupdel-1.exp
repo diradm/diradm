@@ -10,6 +10,8 @@ set n 1
 set gn groupdel1
 set params "$gn"
 
+setenv GIDNUMBERMIN 8000
+
 # no need to edit this line
 diradm-test "testsuite/diradm.$type" "$command-$n-add" "groupadd $params" "cn=$gn,$basedn"
 if [ diradm-run-_diradm	"$command-$n-del" "$command $gn" ] {
