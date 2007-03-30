@@ -31,7 +31,7 @@ proc diradm-run-_ldapcmp { subdir testname params dnlist } {
             puts -nonewline $ofl $data
             flush $ofl
 			if {[catch {close $fl} err]} {
-				perror "$testname ldapsearch failure"
+				#perror "$testname ldapsearch failure"
 				send_user "ldapsearch failed: $err\n$data\n"
 			}
 		}
