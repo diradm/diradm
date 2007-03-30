@@ -1,3 +1,243 @@
+2007-03-30 11:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.40), "Exp", lines: +1 -1;  commitid: aS0mP0k4RxLas6cs;
+
+	Bump version to 2.9.3.
+
+2007-03-30 10:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		testsuite/diradm.group/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: pwIPumqBctnbn6cs;
+		testsuite/diradm.user/Makefile.am (1.3), "Exp", lines: +1 -1;  commitid: pwIPumqBctnbn6cs;
+
+	Newer Makefile.am.
+
+2007-03-30 10:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		testsuite/diradm.user/useradd-1-redhat-additional-ldap-group-groupadd.tst (1.1)
+		testsuite/diradm.user/useradd-1-redhat-additional-ldap-group.tst (1.1)
+	Changed:
+		testsuite/diradm.user/useradd-1-redhat.tst (1.2), "Exp", lines: +2 -2;  commitid: 01tP1OffKqHZm6cs;
+		testsuite/diradm.user/useradd-1.exp (1.2), "Exp", lines: +7 -1;  commitid: 01tP1OffKqHZm6cs;
+		testsuite/diradm.user/usermod-1-initial-add-redhat.tst (1.2), "Exp", lines: +7 -1;  commitid: 01tP1OffKqHZm6cs;
+		testsuite/diradm.user/usermod-1-rename-redhat.tst (1.2), "Exp", lines: +7 -1;  commitid: 01tP1OffKqHZm6cs;
+		testsuite/diradm.user/usermod-1.exp (1.3), "Exp", lines: +7 -3;  commitid: 01tP1OffKqHZm6cs;
+
+	Add all testcases for RedHat stuff.
+
+2007-03-30 10:47  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.misc.sh.in (1.9), "Exp", lines: +9 -9;  commitid: YTjB4N25jPYQm6cs;
+
+	Document switches for RedHat usage.
+
+2007-03-30 10:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.user.sh.in (1.28), "Exp", lines: +13 -2;  commitid: RGZSQr9GK0Qyl6cs;
+
+	Handle cases of usermod and useradd with RedHat user-groups during
+	renaming or specification of a direct GID.
+
+2007-03-30 10:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		testsuite/diradm.group/groupadd-1-basic-gidnumbermin.tst (1.1)
+
+	New testcase for groups.
+
+2007-03-30 10:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		testsuite/diradm.user/usermod-1-additional-gid-bin.tst (1.1)
+		testsuite/diradm.user/usermod-1-additional-gid0.tst (1.1)
+		testsuite/diradm.user/usermod-1-additional-ldap-group-groupadd.tst (1.1)
+		testsuite/diradm.user/usermod-1-additional-ldap-group.tst (1.1)
+		testsuite/diradm.user/usermod-1-comment.tst (1.1)
+		testsuite/diradm.user/usermod-1-expire.tst (1.1)
+		testsuite/diradm.user/usermod-1-gid0.tst (1.1)
+		testsuite/diradm.user/usermod-1-gid100.tst (1.1)
+		testsuite/diradm.user/usermod-1-home.tst (1.1)
+		testsuite/diradm.user/usermod-1-inactive.tst (1.1)
+		testsuite/diradm.user/usermod-1-initial-add-redhat.tst (1.1)
+		testsuite/diradm.user/usermod-1-lock.tst (1.1)
+		testsuite/diradm.user/usermod-1-lock2.tst (1.1)
+		testsuite/diradm.user/usermod-1-password.tst (1.1)
+		testsuite/diradm.user/usermod-1-rename-redhat.tst (1.1)
+		testsuite/diradm.user/usermod-1-rename.tst (1.1)
+		testsuite/diradm.user/usermod-1-shell.tst (1.1)
+		testsuite/diradm.user/usermod-1-uid.tst (1.1)
+		testsuite/diradm.user/usermod-1-unlock.tst (1.1)
+		testsuite/diradm.user/usermod-1-unlock2.tst (1.1)
+	Changed:
+		testsuite/diradm.user/usermod-1.exp (1.2), "Exp", lines: +31 -2;  commitid: dQDMVlDeghsJf6cs;
+
+	add usermod testcases.
+
+2007-03-30 10:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.39), "Exp", lines: +1 -0;  commitid: cckBmMRiNJhwf6cs;
+
+	Removing config accidently.
+
+2007-03-30 10:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		testsuite/lib/diradm.exp (1.6), "Exp", lines: +1 -1;  commitid: 5jeYgIHCrudpf6cs;
+
+	Not fatal always to have some ldapsearch return codes.
+
+2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		testsuite/diradm.group/groupadd-1.exp (1.2), "Exp", lines: +5 -0;  commitid: B7DVG87OqbXff6cs;
+		testsuite/diradm.group/groupdel-1-add.tst (1.2), "Exp", lines: +1 -1;  commitid: B7DVG87OqbXff6cs;
+		testsuite/diradm.group/groupdel-1-readd.tst (1.2), "Exp", lines: +1 -1;  commitid: B7DVG87OqbXff6cs;
+		testsuite/diradm.group/groupdel-1.exp (1.2), "Exp", lines: +2 -0;  commitid: B7DVG87OqbXff6cs;
+
+	use GID min stuff.
+
+2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.19), "Exp", lines: +3 -3;  commitid: c9l8CRZ4W3taf6cs;
+
+	Add overwriting GID min/max.
+
+2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.group.sh.in (1.10), "Exp", lines: +3 -1;  commitid: 6rEmxciu1p57f6cs;
+
+	Avoid variable overwriting.
+
+2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.user.sh.in (1.27), "Exp", lines: +3 -2;  commitid: Jtkj8rfd7793f6cs;
+
+	Handle gecos correctly.
+
+2007-03-30 09:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.user.sh.in (1.26), "Exp", lines: +64 -13;  commitid: i9StsRQ11pqJN5cs;
+
+	Handle all cases of base64 data and special group stuff properly.
+
+2007-03-30 09:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.common.sh.in (1.17), "Exp", lines: +36 -6;  commitid: x5mll5IWKVxuN5cs;
+
+	Clean up base64 handling, and add getent support for getting some
+	non-LDAP group data.
+
+2007-03-30 09:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		configure.ac (1.38), "Exp", lines: +14 -9;  commitid: xlaVxXKRnkJhN5cs;
+
+	Add getent to list of utilities and update for Makefile building in
+	testsuites.
+
+2007-03-30 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.in (1.27), "Exp", lines: +2 -1;  commitid: oW4Fvl3wNjG9N5cs;
+
+	Add getent to list of utilities.
+
+2007-03-30 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.18), "Exp", lines: +4 -1;  commitid: KL6GmAPQCz95N5cs;
+
+	Document how to use SSL in the config file.
+
+2007-03-30 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm-mkpasswd.pl.in (1.4), "Exp", lines: +4 -2;  commitid: hYGvYOtzpda1N5cs;
+
+	Allow forcing of the SALT using environment, for test purposes.
+
+2007-03-30 09:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		testsuite/lib/diradm.exp (1.5), "Exp", lines: +10 -5;  commitid: YdwSIZtvGXHIM5cs;
+
+	Split up testing procedures to allow multiple DNs.
+
+2007-03-30 09:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		testsuite/config/unix.exp (1.8), "Exp", lines: +1 -0;  commitid: qyTn58MhI8EBM5cs;
+
+	Force salt for testing.
+
+2007-03-30 09:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		testsuite/Makefile.am (1.4), "Exp", lines: +1 -1;  commitid: 9qIVLeaTAhNyM5cs;
+
+	Add more subdirs.
+
+2007-03-30 09:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		testsuite/diradm.group/Makefile.am (1.1)
+	Changed:
+		testsuite/diradm.am/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
+		testsuite/diradm.host/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
+		testsuite/diradm.smb/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
+		testsuite/diradm.user/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
+
+	Add automake stuff.
+
+2007-03-30 08:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Added:
+		testsuite/diradm.user/.cvsignore (1.1)
+		testsuite/diradm.user/Makefile.am (1.1)
+		testsuite/diradm.user/useradd-1-additional-groups-numeric.tst (1.1)
+		testsuite/diradm.user/useradd-1-additional-groups.tst (1.1)
+		testsuite/diradm.user/useradd-1-basic.tst (1.1)
+		testsuite/diradm.user/useradd-1-comment.tst (1.1)
+		testsuite/diradm.user/useradd-1-email.tst (1.1)
+		testsuite/diradm.user/useradd-1-redhat.tst (1.1)
+		testsuite/diradm.user/useradd-1-shadow.tst (1.1)
+		testsuite/diradm.user/useradd-1.exp (1.1)
+		testsuite/diradm.user/useradd-1.tst (1.1)
+		testsuite/diradm.user/userdel-1-basic.tst (1.1)
+		testsuite/diradm.user/userdel-1-readd.tst (1.1)
+		testsuite/diradm.user/userdel-1.exp (1.1)
+		testsuite/diradm.user/userdel-1.tst (1.1)
+		testsuite/diradm.user/usermod-1-initial-add.tst (1.1)
+		testsuite/diradm.user/usermod-1.exp (1.1)
+		testsuite/diradm.user/usermod-1.tst (1.1)
+
+	Initial pass at user tests.
+
+2007-03-23 15:33  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.group.sh.in (1.9), "Exp", lines: +5 -4;  commitid: rpvOkfcpwaREaebs;
+
+	Fix bugs regarding variable usage and plurality.
+
+2007-03-23 15:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+	Changed:
+		src/diradm.conf.in (1.17), "Exp", lines: +2 -1;  commitid: KV6FTY3yrHaK8ebs;
+		src/diradm.in (1.26), "Exp", lines: +2 -2;  commitid: KV6FTY3yrHaK8ebs;
+
+	Make LDAP options be configurable to allow for TLS control.
+
 2007-03-22 22:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 	Changed:
