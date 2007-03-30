@@ -1,5 +1,5 @@
 # Begin /etc/diradm.conf
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.17 2007/03/23 15:27:34 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.conf.in,v 1.18 2007/03/30 09:03:39 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # @PACKAGE@ @VERSION@
 
@@ -88,6 +88,9 @@ BASEDN="${BASEDN%\?*}"
 [ -z "${BINDDN}" ] && BINDDN="`grabconf rootbinddn "cn=Manager,${BASEDN}"`"
 [ -z "${BINDPASS}" ] && BINDPASS="$(grabpasswd)"
 [ -z "${BINDPASS}" ] && BINDPASS="secret"
+# Want SSL/SASL? You should configure the LDAPOPTS variable!
+# Do not remove the -x unless you are using SASL
+# If you want SSL, you should have '-Z' in the LDAPOPTS
 [ -z "${LDAPOPTS}" ] && LDAPOPTS="-x"
 # back to normal stuff
 USER_BASEDN="`grabconf nss_base_passwd "ou=Users,${BASEDN}"`"
