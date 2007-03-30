@@ -1,5 +1,5 @@
 #!@BASHSH@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.26 2007/03/23 15:27:34 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.in,v 1.27 2007/03/30 09:03:51 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 ################################################################################
 #
@@ -110,6 +110,7 @@ DATE="@DATE@"
 EGREP="@EGREP@"
 FALSE="@FALSE@"
 FGREP="@FGREP@"
+GETENT="@GETENT@"
 GREP="@GREP@"
 HEAD="@HEAD@"
 LDAPADD="@LDAPADD@"
