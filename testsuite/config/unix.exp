@@ -47,6 +47,7 @@ proc diradm_start {} {
 	setenv BINDPASS "secret"
 	setenv UIDNUMBERMIN 20000
 	setenv SAMBADOMAINSID "S-1-5-21-3721693875-1545016702-1248474524"
+	setenv DIRADM_FORCE_SALT "ab"
 	global verbose
 	if { $verbose > 0 } {
 		setenv DEBUG 1
