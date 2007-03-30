@@ -21,23 +21,27 @@ proc diradm-run-_ldapcmp { subdir testname params dnlist } {
 	set nshort "$subdir/[file tail $testname]"
 	set bname "[file rootname [file tail $nshort]]"
 	catch { file delete "$nshort.txt" }
+    set ofl [open "$nshort.txt" a+]
     set data "No result"
         foreach dn $dnlist {
 			verbose "dn=$dn"
 			set cmd "ldapsearch -b $dn -LLL -D cn=Manager,dc=example -w secret"
 			set fl [open "|$cmd"]
 			set data [read $fl]
+            puts -nonewline $ofl $data
+            flush $ofl
 			if {[catch {close $fl} err]} {
 				perror "$testname ldapsearch failure"
 				send_user "ldapsearch failed: $err\n$data\n"
 			}
 		}
-    set fl [open "$nshort.txt" a+]
-    puts -nonewline $fl $data
-	flush $fl
-	close $fl
+	close $ofl
 
-	set cmd "diff -Nu --strip-trailing-cr $nshort.tst $nshort.txt"
+    diradm-run_ldapvalidate $subdir $testname $nshort
+}
+
+proc diradm-run_ldapvalidate { subdir testname filebasename } {
+	set cmd "diff -Nu --strip-trailing-cr $filebasename.tst $filebasename.txt"
     set fl [open "|$cmd"]
     set data [read $fl]
     if {[catch {close $fl} err]} {
@@ -47,6 +51,7 @@ proc diradm-run-_ldapcmp { subdir testname params dnlist } {
 		pass "$testname LDAP validation"
     }
 }
+
 proc diradm-test { subdir testname params dnlist } {
     verbose "diradm-test"
     if [ diradm-run-_diradm $testname $params ] {
