@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.misc.sh.in,v 1.8 2007/03/22 17:20:12 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.misc.sh.in,v 1.9 2007/03/30 10:47:55 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the host sub-system.
 
@@ -9,12 +9,12 @@ print_usage_sub() {
 		useradd)
 		echo " diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
 		echo "                [-d home] [-s shell] [-c comment] [-m [-k template]]"
-		echo "                [-f inactive] [-e expire] [-p passwd] [-E email] LOGIN"
+		echo "                [-f inactive] [-e expire] [-p passwd] [-E email] [-r|-R] LOGIN"
 		;;
 		usermod)
 		echo " diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]"
 		echo "                [-d home [-m]] [-s shell] [-c comment] [-l new_name]"
-		echo "                [-f inactive] [-e expire ] [-p passwd] [-L|-U]"
+		echo "                [-f inactive] [-e expire] [-p passwd] [-L|-U] [-r|-R]"
 		echo "                [-E email] LOGIN"
 		;;
 		userdel)
@@ -27,7 +27,7 @@ print_usage_sub() {
 		echo " diradm groupadd [-g GID [-o]] GROUP"
 		;;
 		groupmod)
-		echo " diradm groupmod [-g GID [-o]] [-n NEWNAME ] GROUP"
+		echo " diradm groupmod [-g GID [-o]] [-n NEWNAME] GROUP"
 		;;
 		groupdel)
 		echo " diradm groupdel GROUP"
@@ -73,12 +73,12 @@ print_usage_sub() {
 		print_usage_sub	smbhostadd smbhostdel
 		;;
 		hostadd)
-		echo " diradm hostadd [-i IP,... ] [-e MAC,... ] [-a ALIAS,... ] HOST"
+		echo " diradm hostadd [-i IP,...] [-e MAC,...] [-a ALIAS,...] HOST"
 		;;
 		hostmod)
-		echo " diradm hostmod [-i add-IP,... ] [-I del-IP,... ] [-e add-MAC,... ]"
-		echo "                [-E del-MAC,... ] [-a add-ALIAS,... ]"
-		echo "                [-A del-ALIAS,... ] [-n NEWNAME ] HOST"
+		echo " diradm hostmod [-i add-IP,...] [-I del-IP,...] [-e add-MAC,...]"
+		echo "                [-E del-MAC,...] [-a add-ALIAS,...]"
+		echo "                [-A del-ALIAS,...] [-n NEWNAME] HOST"
 		;;
 		hostdel)
 		echo " diradm hostdel HOST"
@@ -87,7 +87,7 @@ print_usage_sub() {
 		print_usage_sub	hostadd hostdel hostmod
 		;;
 		amadd)
-		echo " diradm amadd [ -o mount-options,... ] [ -O ] [ -d DESC ] "
+		echo " diradm amadd [-o mount-options,...] [-O] [-d DESC] "
 		echo "              MAPNAME MAPKEY SOURCE"
 		;;
 		amdel)
