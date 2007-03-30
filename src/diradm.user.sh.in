@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.25 2007/03/22 22:05:32 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.26 2007/03/30 09:05:32 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -84,7 +84,10 @@ useradd() {
 			# that evil redhat thing of a group for every user
 			## TODO: TEST THIS
 			search_group "cn" "${LOGIN}"
-			if [ "$?" -eq 0 ]; then
+			rc1=$?
+			search_group_files "cn" "${LOGIN}"
+			rc2=$?
+			if [ "$rc1" -eq 0 -o "$rc2" -eq 0 ]; then
 				echo "${modulename}: Group '${LOGIN}' already exists!"
 				echo "Pass -R to useradd to disable USERGROUPS usage."
 				echo "And add the user to a group afterwards."
@@ -101,7 +104,10 @@ useradd() {
 		fi
 	fi
 	search_group "gidNumber" "${GIDNUMBER}"
-	if [ "$?" -ne 0 ]; then
+	rc1=$?
+	search_group_files "gidNumber" "${GIDNUMBER}"
+	rc2=$?
+	if [ "$rc1" -ne 0 -a "$rc2" -ne 0 ]; then
 		echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Adding user anyway."
 	fi
 	if [ -n "${OTHERGROUPS}" ]; then
@@ -110,17 +116,31 @@ useradd() {
 			echo "${POSIXGROUP}" | ${GREP} -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
 				search_group "gidNumber" "${POSIXGROUP}"
-				if [ "$?" -ne 0 ]; then
+				rc1=$?
+				search_group_files "gidNumber" "${POSIXGROUP}"
+				rc2=$?
+				if [ "$rc1" -ne 0 -a "$rc2" -ne 0 ]; then
 					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
 					exit 6
+				fi
+				if [ "$rc1" -ne 0 -a "$rc2" -eq 0 ]; then
+					echo "${modulename}: Group \"${POSIXGROUP}\" is not LDAP based, you must add the user elsewhere."
+					continue
 				fi
 				POSIXGROUP="$(ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=${POSIXGROUP}" cn)"
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
 				search_group "cn" "${POSIXGROUP}"
-				if [ "$?" -ne 0 ]; then
+				rc1=$?
+				search_group_files "cn" "${POSIXGROUP}"
+				rc2=$?
+				if [ "$rc1" -ne 0 -a "$rc2" -ne 0 ]; then
 					echo "${modulename}: Unknown group \"${POSIXGROUP}\""
 					exit 6
+				fi
+				if [ "$rc1" -ne 0 -a "$rc2" -eq 0 ]; then
+					echo "${modulename}: Group \"${POSIXGROUP}\" is not LDAP based, you must add the user elsewhere."
+					continue
 				fi
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			fi
@@ -377,13 +397,17 @@ usermod() {
 			GIDNUMBER="${GID}"
 		else
 			GIDNUMBER="$(ldap_search_getattr "${GROUP_BASEDN}" "cn=${GID}" gidNumber)"
+			[ -z "${GIDNUMBER}" ] && GIDNUMBER="$(getent_group_getattr "cn=${GID}" gidNumber)"
 			if [ -z "${GIDNUMBER}" ]; then
 				echo "${modulename}: Unknown group \"${GID}\""
 				exit 6
 			fi
 		fi
 		search_group "gidNumber" "${GIDNUMBER}"
-		if [ "$?" -ne 0 ]; then
+		rc1=$?
+		search_group_files "gidNumber" "${GIDNUMBER}"
+		rc2=$?
+		if [ "$rc1" -ne 0 -a "$rc2" -ne 0 ]; then
 			echo "${modulename}: Warning! Group ${GIDNUMBER} not found. Modifying user anyway."
 		fi
 	fi
@@ -395,17 +419,31 @@ usermod() {
 			echo "${POSIXGROUP}" | ${GREP} -qs "^[[:digit:]]*$"
 			if [ "$?" -eq 0 ]; then
 				search_group "gidNumber" "${POSIXGROUP}"
-				if [ "$?" -ne 0 ]; then
+				rc1=$?
+				search_group_files "gidNumber" "${POSIXGROUP}"
+				rc2=$?
+				if [ "$rc1" -ne 0 -a "$rc2" -ne 0 ]; then
 					echo "${modulename}: Unknown other group number \"${POSIXGROUP}\""
 					exit 6
+				fi
+				if [ "$rc1" -ne 0 -a "$rc2" -eq 0 ]; then
+					echo "${modulename}: Group \"${POSIXGROUP}\" is not LDAP based, you must add the user elsewhere."
+					continue
 				fi
 				POSIXGROUP="$(ldap_search_getattr "${GROUP_BASEDN}" "gidNumber=${POSIXGROUP}" cn)"
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			else
 				search_group "cn" "${POSIXGROUP}"
-				if [ "$?" -ne 0 ]; then
+				rc1=$?
+				search_group_files "cn" "${POSIXGROUP}"
+				rc2=$?
+				if [ "$rc1" -ne 0 -a "$rc2" -ne 0 ]; then
 					echo "${modulename}: Unknown other group \"${POSIXGROUP}\""
 					exit 6
+				fi
+				if [ "$rc1" -ne 0 -a "$rc2" -eq 0 ]; then
+					echo "${modulename}: Group \"${POSIXGROUP}\" is not LDAP based, you must add the user elsewhere."
+					continue
 				fi
 				ADDTOGROUPS="${ADDTOGROUPS} ${POSIXGROUP}"
 			fi
@@ -497,8 +535,7 @@ usermod() {
 	# password locking is happening
 	if [ -n "${LOCKED}" ]; then
 		# grab data
-		OLDPASSWORDENCODED="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword)"
-		OLDPASSWORD="$(ldap_base64_decode "${OLDPASSWORDENCODED}")"
+		OLDPASSWORD="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword)"
 		userPassword_SambaNT="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword_SambaNT)"
 		userPassword_SambaLM="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword_SambaLM)"
 		userPassword_Irix="$(ldap_search_getattr "${USER_BASEDN}" "uid=${LOGIN}" userPassword_Irix)"
@@ -516,6 +553,14 @@ usermod() {
 			[ -n "${userPassword_Irix}" ] && userPassword_Irix="$(echo "${userPassword_Irix}" | ${SEDEXT} -e 's/}!/}/')"
 		fi
 	fi
+	if [ -n "${userPassword_Plain}" ]; then
+		userPassword_Crypt="$(${MKPASSWD} -m ${userPassword_Plain})"
+		userPassword_Irix="$(${MKPASSWD} -i ${userPassword_Plain})"
+		if [ "x${SAMBA}" == "xyes" ]; then
+			userPassword_SambaNT="$(${MKPASSWD} -n ${userPassword_Plain})"
+			userPassword_SambaLM="$(${MKPASSWD} -l ${userPassword_Plain})"
+		fi
+	fi
 
 	COMMAND_DN="dn: uid=${LOGIN},${USER_BASEDN}"
 	append "${COMMAND_DN}"
@@ -531,9 +576,15 @@ usermod() {
 	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
 	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
 	[ -n "${userPassword_Crypt}" ] && append_attrib_replace_base64 "userPassword" "{CRYPT}${userPassword_Crypt}"
-	[ -n "${userPassword_SambaNT}" ] && append_attrib_replace_base64 "sambaNTPassword" "${userPassword_SambaNT}"
-	[ -n "${userPassword_SambaLM}" ] && append_attrib_replace_base64 "sambaLMPassword" "${userPassword_SambaLM}"
-	[ -n "${userPassword_Irix}" ] && append_attrib_replace_base64 "irixPassword" "{CRYPT}${userPassword_Irix}"
+	if [ "x${SAMBA}" == "xyes" ]; then
+		[ -n "${userPassword_SambaNT}" ] && append_attrib_replace_base64 "sambaNTPassword" "${userPassword_SambaNT}"
+		[ -n "${userPassword_SambaLM}" ] && append_attrib_replace_base64 "sambaLMPassword" "${userPassword_SambaLM}"
+	fi
+	if [ "x${IRIX}" == "xyes" ]; then
+		search_attr "${OBJECT_DN}" "(objectClass=irixAccount)" "objectClass: irixAccount" \
+			|| append_attrib_add objectClass "irixAccount"
+		[ -n "${userPassword_Irix}" ] && append_attrib_replace_base64 "irixPassword" "{CRYPT}${userPassword_Irix}"
+	fi
 	# if we haven't set anything so far, all of our changes are in other DNs
 	[ "${COMMAND}" == "${COMMAND_DN}" ] && unset COMMAND
 	append "\n\n"	
