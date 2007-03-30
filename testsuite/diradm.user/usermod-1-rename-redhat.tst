@@ -6,7 +6,7 @@ objectClass: organizationalPerson
 objectClass: inetOrgPerson
 userPassword:: e0NSWVBUfWFiSm5nZ3hoQi95V0k=
 uidNumber: 44505
-gidNumber: 100
+gidNumber: 44001
 cn: usermod2
 homeDirectory: /home/usermod2
 loginShell: /bin/sh
@@ -22,4 +22,10 @@ givenName: usermod2
 displayName: usermod2
 gecos: usermod2,,,
 uid: renameusermod2
+
+dn: cn=renameusermod2,ou=group,dc=example
+objectClass: top
+objectClass: posixGroup
+gidNumber: 44001
+cn: renameusermod2
 

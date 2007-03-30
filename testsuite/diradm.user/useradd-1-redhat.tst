@@ -7,7 +7,7 @@ objectClass: inetOrgPerson
 uid: useradd4
 userPassword:: e0NSWVBUfWFiSm5nZ3hoQi95V0k=
 uidNumber: 43503
-gidNumber: 502
+gidNumber: 43500
 cn: useradd4
 homeDirectory: /home/useradd4
 loginShell: /bin/sh
@@ -27,5 +27,5 @@ dn: cn=useradd4,ou=group,dc=example
 objectClass: top
 objectClass: posixGroup
 cn: useradd4
-gidNumber: 502
+gidNumber: 43500
 

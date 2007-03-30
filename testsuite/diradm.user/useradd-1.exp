@@ -9,13 +9,14 @@ set command useradd
 set basedn "ou=passwd,dc=example"
 set groupdn "ou=group,dc=example"
 set n 1
+setenv GIDNUMBERMIN 43500
 
 # no need to edit this line
 set username useradd1
 diradm-test "testsuite/diradm.$type" "$command-$n-basic" "$command -u 43500 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
 
 set username useradd2
-diradm-test "testsuite/diradm.$type" "$command-$n-additional-groups" "$command -u 43501 -g 100 -G root,bin,adm -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn" 
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-groups" "$command -u 43501 -g 100 -G root,bin,adm -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
 
 set username useradd3
 diradm-test "testsuite/diradm.$type" "$command-$n-additional-groups-numeric" "$command -u 43502 -g 100 -G 0,1,4 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
@@ -31,3 +32,8 @@ diradm-test "testsuite/diradm.$type" "$command-$n-comment" "useradd -u 43505 -g 
 
 set username useradd7
 diradm-test "testsuite/diradm.$type" "$command-$n-shadow" "$command -u 43506 -f 1024 -e 2009-03-31 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
+
+setenv GIDNUMBERMIN 43600
+set username useradd8
+diradm-test "testsuite/diradm.$type" "$command-$n-redhat-additional-ldap-group-groupadd" "groupadd -g 43600 gr$username" "cn=gr$username,$groupdn"
+diradm-test "testsuite/diradm.$type" "$command-$n-redhat-additional-ldap-group" "$command -r -u 43507 -G 0,1,4,gr$username -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn cn=$username,$groupdn cn=gr$username,$groupdn"
