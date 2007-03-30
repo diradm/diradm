@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.16 2007/03/22 21:03:05 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.common.sh.in,v 1.17 2007/03/30 09:04:50 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the common functions.
 
@@ -80,18 +80,29 @@ ldap_search_getattr() {
 	basedn="${1}"
 	search="${2}"
 	attr="${3}"
-	regex="^${attr}:{1,2} "
+	regex="^${attr}: "
+	regex_base64="^${attr}:: "
 	# TODO: turn this off again before 
 	[[ -n "$DEBUG" ]] && echo "ldap_search_getattr: basedn=${basedn} search=${search} attr=${attr}"  1>&2
-	${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr} | ${SEDEXT} -n -e "/${regex}/{s~${regex}~~ ; p}"
+	output="$(${LDAPSEARCH_CMD} -b "${basedn}" "${search}" ${attr})"
+	if [ "${output}" != "${output#${regex_base64}}" ]; then
+		echo "${output}" | ${SEDEXT} -n -e "/${regex}/{s~${regex_base64}~~ ; p}" | ldap_base64_decode_pipe
+	else
+		echo "${output}" | ${SEDEXT} -n -e "/${regex}/{s~${regex}~~ ; p}"
+	fi
 }
 
 ldap_base64_decode() {
-	#echo "$*" | ${PERL} -MMIME::Base64 -e 'print(decode_base64(<STDIN>));'
-	echo "$*" | ${PERL} -MMIME::Base64 -e '$p = ""; while(<STDIN>) { chomp ; $p .= $_; } print(decode_base64($p));'
+	echo "$*" | ldap_base64_decode_pipe
 }
 ldap_base64_encode() {
-	echo "$*" | ${PERL} -MMIME::Base64 -e '$p = ""; while(<STDIN>) { chomp ; $p .= $_; } print(encode_base64($p));'
+	echo "$*" | ldap_base64_encode_pipe
+}
+ldap_base64_decode_pipe() {
+	${PERL} -MMIME::Base64 -e '$p = ""; while(<STDIN>) { chomp ; $p .= $_; } print(decode_base64($p));'
+}
+ldap_base64_encode_pipe() {
+	${PERL} -MMIME::Base64 -e '$p = ""; while(<STDIN>) { chomp ; $p .= $_; } print(encode_base64($p));'
 }
 
 search_attr() {
@@ -116,6 +127,25 @@ search_user() {
 
 search_group() {
 	search_attr "${GROUP_BASEDN}" "${1}=${2}" "${1}: ${2}"
+	return "$?"
+}
+getent_group_columnmapping() {
+	case "$1" in
+		cn) echo 1;;
+		password) echo 2;;
+		gidNumber) echo 3;;
+		uid) echo 4;;
+	esac
+}
+getent_group_getattr() {
+	matchcolumn="$(getent_group_columnmapping ${1%=*})"
+	matchstring="${1#*=}"
+	fetchcolumn="$(getent_group_columnmapping ${2})"
+	awkexp="{if(\$${matchcolumn} == \"$matchstring\") print \$${fetchcolumn}}" 
+	${GETENT} group "${matchstring}" | ${AWK} -F: "${awkexp}"
+}
+search_group_files() {
+	getent_group_getattr "${1}=${2}" "${1}" | ${GREP} -qs "^${2}$"
 	return "$?"
 }
 
