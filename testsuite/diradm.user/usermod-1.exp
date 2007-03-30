@@ -1,15 +1,44 @@
 load_lib "testsuite/lib/diradm.exp"
 
 # diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]
+#                [-d home [-m]] [-s shell] [-c comment] [-l new_name]
+#				 [-f inactive] [-e expire ] [-p passwd] [-L|-U]
+#				 [-E email] LOGIN
+
 
 set type user
 set command usermod
 set basedn "ou=passwd,dc=example"
+set groupdn "ou=group,dc=example"
 set n 1
 
 # no need to edit this line
-#set params _PARAMS_
 set username usermod1
-diradm-test "testsuite/diradm.$type" "$command-$n-initial-add" "useradd -u 44500 -g 100 -d /home/$username -s /bin/sh -p password $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-initial-add" "useradd -u 44500 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn"
+
+diradm-test "testsuite/diradm.$type" "$command-$n-uid" "$command -u 44501 $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-gid0" "$command -g 0 $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-gid100" "$command -g 100 $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-gid0" "$command -G 0 $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-gid-bin" "$command -G bin $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-ldap-group-groupadd" "groupadd -g 44000 gr$username" "cn=gr$username,$groupdn"
+diradm-test "testsuite/diradm.$type" "$command-$n-additional-ldap-group" "$command -G gr$username $username" "uid=$username,$basedn cn=gr$username,$groupdn"
+diradm-test "testsuite/diradm.$type" "$command-$n-home" "$command -d /home/extra-$username $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-shell" "$command -s /bin/false $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-comment" "$command -c \"bob,,,\" $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-inactive" "$command -f 15000 $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-expire" "$command -e 2008-01-30 $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-password" "$command -p passwordredone$username $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-lock" "$command -L $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-lock2" "$command -L $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-unlock" "$command -U $username" "uid=$username,$basedn"
+diradm-test "testsuite/diradm.$type" "$command-$n-unlock2" "$command -U $username" "uid=$username,$basedn"
+
+diradm-test "testsuite/diradm.$type" "$command-$n-rename" "$command -l rename$username $username" "uid=rename$username,$basedn uid=$username,$basedn cn=gr$username,$groupdn"
+
+set username usermod2
+setenv GIDNUMBERMIN 44000
+diradm-test "testsuite/diradm.$type" "$command-$n-initial-add-redhat" "useradd -r -u 44505 -g 100 -d /home/$username -s /bin/sh -p password$username $username" "uid=$username,$basedn cn=$username,$groupdn"
+diradm-test "testsuite/diradm.$type" "$command-$n-rename-redhat" "$command -l rename$username $username" "uid=rename$username,$basedn uid=$username,$basedn cn=$username,$groupdn cn=rename$username,$groupdn"
 
 #diradm-test "testsuite/diradm.$type" "$command-$n-initial-add" "$command $params"
