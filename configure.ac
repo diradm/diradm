@@ -100,6 +100,9 @@ if test "x${ENABLE_SAMBA}" = "xyes"; then
 fi
 
 # output
+#testsuite/diradm.ch/Makefile
+#testsuite/diradm.gpasswd/Makefile
+#testsuite/diradm.passwd/Makefile
 AC_CONFIG_FILES([
    README
    diradm.spec
@@ -110,11 +113,8 @@ AC_CONFIG_FILES([
    testsuite/config-slapd/Makefile
    testsuite/config/Makefile
    testsuite/diradm.am/Makefile
-   testsuite/diradm.ch/Makefile
-   testsuite/diradm.gpasswd/Makefile
    testsuite/diradm.group/Makefile
    testsuite/diradm.host/Makefile
-   testsuite/diradm.passwd/Makefile
    testsuite/diradm.smb/Makefile
    testsuite/diradm.user/Makefile
    testsuite/lib/Makefile
