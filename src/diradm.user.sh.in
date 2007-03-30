@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.26 2007/03/30 09:05:32 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.27 2007/03/30 10:25:10 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -572,7 +572,8 @@ usermod() {
 	[ -n "${HOMEDIRECTORY}" ] && append_attrib_replace "homeDirectory" "${HOMEDIRECTORY}"
 	[ -n "${LOGINSHELL}" ] && append_attrib_replace "loginShell" "${LOGINSHELL}"
 	[ -n "${COMMENT}" ] && FULLNAME=${COMMENT//,*}
-	[ -n "${COMMENT}" ] && append "replace: cn gecos\ncn: ${FULLNAME}\ncn: ${COMMENT}"
+	[ -n "${COMMENT}" ] && append_attrib_replace "cn" "${FULLNAME}" 
+	[ -n "${COMMENT}" ] && append_attrib_replace "gecos" "${COMMENT}"
 	[ -n "${SHADOWINACTIVE}" ] && append_attrib_replace "shadowInactive" "${SHADOWINACTIVE}"
 	[ -n "${SHADOWEXPIRE}" ] && append_attrib_replace "shadowExpire" "${SHADOWEXPIRE}"
 	[ -n "${userPassword_Crypt}" ] && append_attrib_replace_base64 "userPassword" "{CRYPT}${userPassword_Crypt}"
