@@ -1,5 +1,5 @@
 #!@FALSE@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.27 2007/03/30 10:25:10 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/src/diradm.user.sh.in,v 1.28 2007/03/30 10:44:10 robbat2 Exp $
 # vim: ts=4 sts=4 noexpandtab sw=4 ft=sh syntax=sh:
 # This contains all of the functions specific to the user sub-system.
 
@@ -76,6 +76,9 @@ useradd() {
 				echo "${modulename}: Unknown group \"${GID}\""
 				exit 6
 			fi
+		fi
+		if [ "$USERGROUPS" == "yes" ]; then
+			echo "${modulename}: Warning! Group ${GID} specified AND in RedHat User-Group mode!. Using GID instead."
 		fi
 	else
 		if [ "$USERGROUPS" == "no" ]; then
@@ -337,7 +340,7 @@ usermod() {
 		exit 2
 	fi
 	unset OPTION OPTARG OPTIND
-	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LUSi" OPTION; do
+	while getopts "u:og:G:h:d:s:c:l:mf:e:p:LUSirR" OPTION; do
 		case "${OPTION}" in
 			u) UIDNUMBER="${OPTARG}";;
 			o) DUPLICATES="yes";;
@@ -352,6 +355,8 @@ usermod() {
 			f) SHADOWINACTIVE="${OPTARG}";;
 			e) SHADOWEXPIRE="${OPTARG}";;
 			E) EMAIL="${OPTARG}";;
+			r) USERGROUPS="yes";;
+			R) USERGROUPS="no";;
 			p) if [ -n "${LOCKED}" ]; then print_usage ${modulename} ; exit 1; fi; userPassword_Plain="${2}";;
 			L) if [ -n "${LOCKED}" -o -n "${userPassword_Plain}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="yes";;
 			U) if [ -n "${LOCKED}" -o -n "${userPassword_Plain}" ]; then print_usage ${modulename}; exit 1; fi; LOCKED="no";;
@@ -488,6 +493,12 @@ usermod() {
 			if [ "$?" -eq 0 ]; then
 				echo "${modulename}: User \"${NEWLOGIN}\" exists"
 				exit 9
+			fi
+		fi
+		if [ "${USERGROUPS}" == "yes" ]; then
+			search_group "cn" "${LOGIN}"
+			if [ "$?" -eq 0 ]; then
+				append "dn: cn=${LOGIN},${GROUP_BASEDN}\nchangetype: modrdn\nnewrdn: cn=${NEWLOGIN}\n"
 			fi
 		fi
 		if [ -z "${ADDTOGROUPS}" ]; then
