@@ -42,6 +42,7 @@ proc slapd_exit {} {
 proc ldapinit { } {
 	verbose "ldapinit"
 	global configdir configfile
+	file mkdir $configdir/db
 	file delete -force $configdir/db/dc=example
 	file delete -force $configdir/db/dc=example.ldif
 	set cmd "slapadd -f slapd.conf -l ldapdump"
