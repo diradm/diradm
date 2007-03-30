@@ -31,6 +31,7 @@ AC_PATH_PROGS_ERROR(DATE, date)
 AC_PATH_PROGS_ERROR(EGREP, egrep)
 AC_PATH_PROGS_ERROR(FALSE, false)
 AC_PATH_PROGS_ERROR(FGREP, fgrep)
+AC_PATH_PROGS_ERROR(GETENT, getent)
 AC_PATH_PROGS_ERROR(GREP, grep)
 AC_PATH_PROGS_ERROR(HEAD, head)
 AC_PATH_PROGS_ERROR(SED, sed)
@@ -100,19 +101,23 @@ fi
 
 # output
 AC_CONFIG_FILES([
-   Makefile
    README
    diradm.spec
-   src/Makefile
+   Makefile
    m4/Makefile
+   src/Makefile
    testsuite/Makefile
-	 testsuite/config-slapd/Makefile
-	 testsuite/diradm.am/Makefile
-	 testsuite/config/Makefile
-	 testsuite/lib/Makefile
-	 testsuite/diradm.host/Makefile
-	 testsuite/diradm.smb/Makefile
-	 src/diradm.conf
+   testsuite/config-slapd/Makefile
+   testsuite/config/Makefile
+   testsuite/diradm.am/Makefile
+   testsuite/diradm.ch/Makefile
+   testsuite/diradm.gpasswd/Makefile
+   testsuite/diradm.group/Makefile
+   testsuite/diradm.host/Makefile
+   testsuite/diradm.passwd/Makefile
+   testsuite/diradm.smb/Makefile
+   testsuite/diradm.user/Makefile
+   testsuite/lib/Makefile
    src/diradm.automount.sh
    src/diradm.check.sh
    src/diradm.common.sh
