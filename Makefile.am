@@ -1,8 +1,8 @@
-# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.18 2007/03/30 11:22:19 robbat2 Exp $
+# $Header: /code/convert/cvsroot/infrastructure/diradm/Makefile.am,v 1.19 2007/11/29 05:47:49 robbat2 Exp $
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = m4 src testsuite
+SUBDIRS = m4 src testsuite man
 dist_DOCS = AUTHORS CHANGES.prefork COPYING ChangeLog DEBUGGING DEVELOPMENT INSTALL KNOWN-BUGS NEWS README.prefork THANKS TODO autofs-4.1.3.schema irixpassword.schema samba-3.0.23d.schema
 # built from README.in
 built_DOCS = README
