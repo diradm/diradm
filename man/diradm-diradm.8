@@ -1,0 +1,54 @@
+Usage: diradm command [options]
+ diradm useradd [-u uid [-o]] [-g group] [-G group,...] [-h hosts]
+                [-d home] [-s shell] [-c comment] [-m [-k template]]
+                [-f inactive] [-e expire] [-p passwd] [-E email] LOGIN
+
+ diradm usermod [-u uid [-o]] [-g group] [-G group,...] [-h hosts]
+                [-d home [-m]] [-s shell] [-c comment] [-l new_name]
+                [-f inactive] [-e expire ] [-p passwd] [-L|-U]
+                [-E email] LOGIN
+
+ diradm userdel [-r] LOGIN
+
+ diradm groupadd [-g GID [-o]] GROUP
+ diradm groupmod [-g GID [-o]] [-n NEWNAME ] GROUP
+ diradm groupdel GROUP
+
+ diradm chsh [-s login_shell] LOGIN
+
+ diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]
+             [-o other] LOGIN
+
+ diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]
+              [-E expiredate] [-W warndays] LOGIN
+ diradm chage [-l|-S] LOGIN
+
+ diradm gpasswd GROUP
+ diradm gpasswd -a USER GROUP
+ diradm gpasswd -d USER GROUP
+ diradm gpasswd -R GROUP
+ diradm gpasswd -r GROUP
+ diradm gpasswd [-A USER,...] [-M USER,...] GROUP
+
+ diradm passwd [-f -s] USER
+ diradm passwd [-g] [-r -R] GROUP
+ diradm passwd [-x max] [-n min] [-w warn] [-i inact] USER
+ diradm passwd [-l -u -d -S -e] USER
+
+ diradm hostadd [-i IP,... ] [-e MAC,... ] [-a ALIAS,... ] HOST
+ diradm hostdel HOST
+ diradm hostmod [-i add-IP,... ] [-I del-IP,... ] [-e add-MAC,... ]
+                [-E del-MAC,... ] [-a add-ALIAS,... ]
+                [-A del-ALIAS,... ] [-n NEWNAME ] HOST
+
+ diradm chsh [-s login_shell] LOGIN
+
+ diradm chfn [-f full_name] [-r room_no] [-w work_ph] [-h home_ph]
+             [-o other] LOGIN
+
+ diradm chage [-m mindays] [-M maxdays] [-d lastday] [-I inactive]
+              [-E expiredate] [-W warndays] LOGIN
+ diradm chage [-l|-S] LOGIN
+ diradm version   Print diradm version number, then exit
+ diradm help [command1]...    Print help, then exit
+
