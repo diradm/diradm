@@ -312,12 +312,14 @@ useradd() {
 	if [ "${CREATEHOMEDIR}" == "yes" ]; then
 		# Create Homedir
 		# make sure the functions are defined
-		source ${libexecdir}/diradm.automount.sh
-		targetdir="$(amhash "${AUTOMOUNT_USERDIRBASE}" "${LOGIN}")"
-		if [ "${USER_AUTOMOUNTHOME}" == "yes" ]; then
+		if [ "$ENABLE_AUTOMOUNT" == "yes" -a "${USER_AUTOMOUNTHOME}" == "yes" ]; then
 			# add automount entry first
 			# create hashed dir path
+			source ${libexecdir}/diradm.automount.sh
+			targetdir="$(amhash "${AUTOMOUNT_USERDIRBASE}" "${LOGIN}")"
 			amadd -d "${AUTOMOUNT_USERDESC}" -o "${AUTOMOUNT_OPTIONS_USERS}" -- "${AUTOMOUNT_USERMAP}" "${LOGIN}" "${targetdir}"
+		else
+			targetdir="${HOMEDIRECTORY}"
 		fi
 		# strip NFS host to make local path
 		targetdir_no_nfs="${targetdir/*:}"
