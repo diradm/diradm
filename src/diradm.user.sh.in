@@ -59,8 +59,8 @@ useradd() {
 			exit 4
 		fi
 	else
-		UIDNUMBER="${UIDNUMBERMIN}"
 		UIDNUMBER="$(usernextfreeuid)"
+		[ -z "${UIDNUMBER}" ] && UIDNUMBER="${UIDNUMBERMIN}"
 		if [ "${UIDNUMBER}" -gt "${UIDNUMBERMAX}" ]; then
 			echo "${modulename}: Can't get unique uid"
 			exit 4
