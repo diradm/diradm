@@ -4,7 +4,7 @@ Gordon Pritchard <gordonp _ sfu _ ca>:
 Putting up with my development of diradm on the TechBC research network, to
 make everybodies life easier.
 
-Andreas de Pretis  <andreas _ depretis _ at>:
+Andreas de Pretis <andreas _ depretis _ at>:
 useradd -h, home directory stuff.
 
 Klavs Klavsen <kl _ vsen _ dk>:
@@ -14,19 +14,21 @@ Keith Hightower <khightower _ merkleinc _ com>:
 For being willing to work through the problems more than many other users that
 simply said "It doesn't work, wahaa, I'm leaving".
 
+Eric Thibodeau <kyron _ neuralbs _ com>:
+For being willing to use diradm for his SoC project :-), and also for finding
+the UID generation bug. Gentoo bug #230209.
 
-
-
-
-
+Horatiu Halmaghi <hha13 _ sfu _ ca>:
+For pointing out that my UID generation fix still didn't work quite perfectly,
+and needed more polish :-).
 
 No thanks to (yes, this is a rant):
 -----------------------------------
 ACS/OTS @ SFU Burnaby: 
 Not all of you, just a select few in Management that canned my account during
-the development of diradm. While checking to see to  see that diradm would
-would on Solaris, I privately reported to your secure channels that your out of
-date Solaris shellbox had an unlocked 'getent shadow' command, that made all
+the development of diradm. While checking to see to see that diradm would would
+on Solaris, I privately reported to your secure channels that your out of date
+Solaris shellbox had an unlocked 'getent shadow' command, that made all
 passwords public on the machine, and also to all public LDAP queries from
 outside the university. 
 
