@@ -1,3 +1,15 @@
+commit fdb5e8eaceb8b105267a7ef0a08413628c40f8ee
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:48:26 2008 -0700
+
+    Remember to build manpages.
+
+commit f31dfa67f043f85795cb3ad26df2a07e8a1acf3e
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:45:54 2008 -0700
+
+    Convert to git changelog.
+
 commit d1147b68a778b525054583fc31758ffdae5e094c
 Author: Robin H. Johnson <robbat2@gentoo.org>
 Date:   Tue Sep 23 17:45:35 2008 -0700
