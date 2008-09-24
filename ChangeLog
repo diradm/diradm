@@ -1,3 +1,21 @@
+commit d3c2adfae247fffd1a7f3ea51d211b3f0bc93b0e
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:52:07 2008 -0700
+
+    2.9.5.
+
+commit 446d246836f80376f3163add916f3659a3dd47c5
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:51:38 2008 -0700
+
+    Fix build bug.
+
+commit 007ad58047ee072616fc526577f227be293be4a3
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:48:56 2008 -0700
+
+    Update ChangeLog.
+
 commit fdb5e8eaceb8b105267a7ef0a08413628c40f8ee
 Author: Robin H. Johnson <robbat2@gentoo.org>
 Date:   Tue Sep 23 17:48:26 2008 -0700
