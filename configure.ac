@@ -109,6 +109,7 @@ AC_CONFIG_FILES([
    Makefile
    m4/Makefile
    src/Makefile
+   man/Makefile
    testsuite/Makefile
    testsuite/config-slapd/Makefile
    testsuite/config/Makefile
