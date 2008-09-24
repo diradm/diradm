@@ -1,2236 +1,1842 @@
-2007-03-30 11:22  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d1147b68a778b525054583fc31758ffdae5e094c
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:45:35 2008 -0700
 
-	Changed:
-		Makefile.am (1.18), "Exp", lines: +2 -2;  commitid: WrdM5Abp8nBEy6cs;
-		testsuite/Makefile.am (1.5), "Exp", lines: +2 -2;  commitid: WrdM5Abp8nBEy6cs;
-		testsuite/config-slapd/slapd.exp (1.3), "Exp", lines: +1 -0;  commitid: WrdM5Abp8nBEy6cs;
+    Update THANKS notice per Gentoo bug 230209 for UID fixup.
 
-	Clean up build process and ensure test data directory exists.
+commit 162daa4821e8f92edbc31d0c55b6bd70e8a8a9ea
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:41:31 2008 -0700
 
-2007-03-30 11:13  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Ready for release of 2.9.4. Note that openldap of at least 2.3.x is needed.
 
-	Changed:
-		configure.ac (1.41), "Exp", lines: +3 -3;  commitid: JaP46tyhTPKKv6cs;
+commit c8b272ea420f3eb447abbe749578545ab4213921
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:37:39 2008 -0700
 
-	Ignore certain directories for the moment.
+    Much better fixup for UID generation.
 
-2007-03-30 11:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit e01d14147e66932588d14d9166474158459214c6
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:35:24 2008 -0700
 
-	Changed:
-		configure.ac (1.40), "Exp", lines: +1 -1;  commitid: aS0mP0k4RxLas6cs;
+    Do iterated search past the limits to find UIDs.
 
-	Bump version to 2.9.3.
+commit 5ae441ce012b050dcb54a1fd37cdfe654f2c258a
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Thu Aug 21 10:41:28 2008 -0700
 
-2007-03-30 10:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    kyron: Fix UID generation.
 
-	Changed:
-		testsuite/diradm.group/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: pwIPumqBctnbn6cs;
-		testsuite/diradm.user/Makefile.am (1.3), "Exp", lines: +1 -1;  commitid: pwIPumqBctnbn6cs;
+commit 5eeae5105b0ba3ce44033777eff038e29991a90f
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Thu Aug 21 10:22:47 2008 -0700
 
-	Newer Makefile.am.
+    Support non-automounted homedirs for bug reported by GSoC student kyron.
 
-2007-03-30 10:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit dfd3822a8b823a9061811981057bc9cebfc73bd4
+Author: robbat2 <robbat2>
+Date:   Thu Nov 29 05:47:49 2007 +0000
 
-	Added:
-		testsuite/diradm.user/useradd-1-redhat-additional-ldap-group-groupadd.tst (1.1)
-		testsuite/diradm.user/useradd-1-redhat-additional-ldap-group.tst (1.1)
-	Changed:
-		testsuite/diradm.user/useradd-1-redhat.tst (1.2), "Exp", lines: +2 -2;  commitid: 01tP1OffKqHZm6cs;
-		testsuite/diradm.user/useradd-1.exp (1.2), "Exp", lines: +7 -1;  commitid: 01tP1OffKqHZm6cs;
-		testsuite/diradm.user/usermod-1-initial-add-redhat.tst (1.2), "Exp", lines: +7 -1;  commitid: 01tP1OffKqHZm6cs;
-		testsuite/diradm.user/usermod-1-rename-redhat.tst (1.2), "Exp", lines: +7 -1;  commitid: 01tP1OffKqHZm6cs;
-		testsuite/diradm.user/usermod-1.exp (1.3), "Exp", lines: +7 -3;  commitid: 01tP1OffKqHZm6cs;
+    Make manpages included.
 
-	Add all testcases for RedHat stuff.
+commit e78c42c7f6927273deac674d892288dbd20e6219
+Author: robbat2 <robbat2>
+Date:   Thu Nov 29 05:47:35 2007 +0000
 
-2007-03-30 10:47  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add start of manpages.
 
-	Changed:
-		src/diradm.misc.sh.in (1.9), "Exp", lines: +9 -9;  commitid: YTjB4N25jPYQm6cs;
+commit 37a4a4377209ecf8479c1e03762f5cfaf43aeff5
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 11:22:43 2007 +0000
 
-	Document switches for RedHat usage.
+    Last 2.9.3 changes.
 
-2007-03-30 10:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit a0e160aebebb259cc40e4be748c273bccbfecc9c
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 11:22:19 2007 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.28), "Exp", lines: +13 -2;  commitid: RGZSQr9GK0Qyl6cs;
+    Clean up build process and ensure test data directory exists.
 
-	Handle cases of usermod and useradd with RedHat user-groups during
-	renaming or specification of a direct GID.
+commit afadcf45c672c75e313f8f70a04da3b646cae276
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 11:13:51 2007 +0000
 
-2007-03-30 10:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Ignore certain directories for the moment.
 
-	Added:
-		testsuite/diradm.group/groupadd-1-basic-gidnumbermin.tst (1.1)
+commit 192689871e2ac343588d94abbe32d1c958c9ddb7
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 11:04:15 2007 +0000
 
-	New testcase for groups.
+    new changelog.
 
-2007-03-30 10:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 43d99bbdb9a263f4662e7c17d168718229d4dbe8
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 11:03:25 2007 +0000
 
-	Added:
-		testsuite/diradm.user/usermod-1-additional-gid-bin.tst (1.1)
-		testsuite/diradm.user/usermod-1-additional-gid0.tst (1.1)
-		testsuite/diradm.user/usermod-1-additional-ldap-group-groupadd.tst (1.1)
-		testsuite/diradm.user/usermod-1-additional-ldap-group.tst (1.1)
-		testsuite/diradm.user/usermod-1-comment.tst (1.1)
-		testsuite/diradm.user/usermod-1-expire.tst (1.1)
-		testsuite/diradm.user/usermod-1-gid0.tst (1.1)
-		testsuite/diradm.user/usermod-1-gid100.tst (1.1)
-		testsuite/diradm.user/usermod-1-home.tst (1.1)
-		testsuite/diradm.user/usermod-1-inactive.tst (1.1)
-		testsuite/diradm.user/usermod-1-initial-add-redhat.tst (1.1)
-		testsuite/diradm.user/usermod-1-lock.tst (1.1)
-		testsuite/diradm.user/usermod-1-lock2.tst (1.1)
-		testsuite/diradm.user/usermod-1-password.tst (1.1)
-		testsuite/diradm.user/usermod-1-rename-redhat.tst (1.1)
-		testsuite/diradm.user/usermod-1-rename.tst (1.1)
-		testsuite/diradm.user/usermod-1-shell.tst (1.1)
-		testsuite/diradm.user/usermod-1-uid.tst (1.1)
-		testsuite/diradm.user/usermod-1-unlock.tst (1.1)
-		testsuite/diradm.user/usermod-1-unlock2.tst (1.1)
-	Changed:
-		testsuite/diradm.user/usermod-1.exp (1.2), "Exp", lines: +31 -2;  commitid: dQDMVlDeghsJf6cs;
+    Bump version to 2.9.3.
 
-	add usermod testcases.
+commit 9827ff9f4249f9075075da2821f7c43ef78812eb
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:48:52 2007 +0000
 
-2007-03-30 10:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Newer Makefile.am.
 
-	Changed:
-		configure.ac (1.39), "Exp", lines: +1 -0;  commitid: cckBmMRiNJhwf6cs;
+commit 4b20bd78868e52bf3c486c94e193f3acf689d1fc
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:48:19 2007 +0000
 
-	Removing config accidently.
+    Add all testcases for RedHat stuff.
 
-2007-03-30 10:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 6444352c61fda6d455b399865bbd82c8298d4877
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:47:55 2007 +0000
 
-	Changed:
-		testsuite/lib/diradm.exp (1.6), "Exp", lines: +1 -1;  commitid: 5jeYgIHCrudpf6cs;
+    Document switches for RedHat usage.
 
-	Not fatal always to have some ldapsearch return codes.
+commit 5992338cbc3ad727bb44bae1c58acf764c47801d
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:44:10 2007 +0000
 
-2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Handle cases of usermod and useradd with RedHat user-groups during renaming or specification of a direct GID.
 
-	Changed:
-		testsuite/diradm.group/groupadd-1.exp (1.2), "Exp", lines: +5 -0;  commitid: B7DVG87OqbXff6cs;
-		testsuite/diradm.group/groupdel-1-add.tst (1.2), "Exp", lines: +1 -1;  commitid: B7DVG87OqbXff6cs;
-		testsuite/diradm.group/groupdel-1-readd.tst (1.2), "Exp", lines: +1 -1;  commitid: B7DVG87OqbXff6cs;
-		testsuite/diradm.group/groupdel-1.exp (1.2), "Exp", lines: +2 -0;  commitid: B7DVG87OqbXff6cs;
+commit cb3a7733528f8edffb8296b877a21ba60ee388e1
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:27:30 2007 +0000
 
-	use GID min stuff.
+    New testcase for groups.
 
-2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 2c03761bb4397106486a5cd02b37e9b3b9f69ec3
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:27:09 2007 +0000
 
-	Changed:
-		src/diradm.conf.in (1.19), "Exp", lines: +3 -3;  commitid: c9l8CRZ4W3taf6cs;
+    add usermod testcases.
 
-	Add overwriting GID min/max.
+commit 5aeb5058ac39438593f66d09e1324e66a13ceb88
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:26:32 2007 +0000
 
-2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Removing config accidently.
 
-	Changed:
-		src/diradm.group.sh.in (1.10), "Exp", lines: +3 -1;  commitid: 6rEmxciu1p57f6cs;
+commit 769227633703b8c46789cb8989854394e2ef1e3f
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:26:12 2007 +0000
 
-	Avoid variable overwriting.
+    Not fatal always to have some ldapsearch return codes.
 
-2007-03-30 10:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit dff3339fd991a37b71456bbe9f9239441735d84c
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:25:46 2007 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.27), "Exp", lines: +3 -2;  commitid: Jtkj8rfd7793f6cs;
+    use GID min stuff.
 
-	Handle gecos correctly.
+commit 597063787b1d6418b86c0d9a76294a592084846a
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:25:31 2007 +0000
 
-2007-03-30 09:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add overwriting GID min/max.
 
-	Changed:
-		src/diradm.user.sh.in (1.26), "Exp", lines: +64 -13;  commitid: i9StsRQ11pqJN5cs;
+commit a2450d94fa8ac72396591875c8417746127016f6
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:25:21 2007 +0000
 
-	Handle all cases of base64 data and special group stuff properly.
+    Avoid variable overwriting.
 
-2007-03-30 09:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d5c0bb08014ed51d7c70559444e15c0016423344
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 10:25:10 2007 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.17), "Exp", lines: +36 -6;  commitid: x5mll5IWKVxuN5cs;
+    Handle gecos correctly.
 
-	Clean up base64 handling, and add getent support for getting some
-	non-LDAP group data.
+commit 9618154265fa74f37ef8e503fd48945e941ed63c
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:05:32 2007 +0000
 
-2007-03-30 09:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Handle all cases of base64 data and special group stuff properly.
 
-	Changed:
-		configure.ac (1.38), "Exp", lines: +14 -9;  commitid: xlaVxXKRnkJhN5cs;
+commit 55a271565fe47a4a9f46105b01f1dd7b0f0feadd
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:04:50 2007 +0000
 
-	Add getent to list of utilities and update for Makefile building in
-	testsuites.
+    Clean up base64 handling, and add getent support for getting some non-LDAP group data.
 
-2007-03-30 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit cd195c67e3b528b0ff69b73581ea7cb3b683947b
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:04:14 2007 +0000
 
-	Changed:
-		src/diradm.in (1.27), "Exp", lines: +2 -1;  commitid: oW4Fvl3wNjG9N5cs;
+    Add getent to list of utilities and update for Makefile building in testsuites.
 
-	Add getent to list of utilities.
+commit a62685a2f72c5de1b94357234ffd60415c10862e
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:03:51 2007 +0000
 
-2007-03-30 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add getent to list of utilities.
 
-	Changed:
-		src/diradm.conf.in (1.18), "Exp", lines: +4 -1;  commitid: KL6GmAPQCz95N5cs;
+commit 2b86ba759d8279c51daf0108f030bbd317c8db53
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:03:39 2007 +0000
 
-	Document how to use SSL in the config file.
+    Document how to use SSL in the config file.
 
-2007-03-30 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 062864a532416d61326917934a626f9beec38046
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:03:27 2007 +0000
 
-	Changed:
-		src/diradm-mkpasswd.pl.in (1.4), "Exp", lines: +4 -2;  commitid: hYGvYOtzpda1N5cs;
+    Allow forcing of the SALT using environment, for test purposes.
 
-	Allow forcing of the SALT using environment, for test purposes.
+commit 4070ea42488e2bccb5c8ba6e7a8c74b0be46da18
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:02:35 2007 +0000
 
-2007-03-30 09:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Split up testing procedures to allow multiple DNs.
 
-	Changed:
-		testsuite/lib/diradm.exp (1.5), "Exp", lines: +10 -5;  commitid: YdwSIZtvGXHIM5cs;
+commit 8bd81c5156ded9a40f7590b68bf69a56eef2e6db
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:02:15 2007 +0000
 
-	Split up testing procedures to allow multiple DNs.
+    Force salt for testing.
 
-2007-03-30 09:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 5390bb5f3118db35f796b9bac841d0630843a6cb
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:02:07 2007 +0000
 
-	Changed:
-		testsuite/config/unix.exp (1.8), "Exp", lines: +1 -0;  commitid: qyTn58MhI8EBM5cs;
+    Add more subdirs.
 
-	Force salt for testing.
+commit 3f70cb5e6eb0ddcd64931bf979c3be27753357cd
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 09:01:49 2007 +0000
 
-2007-03-30 09:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add automake stuff.
 
-	Changed:
-		testsuite/Makefile.am (1.4), "Exp", lines: +1 -1;  commitid: 9qIVLeaTAhNyM5cs;
+commit a8da6ee4306f60c3b39e291ee2969090f2ea2263
+Author: robbat2 <robbat2>
+Date:   Fri Mar 30 08:56:28 2007 +0000
 
-	Add more subdirs.
+    Initial pass at user tests.
 
-2007-03-30 09:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 5b16263d6813f2c6a9aa698b0b6cb58739ea27f2
+Author: robbat2 <robbat2>
+Date:   Fri Mar 23 15:33:09 2007 +0000
 
-	Added:
-		testsuite/diradm.group/Makefile.am (1.1)
-	Changed:
-		testsuite/diradm.am/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
-		testsuite/diradm.host/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
-		testsuite/diradm.smb/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
-		testsuite/diradm.user/Makefile.am (1.2), "Exp", lines: +1 -1;  commitid: 5JTWngYo3L9oM5cs;
+    Fix bugs regarding variable usage and plurality.
 
-	Add automake stuff.
+commit f24be4653d106005cea3bcb35881c72e53fc3c12
+Author: robbat2 <robbat2>
+Date:   Fri Mar 23 15:27:34 2007 +0000
 
-2007-03-30 08:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Make LDAP options be configurable to allow for TLS control.
 
-	Added:
-		testsuite/diradm.user/.cvsignore (1.1)
-		testsuite/diradm.user/Makefile.am (1.1)
-		testsuite/diradm.user/useradd-1-additional-groups-numeric.tst (1.1)
-		testsuite/diradm.user/useradd-1-additional-groups.tst (1.1)
-		testsuite/diradm.user/useradd-1-basic.tst (1.1)
-		testsuite/diradm.user/useradd-1-comment.tst (1.1)
-		testsuite/diradm.user/useradd-1-email.tst (1.1)
-		testsuite/diradm.user/useradd-1-redhat.tst (1.1)
-		testsuite/diradm.user/useradd-1-shadow.tst (1.1)
-		testsuite/diradm.user/useradd-1.exp (1.1)
-		testsuite/diradm.user/useradd-1.tst (1.1)
-		testsuite/diradm.user/userdel-1-basic.tst (1.1)
-		testsuite/diradm.user/userdel-1-readd.tst (1.1)
-		testsuite/diradm.user/userdel-1.exp (1.1)
-		testsuite/diradm.user/userdel-1.tst (1.1)
-		testsuite/diradm.user/usermod-1-initial-add.tst (1.1)
-		testsuite/diradm.user/usermod-1.exp (1.1)
-		testsuite/diradm.user/usermod-1.tst (1.1)
+commit c52da616550d9f616800b07bc78ad85ab56034a2
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 22:08:56 2007 +0000
 
-	Initial pass at user tests.
+    Add changes.
 
-2007-03-23 15:33  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 40d39e2e1392d28917f6301a15fbe1e15edf9473
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 22:08:33 2007 +0000
 
-	Changed:
-		src/diradm.group.sh.in (1.9), "Exp", lines: +5 -4;  commitid: rpvOkfcpwaREaebs;
+    document last minute change.
 
-	Fix bugs regarding variable usage and plurality.
+commit ef7480e7097fcc459b4b80d3b57dc8aebda1d7c2
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 22:06:47 2007 +0000
 
-2007-03-23 15:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    bump to 2.9.1.
 
-	Changed:
-		src/diradm.conf.in (1.17), "Exp", lines: +2 -1;  commitid: KV6FTY3yrHaK8ebs;
-		src/diradm.in (1.26), "Exp", lines: +2 -2;  commitid: KV6FTY3yrHaK8ebs;
+commit 277b99bb18fce694b848fddf8f6180913443beff
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 22:06:14 2007 +0000
 
-	Make LDAP options be configurable to allow for TLS control.
+    one last annoying bug.
 
-2007-03-22 22:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 228157dfc01a1edf974a4a9b57905e26c75504cb
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 22:05:32 2007 +0000
 
-	Changed:
-		NEWS (1.17), "Exp", lines: +3 -0;  commitid: g7VW0MN5gSvio8bs;
+    Fix CRYPT prefix on password lines during usermod replace.
 
-	document last minute change.
+commit 4fcca7202fc4f716083952a40e1691fd943a6885
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:35:07 2007 +0000
 
-2007-03-22 22:06  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    New changelog.
 
-	Changed:
-		configure.ac (1.37), "Exp", lines: +1 -1;  commitid: Vvga9zJECeWGn8bs;
+commit 89a2342d220779ce4285bbd499a27a3a353cbe6c
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:34:40 2007 +0000
 
-	bump to 2.9.1.
+    finish releasenotes.
 
-2007-03-22 22:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 04d2c13499cd7456ac3e4a751cec76cedcd9b36c
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:31:06 2007 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.25), "Exp", lines: +3 -3;  commitid: t1B3qeMg4Wfgn8bs;
+    Add mote stuff to changelog.
 
-	Fix CRYPT prefix on password lines during usermod replace.
+commit fb63342d008148f0a73d97fa72b0d649afbfa931
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:30:53 2007 +0000
 
-2007-03-22 21:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add testsuite to build system.
 
-	Changed:
-		NEWS (1.16), "Exp", lines: +9 -0;  commitid: HHT3BpSKcsDFc8bs;
+commit 38d10438c9d2d87918469425de9fe5c71d654581
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:30:37 2007 +0000
 
-	finish releasenotes.
+    add release notes.
 
-2007-03-22 21:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit f647c0790f8becda5e1ff8a4c6c16c48f7bf7e8e
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:17:04 2007 +0000
 
-	Changed:
-		NEWS (1.15), "Exp", lines: +6 -3;  commitid: VDKIEkjChryhb8bs;
+    Update the THANKS file for a new person, and grammar in the rant.
 
-	add release notes.
+commit 2ae523526ec6da13aa32280537a7e3144046909f
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:11:50 2007 +0000
 
-2007-03-22 21:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add debug warnings.
 
-	Changed:
-		configure.ac (1.36), "Exp", lines: +8 -1;  commitid: fsmOm1ZjnYqeb8bs;
-		Makefile.am (1.17), "Exp", lines: +2 -2;  commitid: rt1bHpVCeOmnb8bs;
+commit 96596bd20762a0db7250c19fb7740f86c22c1176
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:07:17 2007 +0000
 
-	Add testsuite to build system.
+    Update changelog.
 
-2007-03-22 21:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c8126d4305c5bc68adc6bcb5fc90e5228200d1a6
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:05:10 2007 +0000
 
-	Added:
-		testsuite/config/.cvsignore (1.1)
-		testsuite/config/Makefile.am (1.1)
-		testsuite/config-slapd/.cvsignore (1.1)
-		testsuite/config-slapd/Makefile.am (1.1)
-		testsuite/diradm.am/Makefile.am (1.1)
-		testsuite/diradm.host/Makefile.am (1.1)
-		testsuite/diradm.smb/Makefile.am (1.1)
-		testsuite/lib/.cvsignore (1.1)
-		testsuite/lib/Makefile.am (1.1)
-	Changed:
-		testsuite/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
-		testsuite/Makefile.am (1.3), "Exp", lines: +3 -2;  commitid: BeNFbYxEtQ4Ra8bs;
-		testsuite/config-slapd/db/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
-		testsuite/diradm.am/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
-		testsuite/diradm.group/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
-		testsuite/diradm.host/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
-		testsuite/diradm.smb/.cvsignore (1.2), "Exp", lines: +2 -0;  commitid: BeNFbYxEtQ4Ra8bs;
+    Fix password setting to always use base64 encoding, per bug reported by Keith Hightower <khightower _ merkleinc _ com>.
 
-	Add testsuite to build system.
+commit 1fe5e465d2799e3a3d342bb491f66b770a466f0e
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:03:49 2007 +0000
 
-2007-03-22 21:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Fix base64 crypting of password.
 
-	Changed:
-		THANKS (1.4), "Exp", lines: +14 -18;  commitid: 6OPkXBy17hxD68bs;
+commit 21a55cbaad703e36105c5ab790a8f771ccc9dc08
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 21:03:05 2007 +0000
 
-	Update the THANKS file for a new person, and grammar in the rant.
+    Add base64 encode support.
 
-2007-03-22 21:11  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 839a61e621f33f33983f67fbd55f3e9cdb7c86fe
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 20:53:14 2007 +0000
 
-	Changed:
-		DEBUGGING (1.2), "Exp", lines: +6 -2;  commitid: hZYGgUp7Z53Q48bs;
+    Fix blip in syntax.
 
-	Add debug warnings.
+commit 3662a27369f9c88837addac7940ea45fd3719431
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 17:26:30 2007 +0000
 
-2007-03-22 21:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add objectIdentifier help to syntax of irix schema.
 
-	Changed:
-		src/diradm.user.sh.in (1.24), "Exp", lines: +11 -11;  commitid: eIW88B5B05iy28bs;
+commit 7bfec2d119c0f1184736b940199977a00449ec44
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 17:25:34 2007 +0000
 
-	Fix password setting to always use base64 encoding, per bug
-	reported by Keith Hightower <khightower _ merkleinc _ com>.
+    Make variable naming conventions more consistent for password handling.
 
-2007-03-22 21:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit bbad5047af63b6992f97019af6747bdbbfaac9ae
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 17:24:18 2007 +0000
 
-	Changed:
-		src/diradm.group.sh.in (1.8), "Exp", lines: +3 -4;  commitid: 11dkYsKKcDG528bs;
+    Add gpasswd PASSWORD only support, no group admin supported.
 
-	Fix base64 crypting of password.
+commit bfd9d54db879ea51d6257ceb2370e0317b869cca
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 17:21:20 2007 +0000
 
-2007-03-22 21:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add gpasswd support.
 
-	Changed:
-		src/diradm.common.sh.in (1.16), "Exp", lines: +22 -3;  commitid: iJniMYzX8GMP18bs;
+commit 9876f9dea66e1aee2106be041b56468086473b14
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 17:20:43 2007 +0000
 
-	Add base64 encode support.
+    Improve base usage of scripts.
 
-2007-03-22 20:53  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 221fd40656fd014fc116244f85e76d8fefae2f5c
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 17:20:12 2007 +0000
 
-	Changed:
-		irixpassword.schema (1.3), "Exp", lines: +4 -4;  commitid: suozkzaxXOrsY7bs;
+    No passwd for groups. Use gpasswd instead.
 
-	Fix blip in syntax.
+commit 87b1ed21be94e79c0dcdac5d93bab7aae4adf733
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 16:32:41 2007 +0000
 
-2007-03-22 17:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Fix usage to correct directory location.
 
-	Changed:
-		irixpassword.schema (1.2), "Exp", lines: +19 -9;  commitid: DCKO0ZOZTicxP6bs;
+commit 116707637ce70916f411116274ecc181d43a61f1
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 16:29:23 2007 +0000
 
-	Add objectIdentifier help to syntax of irix schema.
+    Fix to correct directories when cross-using functionality.
 
-2007-03-22 17:25  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 264942334e42be84fee2d10d17507e50fd07771f
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 16:28:51 2007 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.23), "Exp", lines: +31 -31;  commitid: vndivoInarhdP6bs;
+    mkpasswd cares about password syntax.
 
-	Make variable naming conventions more consistent for password
-	handling.
+commit 4827d221e749613515c1362eae02644993e1202c
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 16:28:30 2007 +0000
 
-2007-03-22 17:24  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    fix shell invokation.
 
-	Changed:
-		src/diradm.group.sh.in (1.7), "Exp", lines: +47 -11;  commitid: fzd0Iuk8TJrMO6bs;
+commit aeefe264d609197db0e928c6faa86cf210dc96ea
+Author: robbat2 <robbat2>
+Date:   Thu Mar 22 16:28:09 2007 +0000
 
-	Add gpasswd PASSWORD only support, no group admin supported.
+    Add superadduser.diradm to build system.
 
-2007-03-22 17:21  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 2a3e0165dc86de36422531e207d72480ffffb901
+Author: robbat2 <robbat2>
+Date:   Wed Mar 21 16:01:40 2007 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.12), "Exp", lines: +3 -13;  commitid: 3QgaOZ94kntLN6bs;
+    Bump version to 2.9.
 
-	Add gpasswd support.
+commit 280896dfc93224262727e048a1d67c7528098ab8
+Author: robbat2 <robbat2>
+Date:   Fri Dec 22 00:09:50 2006 +0000
 
-2007-03-22 17:20  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Clean up schemas and sort out for samba testing.
 
-	Changed:
-		src/diradm.common.sh.in (1.15), "Exp", lines: +13 -4;  commitid: PivcCwl3h3kyN6bs;
+commit 299623686e7ff75a8d79155c44ef8e2125f11e6b
+Author: robbat2 <robbat2>
+Date:   Fri Dec 22 00:09:15 2006 +0000
 
-	Improve base usage of scripts.
+    variable for testing samba.
 
-2007-03-22 17:20  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 99930601fe38e43fccdb6ab303324cd24385abf6
+Author: robbat2 <robbat2>
+Date:   Fri Dec 22 00:08:58 2006 +0000
 
-	Changed:
-		src/diradm.misc.sh.in (1.8), "Exp", lines: +1 -2;  commitid: adWl1UQe4olnN6bs;
+    allow external DOMAINSID.
 
-	No passwd for groups. Use gpasswd instead.
+commit 6ed5bfb7d61c9ea094e84e7ffc9a659fc9507b45
+Author: robbat2 <robbat2>
+Date:   Fri Dec 22 00:07:50 2006 +0000
 
-2007-03-22 16:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add samba host testsuite.
 
-	Changed:
-		src/diradm.user.sh.in (1.22), "Exp", lines: +2 -2;  commitid: 419f4602afa94567;
+commit 5cb42d4ec681982d8f4fd86da30c1892e21ff219
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 14:27:21 2006 +0000
 
-	Fix usage to correct directory location.
+    add group tests.
 
-2007-03-22 16:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit dc53d6949fedb64396b25138dc946fd6bc4cdc34
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 14:27:10 2006 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.11), "Exp", lines: +3 -3;  commitid: 40714602aee34567;
-		src/diradm.user.sh.in (1.21), "Exp", lines: +2 -2;  commitid: 40714602aee34567;
+    add rename.
 
-	Fix to correct directories when cross-using functionality.
+commit 0812eceb85034f32689702f752bdd0ffd65dff74
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 12:50:24 2006 +0000
 
-2007-03-22 16:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    nicer output on failure.
 
-	Changed:
-		src/diradm.check.sh.in (1.6), "Exp", lines: +2 -2;  commitid: 406c4602aec34567;
+commit 3262bd87db2e4c94642b0b4bc3047d5cb8f48cb7
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 12:50:05 2006 +0000
 
-	mkpasswd cares about password syntax.
+    fix handling of init and debug.
 
-2007-03-22 16:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 06aebabdc4bd26133ecefb70089747ce0101108c
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 12:49:36 2006 +0000
 
-	Changed:
-		src/superadduser.diradm.in (1.5), "Exp", lines: +1 -1;  commitid: 40684602aeae4567;
+    space for autofs test.
 
-	fix shell invokation.
+commit 0cff3179a13cf64f782b16f5864e1aac3b4d588d
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 12:49:11 2006 +0000
 
-2007-03-22 16:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add new ammap tools.
 
-	Changed:
-		configure.ac (1.35), "Exp", lines: +1 -0;  commitid: 40644602ae994567;
-		src/Makefile.am (1.12), "Exp", lines: +2 -2;  commitid: 40644602ae994567;
+commit efa263da8fbc78fe2d66e47f0c4495759524b7ec
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 12:48:46 2006 +0000
 
-	Add superadduser.diradm to build system.
+    cleanup.
 
-2007-03-21 16:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 4e1cd39087a8c7532a3d499886d9db4829b85d97
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 12:48:31 2006 +0000
 
-	Changed:
-		configure.ac (1.34), "Exp", lines: +1 -1;  commitid: 263e460156e44567;
+    testsuite for automount.
 
-	Bump version to 2.9.
+commit 9be496d23c96672ddf3e42770d853e22b2566b6b
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:30:23 2006 +0000
 
-2006-12-22 00:09  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    dud makefile.
 
-	Deleted:
-		autofs.schema (1.2)
-	Added:
-		autofs-4.1.3.schema (1.1)
-		samba-3.0.23d.schema (1.1)
-	Changed:
-		testsuite/config-slapd/ldapdump (1.3), "Exp", lines: +5 -0;  commitid: p98qwKkcNHVfZrZr;
-		testsuite/config-slapd/slapd.conf (1.2), "Exp", lines: +2 -1;  commitid: p98qwKkcNHVfZrZr;
+commit 7369dd9a45deedc5bffcd4b9b4681a5b1d8597b0
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:29:27 2006 +0000
 
-	Clean up schemas and sort out for samba testing.
+    dont commit the test result files.
 
-2006-12-22 00:09  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 2b6ce00b8cf8f71580056b0af60e47ab25657ffd
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:29:14 2006 +0000
 
-	Changed:
-		testsuite/config/unix.exp (1.7), "Exp", lines: +4 -3;  commitid: fiJI2SvFToA3ZrZr;
+    show pass as well as fail.
 
-	variable for testing samba.
+commit bda12867e6be0ce3237a5d941219e1267a4afee4
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:29:06 2006 +0000
 
-2006-12-22 00:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    configure line for new tool.
 
-	Changed:
-		src/diradm.conf.in (1.16), "Exp", lines: +2 -2;  commitid: wVSS2lCGsiCXYrZr;
+commit 616a4048abbc4643ef9c8e822ae238b3db446cae
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:28:41 2006 +0000
 
-	allow external DOMAINSID.
+    new helper, find unique items in a set, O(N) implementation.
 
-2006-12-22 00:07  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 6e27eaec174b14c9f576fa51fae26ef1100b24d5
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:28:17 2006 +0000
 
-	Added:
-		testsuite/diradm.smb/.cvsignore (1.1)
-		testsuite/diradm.smb/smbhostadd-1-rid.tst (1.1)
-		testsuite/diradm.smb/smbhostadd-1.exp (1.1)
-		testsuite/diradm.smb/smbhostadd-1.tst (1.1)
-		testsuite/diradm.smb/smbhostdel-1-add.tst (1.1)
-		testsuite/diradm.smb/smbhostdel-1-readd.tst (1.1)
-		testsuite/diradm.smb/smbhostdel-1.exp (1.1)
-		testsuite/diradm.smb/smbhostdel-1.tst (1.1)
+    fix hostdel bug with dollar sign, and fix hostmod duplicate errors and objectclass removal errors.
 
-	add samba host testsuite.
+commit 042ccc50824fe8cacb022dea30f16844d51f793d
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:27:33 2006 +0000
 
-2006-12-21 14:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    new tool needed, wc.
 
-	Added:
-		testsuite/diradm.group/.cvsignore (1.1)
-		testsuite/diradm.group/groupadd-1-basic.tst (1.1)
-		testsuite/diradm.group/groupadd-1-gid.tst (1.1)
-		testsuite/diradm.group/groupadd-1-giddupe.tst (1.1)
-		testsuite/diradm.group/groupadd-1.exp (1.1)
-		testsuite/diradm.group/groupadd-1.tst (1.1)
-		testsuite/diradm.group/groupdel-1-add.tst (1.1)
-		testsuite/diradm.group/groupdel-1-readd.tst (1.1)
-		testsuite/diradm.group/groupdel-1.exp (1.1)
-		testsuite/diradm.group/groupdel-1.tst (1.1)
-		testsuite/diradm.group/groupmod-1-add.tst (1.1)
-		testsuite/diradm.group/groupmod-1-rename.tst (1.1)
-		testsuite/diradm.group/groupmod-1-renumber-dupe-add.tst (1.1)
-		testsuite/diradm.group/groupmod-1-renumber-dupe.tst (1.1)
-		testsuite/diradm.group/groupmod-1-renumber.tst (1.1)
-		testsuite/diradm.group/groupmod-1.exp (1.1)
-		testsuite/diradm.group/groupmod-1.tst (1.1)
+commit 8b63a58d200e438098dba1b859e2aaeca882e7a8
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:27:25 2006 +0000
 
-	add group tests.
+    improve hostdel syntax.
 
-2006-12-21 14:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit f3a0202d690cf6b5ff34f99905d2f7545e926b55
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:27:00 2006 +0000
 
-	Added:
-		testsuite/diradm.host/hostmod-1-rename.tst (1.1)
-	Changed:
-		testsuite/diradm.host/hostmod-1.exp (1.2), "Exp", lines: +4 -0;  commitid: SSI661nsZmXmLoZr;
+    helpers for creating tests.
 
-	add rename.
+commit c51d48f55bfd8bb9777a9ee3880955ab389c6edc
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:26:33 2006 +0000
 
-2006-12-21 12:50  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    host* testcases completed.
 
-	Changed:
-		testsuite/lib/diradm.exp (1.4), "Exp", lines: +7 -4;  commitid: 62CINMmOmmAaeoZr;
+commit 17d18f5b604d2aa63b374a6897de9921fa6b1334
+Author: robbat2 <robbat2>
+Date:   Thu Dec 21 02:26:19 2006 +0000
 
-	nicer output on failure.
+    Force dn usage for testcases and clean up bugs.
 
-2006-12-21 12:50  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit ec514f53645dc614bc9fa042ce17ad51886da831
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 09:01:32 2006 +0000
 
-	Changed:
-		testsuite/config/unix.exp (1.6), "Exp", lines: +5 -1;  commitid: hCaMoOliZ2X3eoZr;
+    uidnumber must exist.
 
-	fix handling of init and debug.
+commit 6f6e392b0437292071637e6810532d3caa90f9b1
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 08:33:26 2006 +0000
 
-2006-12-21 12:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    quit for cleanup.
 
-	Changed:
-		testsuite/config-slapd/ldapdump (1.2), "Exp", lines: +8 -0;  commitid: k2yN2AXzLrzTdoZr;
+commit 7ef6db59cb21bb77a8f446a6bcdb01bd49f46d38
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 02:19:02 2006 +0000
 
-	space for autofs test.
+    convert help to have common blocks and autocomplete help nicely.
 
-2006-12-21 12:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 7e00169e37fb5b2aca666ce2256cf3359f734366
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 02:17:37 2006 +0000
 
-	Changed:
-		src/diradm.automount.sh.in (1.6), "Exp", lines: +47 -1;  commitid: 01aNPfZgEhMKdoZr;
-		src/diradm.in (1.25), "Exp", lines: +3 -3;  commitid: 01aNPfZgEhMKdoZr;
-		src/diradm.misc.sh.in (1.7), "Exp", lines: +8 -2;  commitid: 01aNPfZgEhMKdoZr;
+    old file.
 
-	add new ammap tools.
+commit 058d42444a6a8d2aef6ed07dbbc51ddba2e64ffa
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 01:30:28 2006 +0000
 
-2006-12-21 12:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add first testcase.
 
-	Changed:
-		configure.ac (1.33), "Exp", lines: +0 -1;  commitid: oMxWuK8yeJQBdoZr;
+commit 5f8308788723b9e2e773999d24a0f969d2f00206
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 01:30:12 2006 +0000
 
-	cleanup.
+    put in diradm_version and clean up.
 
-2006-12-21 12:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 0b357ed215a610293cd85edb7f8ce38f8281e8e2
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 01:29:59 2006 +0000
 
-	Added:
-		testsuite/diradm.am/.cvsignore (1.1)
-		testsuite/diradm.am/amadd-1-customopt-description.tst (1.1)
-		testsuite/diradm.am/amadd-1-customopt.tst (1.1)
-		testsuite/diradm.am/amadd-1-defaultopt-description.tst (1.1)
-		testsuite/diradm.am/amadd-1-defaultopt.tst (1.1)
-		testsuite/diradm.am/amadd-1.exp (1.1)
-		testsuite/diradm.am/amdel-1-add.tst (1.1)
-		testsuite/diradm.am/amdel-1-readd.tst (1.1)
-		testsuite/diradm.am/amdel-1.exp (1.1)
-		testsuite/diradm.am/ammapadd-1-add.tst (1.1)
-		testsuite/diradm.am/ammapadd-1.exp (1.1)
-		testsuite/diradm.am/ammapdel-1-add.tst (1.1)
-		testsuite/diradm.am/ammapdel-1-readd.tst (1.1)
-		testsuite/diradm.am/ammapdel-1.exp (1.1)
+    actual test runner.
 
-	testsuite for automount.
+commit aebdbdf6495b5b2f4df14d48640ffcddd5aa8e2e
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 01:29:41 2006 +0000
 
-2006-12-21 02:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    cleanup verbose.
 
-	Deleted:
-		testsuite/Makefile.am (1.2)
+commit 527ffec34a5ad7bb2b8f7c3a54c3d19a2f3f2902
+Author: robbat2 <robbat2>
+Date:   Wed Dec 20 01:29:21 2006 +0000
 
-	dud makefile.
+    fix check invocation.
 
-2006-12-21 02:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 88f48f501c4fc8dc08177ec387ff39df1290672b
+Author: robbat2 <robbat2>
+Date:   Tue Dec 19 12:17:48 2006 +0000
 
-	Changed:
-		.cvsignore (1.10), "Exp", lines: +1 -0;  commitid: GpwECY4ofuj9NkZr;
+    Test harness for diradm.
 
-	dont commit the test result files.
+commit 13f0b93a1cd336c75ae6d5db11db93f47fe2bf04
+Author: robbat2 <robbat2>
+Date:   Tue Dec 19 12:17:33 2006 +0000
 
-2006-12-21 02:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    autofs schema.
 
-	Changed:
-		Makefile.am (1.16), "Exp", lines: +2 -2;  commitid: dnJYLVuEmsu4NkZr;
+commit 09d04233033a3a3509f132bf1a78c12064208ae1
+Author: robbat2 <robbat2>
+Date:   Tue Dec 19 12:17:22 2006 +0000
 
-	show pass as well as fail.
+    slapd infrastructure for test engine.
 
-2006-12-21 02:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit bcb49b3d1878bdd81d5a34b96b8b4e79c5dd1492
+Author: robbat2 <robbat2>
+Date:   Tue Dec 19 07:50:21 2006 +0000
 
-	Changed:
-		configure.ac (1.32), "Exp", lines: +1 -0;  commitid: MGe5YddCZHo1NkZr;
+    test infrastructure.
 
-	configure line for new tool.
+commit 9a2a8648ede35269c01e60fe92a1643afcf9e667
+Author: robbat2 <robbat2>
+Date:   Tue Dec 19 07:49:42 2006 +0000
 
-2006-12-21 02:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Create test infrastructure.
 
-	Changed:
-		src/diradm.common.sh.in (1.14), "Exp", lines: +13 -1;  commitid: C3d7ytBwDb3TMkZr;
+commit ea088bf8b159a3f5f94acbf66c8caff109d5024c
+Author: robbat2 <robbat2>
+Date:   Tue Dec 19 04:08:06 2006 +0000
 
-	new helper, find unique items in a set, O(N) implementation.
+    don't force versions
 
-2006-12-21 02:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit ee10b2180c61639783bfcb63816541503f1ec3aa
+Author: robbat2 <robbat2>
+Date:   Mon Dec 18 08:28:24 2006 +0000
 
-	Changed:
-		src/diradm.host.sh.in (1.6), "Exp", lines: +24 -4;  commitid: 3IXjofWVdAnKMkZr;
+    fix ethers handling on hosts.
 
-	fix hostdel bug with dollar sign, and fix hostmod duplicate errors
-	and objectclass removal errors.
+commit 7da0a4171d115b30930956334aee4b77db5ea9e0
+Author: robbat2 <robbat2>
+Date:   Mon Dec 18 08:28:08 2006 +0000
 
-2006-12-21 02:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    stderr not stdout for debug.
 
-	Changed:
-		src/diradm.in (1.24), "Exp", lines: +2 -1;  commitid: SlZQcFZB95QuMkZr;
+commit 6c748e88a8fbb638c0e490a3efaeeeceef15c626
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 22:31:35 2006 +0000
 
-	new tool needed, wc.
+    add news.
 
-2006-12-21 02:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 6d15a26144532e3b98bd156a27af5784e2f53c42
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 22:31:21 2006 +0000
 
-	Changed:
-		src/diradm.samba.sh.in (1.5), "Exp", lines: +4 -3;  commitid: J8gSMvaz3k0sMkZr;
+    news item.
 
-	improve hostdel syntax.
+commit 49eb5e1bd11ced14aefa9c27fedd862cb1ee9ec8
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 22:30:35 2006 +0000
 
-2006-12-21 02:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    NEWS file.
 
-	Added:
-		testsuite/template.exp.in (1.1)
-		testsuite/test-create.sh (1.1)
+commit 9bde5d06ec6c74bac7f23f14f06591e71407f9a3
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 22:27:38 2006 +0000
 
-	helpers for creating tests.
+    bump version.
 
-2006-12-21 02:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 8fe8504f444d0070bc197942d69d1189b7f46c90
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:43:58 2006 +0000
 
-	Deleted:
-		testsuite/diradm.host/hostadd-1.tst (1.2)
-	Added:
-		testsuite/diradm.host/hostadd-1-address-dupe.tst (1.1)
-		testsuite/diradm.host/hostadd-1-address.tst (1.1)
-		testsuite/diradm.host/hostadd-1-alias-dupe.tst (1.1)
-		testsuite/diradm.host/hostadd-1-alias.tst (1.1)
-		testsuite/diradm.host/hostadd-1-complex.tst (1.1)
-		testsuite/diradm.host/hostadd-1-ether-dupe.tst (1.1)
-		testsuite/diradm.host/hostadd-1-ether.tst (1.1)
-		testsuite/diradm.host/hostadd-1-simple.tst (1.1)
-		testsuite/diradm.host/hostdel-1-add.tst (1.1)
-		testsuite/diradm.host/hostdel-1-readd.tst (1.1)
-		testsuite/diradm.host/hostdel-1.exp (1.1)
-		testsuite/diradm.host/hostmod-1-add-address-dupe.tst (1.1)
-		testsuite/diradm.host/hostmod-1-add-address.tst (1.1)
-		testsuite/diradm.host/hostmod-1-del-address-dupe.tst (1.1)
-		testsuite/diradm.host/hostmod-1-del-address.tst (1.1)
-		testsuite/diradm.host/hostmod-1-initial-add.tst (1.1)
-		testsuite/diradm.host/hostmod-1.exp (1.1)
-	Changed:
-		testsuite/diradm.host/hostadd-1.exp (1.2), "Exp", lines: +38 -2;  commitid: c6UF88UZ8ow9MkZr;
+    add reconf note.
 
-	host* testcases completed.
+commit a41b571256ce02245a5633689d7b4fa21312c2d7
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:42:58 2006 +0000
 
-2006-12-21 02:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add chown/chmod to configure.ac.
 
-	Changed:
-		testsuite/config/unix.exp (1.5), "Exp", lines: +4 -3;  commitid: oullyEkexkm4MkZr;
-		testsuite/lib/diradm.exp (1.3), "Exp", lines: +21 -23;  commitid: oullyEkexkm4MkZr;
+commit 129b9d53aaeb4e1c72ae402a643320f617914a7c
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:40:02 2006 +0000
 
-	Force dn usage for testcases and clean up bugs.
+    Clean up chown/chmod and fix a case where chmod might not have had permissions.
 
-2006-12-20 09:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 218e86f8d4b8065d9abb46bb0099c26d2f86214e
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:39:40 2006 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.13), "Exp", lines: +4 -2;  commitid: PlNnhZzdx2bEZeZr;
+    chown/chmod.
 
-	uidnumber must exist.
+commit 91d098cc2e1e7fc555b482c36d278a1b8571b876
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:39:24 2006 +0000
 
-2006-12-20 08:33  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add chown/chmod.
 
-	Changed:
-		testsuite/config/unix.exp (1.4), "Exp", lines: +3 -3;  commitid: rxQbsTHDg6u0QeZr;
+commit e5dcdf5c74b4abfd9413bb95f07f05dd30b9496c
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:22:38 2006 +0000
 
-	quit for cleanup.
+    usermod note.
 
-2006-12-20 02:19  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 6fda49731127f3a05d8bd1f6c10c4301d8b53ee9
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:20:55 2006 +0000
 
-	Changed:
-		src/diradm.misc.sh.in (1.6), "Exp", lines: +115 -96;  commitid: d3AHWLLNec6zLcZr;
+    Add general development instructions.
 
-	convert help to have common blocks and autocomplete help nicely.
+commit 4c95c6db83295f2a4a82b736137cd48dea566c30
+Author: robbat2 <robbat2>
+Date:   Thu Jun 8 21:16:25 2006 +0000
 
-2006-12-20 01:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add debugging for usernextfreeuid.
 
-	Added:
-		testsuite/diradm.host/.cvsignore (1.1)
-		testsuite/diradm.host/hostadd-1.exp (1.1)
-		testsuite/diradm.host/hostadd-1.tst (1.1)
+commit b9893cd626417fa3d31c6e8304d7c5251e5aced0
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 23:40:27 2006 +0000
 
-	add first testcase.
+    fix handling of ?*.
 
-2006-12-20 01:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 447d5d9fbbbbd398557e179388303b5810ac93d8
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 20:12:56 2006 +0000
 
-	Changed:
-		testsuite/config/unix.exp (1.3), "Exp", lines: +48 -4;  commitid: U2iyfppLVioOucZr;
+    2.8.1 release.
 
-	put in diradm_version and clean up.
+commit 3fb80232608a6c8178f4ec44245ebcbd19a8ad44
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 20:11:17 2006 +0000
 
-2006-12-20 01:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    ignore trailing ? search types.
 
-	Changed:
-		testsuite/lib/diradm.exp (1.2), "Exp", lines: +42 -27;  commitid: JeguQgwjWdTJucZr;
+commit 9059841e0a446570fd6ca88b9fe223b6d85d02d8
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:57:03 2006 +0000
 
-	actual test runner.
+    changelog update.
 
-2006-12-20 01:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit ead5f7abf3d4c21a79384b5f480f82c3a9cd8548
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:56:50 2006 +0000
 
-	Changed:
-		testsuite/config-slapd/slapd.exp (1.2), "Exp", lines: +27 -23;  commitid: XF81bX7kvTlDucZr;
+    new news.
 
-	cleanup verbose.
+commit 09fdd953c03f4689f10da0d397f6287af57889a1
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:53:08 2006 +0000
 
-2006-12-20 01:29  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    better list.
 
-	Changed:
-		Makefile.am (1.15), "Exp", lines: +2 -3;  commitid: hSnL4JjmdMswucZr;
+commit d8d84170dc7f2bab98612d3880dbc0cdb4dd515e
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:52:55 2006 +0000
 
-	fix check invocation.
+    bump version number.
 
-2006-12-19 12:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 970c680de5ba0b9cf638caa3464e591cb0f3516f
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:52:46 2006 +0000
 
-	Added:
-		testsuite/lib/diradm.exp (1.1)
-	Changed:
-		.cvsignore (1.9), "Exp", lines: +1 -0;  commitid: ovCMKpnMzJRX68Zr;
-		Makefile.am (1.14), "Exp", lines: +8 -3;  commitid: ovCMKpnMzJRX68Zr;
-		src/diradm.conf.in (1.15), "Exp", lines: +5 -3;  commitid: ovCMKpnMzJRX68Zr;
-		src/diradm.misc.sh.in (1.5), "Exp", lines: +3 -3;  commitid: ovCMKpnMzJRX68Zr;
-		testsuite/config/unix.exp (1.2), "Exp", lines: +13 -34;  commitid: ovCMKpnMzJRX68Zr;
+    Update spec file for RPM users.
 
-	Test harness for diradm.
+commit 7f0f565237683aefd72370ccc890558ba2b9769b
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:50:45 2006 +0000
 
-2006-12-19 12:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Clean up CVS keyword tracker code.
 
-	Added:
-		autofs.schema (1.1)
+commit 8d5171d12d3bb58d4f69ee7b87d6900944f7455c
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:46:21 2006 +0000
 
-	autofs schema.
+    passwd is a valid command.
 
-2006-12-19 12:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c830369c0afa9b942ee36f90ce73f8830b2e0dc3
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:45:50 2006 +0000
 
-	Added:
-		testsuite/config-slapd/ldap.conf (1.1)
-		testsuite/config-slapd/ldapdump (1.1)
-		testsuite/config-slapd/slapd.conf (1.1)
-		testsuite/config-slapd/slapd.exp (1.1)
-		testsuite/config-slapd/db/.cvsignore (1.1)
+    trim trailing $ from names.
 
-	slapd infrastructure for test engine.
+commit fbd4509ea9ea50a0954763bfa511ab3848dea546
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:45:35 2006 +0000
 
-2006-12-19 07:50  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    print usage for passwd function.
 
-	Changed:
-		Makefile.am (1.13), "Exp", lines: +2 -2;  commitid: e1gCoJ4rEsRdD6Zr;
-		configure.ac (1.31), "Exp", lines: +1 -0;  commitid: e1gCoJ4rEsRdD6Zr;
-		src/.cvsignore (1.6), "Exp", lines: +1 -0;  commitid: e1gCoJ4rEsRdD6Zr;
+commit 6c41d5f348e475abcb2dfdb84b7ac570f221fdef
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:17:35 2006 +0000
 
-	test infrastructure.
+    Change all LDIF style deletion to append_dn_delete function.
 
-2006-12-19 07:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit ff8226a285a1d7e66a02484f5e0434d92f671b0e
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:09:00 2006 +0000
 
-	Added:
-		testsuite/.cvsignore (1.1)
-		testsuite/Makefile.am (1.1)
-		testsuite/config/unix.exp (1.1)
+    update for newer autoconf support.
 
-	Create test infrastructure.
+commit 93b6979f4d7d3058413f14cc4292f1fd6589be89
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:08:38 2006 +0000
 
-2006-12-19 04:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    fix case where shadow data might be partially missing.
 
-	Changed:
-		reconf (1.7), "Exp", lines: +4 -4;  commitid: nEVe269eSZIYo5Zr;
+commit 9f2f3a23f0d3a173dd0b42a88a1fbe5094dbdd86
+Author: robbat2 <robbat2>
+Date:   Tue Jun 6 19:08:24 2006 +0000
 
-	don't force versions
+    fix testcase for sed -r.
 
-2006-12-18 08:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit fad291c8b747b4bde497858523847f55bfd36d93
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 08:14:10 2005 +0000
 
-	Changed:
-		src/diradm.host.sh.in (1.5), "Exp", lines: +43 -17;  commitid: EdHzT7yCabHgSYYr;
+    changelog bump.
 
-	fix ethers handling on hosts.
+commit 6c117600ad95783c693c1c1152854e53523c688f
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 08:12:36 2005 +0000
 
-2006-12-18 08:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    update Makefile.
 
-	Changed:
-		src/diradm.common.sh.in (1.12), "Exp", lines: +3 -3;  commitid: JKGygzG9ZcYaSYYr;
+commit f2ec0406a7546d568d8a28c1fffa2eafaba9c553
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 08:12:18 2005 +0000
 
-	stderr not stdout for debug.
+    update NEWS.
 
-2006-06-08 22:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 53849c7611d046f6d2bea159f864727900e45e28
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 08:10:32 2005 +0000
 
-	Changed:
-		NEWS (1.14), "Exp", lines: +1 -0;  commitid: 66784488a5394567;
+    Clean up TODO.
 
-	news item.
+commit 1538efe5f5bea7f07c2f7e0a296cb64c81203993
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 08:10:24 2005 +0000
 
-2006-06-08 22:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add KNOWN-BUGS to doc list.
 
-	Changed:
-		NEWS (1.13), "Exp", lines: +34 -29;  commitid: 65fb4488a50b4567;
+commit 71e8cee5c8a567f94d8e75349a29c06db52f618b
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 07:26:08 2005 +0000
 
-	NEWS file.
+    changelog bump.
 
-2006-06-08 22:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 1120dc550b3773c0f65b0fe79a1af8e3e283d625
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 07:21:15 2005 +0000
 
-	Changed:
-		configure.ac (1.30), "Exp", lines: +1 -1;  commitid: 64064488a45a4567;
+    Clean up bootstrap build.
 
-	bump version.
+commit 288af42fe22465310e1982b09003880c5df1df42
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 07:20:12 2005 +0000
 
-2006-06-08 21:43  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    update changelog
 
-	Changed:
-		DEVELOPMENT (1.2), "Exp", lines: +7 -5;  commitid: 594744889a1e4567;
+commit 9596a4918f0159a0ca98fb25cd8cc4e237db92dd
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 07:17:13 2005 +0000
 
-	add reconf note.
+    Update THANKS file.
 
-2006-06-08 21:42  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 1dda9096ecb41c7575201c43ad6dd8cad7a390fd
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:52:02 2005 +0000
 
-	Changed:
-		configure.ac (1.29), "Exp", lines: +15 -9;  commitid: 58fc448899e24567;
+    Bump version number on configure.
 
-	add chown/chmod to configure.ac.
+commit d046eae96ad4ea0e7cf7410b123e699fcc9e0006
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:51:42 2005 +0000
 
-2006-06-08 21:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Finally write README
 
-	Changed:
-		src/superadduser.diradm.in (1.4), "Exp", lines: +12 -10;  commitid: 586e448899324567;
+commit 11f9f51c32f8b83d9cb9d456f0510bed22b02731
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:44:14 2005 +0000
 
-	Clean up chown/chmod and fix a case where chmod might not have had
-	permissions.
+    Clean up README.
 
-2006-06-08 21:39  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d38860b1e5916177613c7fad3bdd8e87bc70263c
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:44:03 2005 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.20), "Exp", lines: +5 -5;  commitid: 58204488991c4567;
+    add helpfile for debugging.
 
-	chown/chmod.
+commit 082c404159ec88a16121bc7a0533d52595293233
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:42:53 2005 +0000
 
-2006-06-08 21:39  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    New file, documenting bugs.
 
-	Changed:
-		src/diradm.in (1.23), "Exp", lines: +3 -1;  commitid: 57ff4488990c4567;
+commit 66f1979c3e097a1e2bd3774b014dde8686208b03
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:34:37 2005 +0000
 
-	add chown/chmod.
+    Clean up TODO messages.
 
-2006-06-08 21:22  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 2842271593b5c051c24990d701f3599efb13815d
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:21:39 2005 +0000
 
-	Changed:
-		TODO (1.4), "Exp", lines: +2 -0;  commitid: 55094488951e4567;
+    Add brief listing mode for chage/passwd -S. Add passwd -e and -S functionality. Make diradm passwd actually do stuff.
 
-	usermod note.
+commit 956f5a6b90ea9b513857f1e8cbf4a99009461e1f
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 06:19:52 2005 +0000
 
-2006-06-08 21:20  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Add help for passwd cmd.
 
-	Added:
-		DEVELOPMENT (1.1)
+commit 303edb0081a5bb830982e237932860d35077dacf
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 05:24:35 2005 +0000
 
-	Add general development instructions.
+    Update self-testing routines.
 
-2006-06-08 21:16  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 42630fefaf62df67f7720989740663d693af0b97
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 05:24:10 2005 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.11), "Exp", lines: +5 -3;  commitid: 5063448893a94567;
+    update binary variables.
 
-	Add debugging for usernextfreeuid.
+commit ed5fb7c6cd2adecc7c254f85b4855d23cfb9cc31
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 05:14:20 2005 +0000
 
-2006-06-06 23:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    move away from sourcing with .. Source check script when needed.
 
-	Changed:
-		src/diradm.conf.in (1.14), "Exp", lines: +5 -5;  commitid: 505f4486126b4567;
+commit 3648b4031e9cff7022e5716284761971ed49a9c0
+Author: robbat2 <robbat2>
+Date:   Tue Dec 13 05:13:14 2005 +0000
 
-	fix handling of ?*.
+    move away from sourcing with ..
 
-2006-06-06 20:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d3d880ea826a45e868ca3622186cfc9e8d24c9a4
+Author: robbat2 <robbat2>
+Date:   Wed Nov 16 23:33:24 2005 +0000
 
-	Changed:
-		NEWS (1.12), "Exp", lines: +3 -0;  commitid: 229b4485e1ba4567;
-		configure.ac (1.28), "Exp", lines: +1 -1;  commitid: 229b4485e1ba4567;
+    bump.
 
-	2.8.1 release.
+commit 1c6916db32eaf98da0eb6767a48d39691685c7a8
+Author: robbat2 <robbat2>
+Date:   Wed Nov 16 23:32:28 2005 +0000
 
-2006-06-06 20:11  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    minor version bump.
 
-	Changed:
-		src/diradm.conf.in (1.13), "Exp", lines: +8 -1;  commitid: 20cf4485e1654567;
+commit 8ce1cb900c7ad8748da490169793d1b45955bcec
+Author: robbat2 <robbat2>
+Date:   Wed Nov 16 23:31:55 2005 +0000
 
-	ignore trailing ? search types.
+    Missed diradm.shadow.sh.in in distfile.
 
-2006-06-06 19:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 5555872b70f002632b0953e016730bb902de3535
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 01:01:55 2005 +0000
 
-	Changed:
-		NEWS (1.11), "Exp", lines: +9 -0;  commitid: 1a304485de024567;
+    bump.
 
-	new news.
+commit 7c7328ff0cc926a1f0ccdb784a5d1c9e861d7d23
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 01:01:45 2005 +0000
 
-2006-06-06 19:53  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    tag for 2.5 release.
 
-	Changed:
-		TODO (1.3), "Exp", lines: +15 -0;  commitid: 18144485dd244567;
+commit 313fcba7bbe57e1650b062a45bfb0c089be9cfde
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 01:00:59 2005 +0000
 
-	better list.
+    bump.
 
-2006-06-06 19:52  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit edf9e0be7f9818b5de685226049141f49e586d74
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:59:27 2005 +0000
 
-	Changed:
-		configure.ac (1.27), "Exp", lines: +1 -1;  commitid: 17f64485dd174567;
+    ensure automount/irix configure stuff works right too.
 
-	bump version number.
+commit c4c527e25b51892cc0bcba128083fe056c1ae8fb
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:56:21 2005 +0000
 
-2006-06-06 19:52  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    bump.
 
-	Changed:
-		diradm.spec.in (1.2), "Exp", lines: +10 -1;  commitid: 17ea4485dd0e4567;
+commit 6423fb4dedc5b90ea8c89e1d01b7402d5f1d195d
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:56:04 2005 +0000
 
-	Update spec file for RPM users.
+    fix gentoo bug #103191, disable-samba not working right.
 
-2006-06-06 19:50  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit daa14e195dff683fd0fdd24866dfa96c9d7a39cd
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:55:35 2005 +0000
 
-	Changed:
-		src/diradm.in (1.22), "Exp", lines: +2 -10;  commitid: 17b64485dc954567;
-		src/diradm.misc.sh.in (1.4), "Exp", lines: +2 -10;  commitid: 17b64485dc954567;
+    maintiner clean can remove makefile.in
 
-	Clean up CVS keyword tracker code.
+commit d4e3e1ae1eb5c7e887af76c311d3fa9e096226f8
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:55:15 2005 +0000
 
-2006-06-06 19:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    code to find real min uid.
 
-	Changed:
-		src/diradm.in (1.21), "Exp", lines: +5 -6;  commitid: 13104485db8d4567;
+commit c9d3df7a3582b01a25baef3e36eb3e0a0a3c37ff
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:55:04 2005 +0000
 
-	passwd is a valid command.
+    use @BASH@ for top
 
-2006-06-06 19:45  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 8b56c5d8d78630ef5f27c3ddd28d6005e59f1483
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:53:36 2005 +0000
 
-	Changed:
-		src/diradm.samba.sh.in (1.4), "Exp", lines: +6 -5;  commitid: 12da4485db6e4567;
+    add in new code to find the next free UID, skipping holes.
 
-	trim trailing $ from names.
+commit a88e8007d9df71a9c280fa49969e7ba3386184a4
+Author: robbat2 <robbat2>
+Date:   Mon Aug 22 00:53:01 2005 +0000
 
-2006-06-06 19:45  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Work on Slackware-like superadduser for diradm.
 
-	Changed:
-		src/diradm.shadow.sh.in (1.10), "Exp", lines: +7 -1;  commitid: 12c84485db5f4567;
+commit 9a095baab5cafa6a5365e0903a12c8b91c31d215
+Author: robbat2 <robbat2>
+Date:   Mon Jul 4 01:45:50 2005 +0000
 
-	print usage for passwd function.
+    add todo file.
 
-2006-06-06 19:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 5068719e6b550fd8ddf4fab7e3f31ab2b8b4c8df
+Author: robbat2 <robbat2>
+Date:   Mon Jul 4 01:45:34 2005 +0000
 
-	Changed:
-		src/diradm.automount.sh.in (1.5), "Exp", lines: +2 -4;  commitid: 3624485d4cf4567;
-		src/diradm.common.sh.in (1.10), "Exp", lines: +8 -1;  commitid: 3624485d4cf4567;
-		src/diradm.host.sh.in (1.4), "Exp", lines: +2 -5;  commitid: 3624485d4cf4567;
-		src/diradm.samba.sh.in (1.3), "Exp", lines: +2 -4;  commitid: 3624485d4cf4567;
-		src/diradm.user.sh.in (1.19), "Exp", lines: +2 -2;  commitid: 3624485d4cf4567;
+    Add todo file.
 
-	Change all LDIF style deletion to append_dn_delete function.
+commit d6e255a6997bff9ec3fc3675fe2d8e2a571d4b79
+Author: robbat2 <robbat2>
+Date:   Wed May 18 22:58:44 2005 +0000
 
-2006-06-06 19:09  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    update news.
 
-	Changed:
-		configure.ac (1.26), "Exp", lines: +2 -5;  commitid: 7aeb4485d2cc4567;
+commit aae25ad36f83f0b9b24b05df0aebae88c4df5293
+Author: robbat2 <robbat2>
+Date:   Wed May 18 22:58:40 2005 +0000
 
-	update for newer autoconf support.
+    fix up configure script.
 
-2006-06-06 19:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c3fff6f02648a0c470952d5b352ed4428a17c6fe
+Author: robbat2 <robbat2>
+Date:   Wed May 18 22:58:29 2005 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.9), "Exp", lines: +13 -7;  commitid: 7ab04485d2b64567;
+    update comments.
 
-	fix case where shadow data might be partially missing.
+commit 91fcb78323d3b52488d71e8fb69dad004b8e4e10
+Author: robbat2 <robbat2>
+Date:   Wed May 18 22:57:07 2005 +0000
 
-2006-06-06 19:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    chsh and chfn completed and tested.
 
-	Changed:
-		src/diradm.check.sh.in (1.5), "Exp", lines: +15 -10;  commitid: 7a9a4485d2a84567;
+commit 0284ae4819de665441fc18fab42e3dcf0081f57d
+Author: robbat2 <robbat2>
+Date:   Wed May 18 22:56:57 2005 +0000
 
-	fix testcase for sed -r.
+    dont debug searches.
 
-2005-12-13 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit b18fb4aa7671f110607f112200a67888e73ad955
+Author: robbat2 <robbat2>
+Date:   Wed May 18 22:56:47 2005 +0000
 
-	Changed:
-		Makefile.am (1.12), "Exp", lines: +2 -2;  commitid: 27d9439e82744567;
+    clean up WHOAMI usage.
 
-	update Makefile.
+commit b54ee69e85cd0265b4e5733d16baa63d6c3ccfa7
+Author: robbat2 <robbat2>
+Date:   Wed May 18 01:08:24 2005 +0000
 
-2005-12-13 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    raw password input method.
 
-	Changed:
-		NEWS (1.10), "Exp", lines: +4 -0;  commitid: 27a6439e82624567;
+commit d75e315fe69ce0542a90ce86b646e9d0f15c7708
+Author: robbat2 <robbat2>
+Date:   Wed May 18 01:07:50 2005 +0000
 
-	update NEWS.
+    chfn finished, and move away from WHOAMI.
 
-2005-12-13 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 8f5c1cde665d6ef0fca9af25811d9ad33074b441
+Author: robbat2 <robbat2>
+Date:   Wed May 11 01:18:29 2005 +0000
 
-	Changed:
-		NEWS (1.10), "Exp", lines: +4 -0;  commitid: 27a6439e82624567;
+    fix getopt behavior. compelete chage.
 
-	update NEWS.
+commit cc083ed49c57137b6632be7a34a91db7cc474096
+Author: robbat2 <robbat2>
+Date:   Wed May 11 01:18:08 2005 +0000
 
-2005-12-13 08:10  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add isinteger.
 
-	Changed:
-		TODO (1.2), "Exp", lines: +3 -7;  commitid: 26f3439e81f84567;
+commit a9d841a06ecc09a42c27acc2a83696a6a20d4eb7
+Author: robbat2 <robbat2>
+Date:   Wed May 11 01:04:15 2005 +0000
 
-	Clean up TODO.
+    fix getopt behavior. fix samba/irix usage. force -- on internal commands. fix amadd call. add initial irix support to usermod.
 
-2005-12-13 08:10  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d66b3fd33b7e6c8873a328afe1563d211b6f88b2
+Author: robbat2 <robbat2>
+Date:   Wed May 11 01:02:56 2005 +0000
 
-	Changed:
-		Makefile.am (1.11), "Exp", lines: +2 -2;  commitid: 26df439e81f04567;
+    fix getopt input and behavior.
 
-	Add KNOWN-BUGS to doc list.
+commit 4dca6a925f937e59222c4c6739a18f5a012192ca
+Author: robbat2 <robbat2>
+Date:   Wed May 11 01:02:08 2005 +0000
 
-2005-12-13 07:21  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    unset command when complete.
 
-	Changed:
-		.cvsignore (1.8), "Exp", lines: +1 -0;  commitid: 202f439e766b4567;
-		reconf (1.6), "Exp", lines: +1 -0;  commitid: 202f439e766b4567;
+commit 793f0526d2ee86d6e06e264ccbd6d7fffb7778a7
+Author: robbat2 <robbat2>
+Date:   Mon May 9 21:33:56 2005 +0000
 
-	Clean up bootstrap build.
+    work on passwd command.
 
-2005-12-13 07:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 5ff0520e8754563773afdd32a5183633fec26fe1
+Author: robbat2 <robbat2>
+Date:   Wed May 4 08:12:29 2005 +0000
 
-	Changed:
-		THANKS (1.3), "Exp", lines: +38 -0;  commitid: 19ef439e75794567;
+    forgot automount.
 
-	Update THANKS file.
+commit c436615cef25d2ccd9d474a48f2b8ba6bfae3325
+Author: robbat2 <robbat2>
+Date:   Wed May 4 08:12:13 2005 +0000
 
-2005-12-13 06:52  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    split out shadow/passwd stuff, and start superadduser.
 
-	Changed:
-		configure.ac (1.25), "Exp", lines: +1 -1;  commitid: 11e5439e6f924567;
+commit f4b10f8d87be8d5e757b8d307a74fde44480f2b2
+Author: robbat2 <robbat2>
+Date:   Wed May 4 07:38:38 2005 +0000
 
-	Bump version number on configure.
+    clean up configure.ac and bump version.
 
-2005-12-13 06:51  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c0e108d43922b42b5c88b3ab8571539365b7fc01
+Author: robbat2 <robbat2>
+Date:   Wed May 4 07:32:59 2005 +0000
 
-	Changed:
-		README.in (1.6), "Exp", lines: +14 -4;  commitid: 1199439e6f7e4567;
+    make crypt-smbhash optional.
 
-	Finally write README
+commit e32bbb6ac84dde56cf195164ee8c6e90725b62ff
+Author: robbat2 <robbat2>
+Date:   Wed May 4 07:32:40 2005 +0000
 
-2005-12-13 06:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    rename irix to irixpasswd.
 
-	Changed:
-		README.in (1.5), "Exp", lines: +3 -4;  commitid: e16439e6dbe4567;
+commit 4c0763765cc4151e192c47fe130745f41b8c23e1
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:48:55 2005 +0000
 
-	Clean up README.
+    automount and irix are now optional.
 
-2005-12-13 06:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit bf8bcfde3bba7f10b47dd51db2f19b72e651164f
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:48:26 2005 +0000
 
-	Added:
-		DEBUGGING (1.1)
+    automount stuff now available to external use.
 
-	add helpfile for debugging.
+commit eb677e24f3c8ce7f764b814cee2ab56dacb9e884
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:48:00 2005 +0000
 
-2005-12-13 06:42  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    samba optional stuff, needs testing still.
 
-	Added:
-		KNOWN-BUGS (1.1)
+commit 7fa20db5c1b7666ca5e295f1ccd07691420408b6
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:47:44 2005 +0000
 
-	New file, documenting bugs.
+    automount and irix cleanup and optional stuff.
 
-2005-12-13 06:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d3f143abc611f064a30afa761e349641cdd9f835
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:47:28 2005 +0000
 
-	Changed:
-		src/diradm.group.sh.in (1.6), "Exp", lines: +7 -7;  commitid: a2e439e6b7d4567;
-		src/diradm.shadow.sh.in (1.8), "Exp", lines: +4 -5;  commitid: a2e439e6b7d4567;
+    == cleanup.
 
-	Clean up TODO messages.
+commit 20d1bf928a6c9500b6d3f45de2e3373299f6cf00
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:46:58 2005 +0000
 
-2005-12-13 06:21  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    remove usage of egrep and refactor sed expression for more speed.
 
-	Changed:
-		src/diradm.shadow.sh.in (1.7), "Exp", lines: +65 -24;  commitid: 487439e68734567;
+commit f803a23e09c5ecf7232bee4c69eb694d5f7e6b9d
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:46:31 2005 +0000
 
-	Add brief listing mode for chage/passwd -S. Add passwd -e and -S
-	functionality. Make diradm passwd actually do stuff.
+    remove TODO notes as these are completed.
 
-2005-12-13 06:19  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c7e0a2187027823985817fad875367d96bca5a35
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:46:07 2005 +0000
 
-	Changed:
-		src/diradm.misc.sh.in (1.3), "Exp", lines: +9 -3;  commitid: 3ea439e68084567;
+    cleanup display and add automount docs.
 
-	Add help for passwd cmd.
+commit 452d37b445ad3d66200cdca083a93078b0c62898
+Author: robbat2 <robbat2>
+Date:   Tue May 3 20:45:37 2005 +0000
 
-2005-12-13 05:24  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    make automount and irix optional, cleanup == usage.
 
-	Changed:
-		src/diradm.check.sh.in (1.4), "Exp", lines: +4 -4;  commitid: 73a2439e5b134567;
+commit 80445365646c65bf8376d9b3cef2c1d93df939ea
+Author: robbat2 <robbat2>
+Date:   Tue May 3 09:03:37 2005 +0000
 
-	Update self-testing routines.
+    all passing of automount options.
 
-2005-12-13 05:24  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit e43f903483d819d837e6f789f5f2ef92e00dcc58
+Author: robbat2 <robbat2>
+Date:   Tue May 3 04:44:20 2005 +0000
 
-	Changed:
-		src/diradm.in (1.20), "Exp", lines: +19 -18;  commitid: 737e439e5afa4567;
+    complete sed fixes.
 
-	update binary variables.
+commit cc4edb964e033f40ad75c37e8b10a1440e310cd8
+Author: robbat2 <robbat2>
+Date:   Tue May 3 04:32:13 2005 +0000
 
-2005-12-13 05:14  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Fix bug Gentoo:#90026 and start work on portable sed stuff.
 
-	Changed:
-		src/diradm.in (1.19), "Exp", lines: +8 -7;  commitid: 71f9439e58ac4567;
-		src/diradm.user.sh.in (1.18), "Exp", lines: +3 -3;  commitid: 71f9439e58ac4567;
+commit 52d1775842df08ea48e307e5cf0938a8f732c5ea
+Author: robbat2 <robbat2>
+Date:   Tue May 3 04:31:14 2005 +0000
 
-	move away from sourcing with .. Source check script when needed.
+    allow '.','_' and '-' in user and group names.
 
-2005-12-13 05:13  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 878175387421c743ef24939f6c81d0c37c5f8163
+Author: robbat2 <robbat2>
+Date:   Mon Feb 7 09:59:39 2005 +0000
 
-	Changed:
-		src/diradm.in (1.18), "Exp", lines: +10 -10;  commitid: 71bc439e586a4567;
+    attempt to fix trailing dn bug in usermod -G.
 
-	move away from sourcing with ..
+commit a3cf0a52d6000090369dbcefadd3b3547c1fb3f1
+Author: robbat2 <robbat2>
+Date:   Fri Jan 14 02:34:56 2005 +0000
 
-2005-11-16 23:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add new script to automake.
 
-	Changed:
-		configure.ac (1.24), "Exp", lines: +1 -1;
+commit 8ccb07ba28636e873485fec8084795bac870c132
+Author: robbat2 <robbat2>
+Date:   Fri Jan 14 02:34:30 2005 +0000
 
-	minor version bump.
+    new automount stuff, properly abstracted. still need to add it to groups.
 
-2005-11-16 23:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c595918c90d74dfcbc2fd33491d117ac7c387597
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 13:35:02 2005 +0000
 
-	Changed:
-		src/Makefile.am (1.11), "Exp", lines: +2 -2
+    cl update.
 
-	Missed diradm.shadow.sh.in in distfile.
+commit 8121c55153345b73f214d3324799a61d47513049
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 13:34:52 2005 +0000
 
-2005-08-22 01:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add debug instructions.
 
-	Changed:
-		configure.ac (1.23), "Exp", lines: +1 -1
+commit 23fd9343bc9227551d9401947def8be30bec8a29
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 13:32:41 2005 +0000
 
-	tag for 2.5 release.
+    cl update.
 
-2005-08-22 00:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 98c31ea6b88f68a8367c14cd9a28e8a034207292
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 13:32:19 2005 +0000
 
-	Changed:
-		configure.ac (1.22), "Exp", lines: +2 -2
+    add to news.
 
-	ensure automount/irix configure stuff works right too.
+commit 886a1bb35f7fc136925beceec7fed04bc8b118d5
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 13:31:36 2005 +0000
 
-2005-08-22 00:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    cl update.
 
-	Changed:
-		configure.ac (1.21), "Exp", lines: +2 -1
+commit a3ede272f30a282d7866f14a6e9bbe6b9c98ae6a
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 13:31:17 2005 +0000
 
-	fix gentoo bug #103191, disable-samba not working right.
+    fix empty password glitch.
 
-2005-08-22 00:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 6383875e4c33b1825afa1ba5995ab24c9a15688d
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:50:17 2005 +0000
 
-	Changed:
-		Makefile.am (1.10), "Exp", lines: +2 -2
-		m4/Makefile.am (1.6), "Exp", lines: +1 -1
-		src/Makefile.am (1.10), "Exp", lines: +2 -1
+    changelog update.
 
-	maintiner clean can remove makefile.in
+commit 6f5c2abedc44bf6530740b059bdefe166927b550
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:49:50 2005 +0000
 
-2005-08-22 00:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    bump version.
 
-	Changed:
-		src/diradm.conf.in (1.12), "Exp", lines: +3 -2
+commit 733933b67b9029a683a2ee3f2773be214714c046
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:49:39 2005 +0000
 
-	code to find real min uid.
+    new news.
 
-2005-08-22 00:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 695626c349385a0ee17aaa9e7ac3d56a6da886d8
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:47:12 2005 +0000
 
-	Changed:
-		src/superadduser.diradm.in (1.3), "Exp", lines: +1 -1
+    some changelog entries duped.
 
-	use @BASH@ for top
+commit 58333501e3d0bb28de170f2122094ef57ad65474
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:44:40 2005 +0000
 
-2005-08-22 00:53  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add irixpassword to makefileam.
 
-	Changed:
-		src/diradm.common.sh.in (1.9), "Exp", lines: +14 -2
-		src/diradm.user.sh.in (1.17), "Exp", lines: +2 -6
+commit 1eb7ae52de646d0199c2089ffcfdb87480923017
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:44:04 2005 +0000
 
-	add in new code to find the next free UID, skipping holes.
+    add irixpassword schema.
 
-2005-08-22 00:53  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit a4cb8c3178501eb756ffac646013e501fb9b40b7
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 12:17:52 2005 +0000
 
-	Changed:
-		src/superadduser.diradm.in (1.2), "Exp", lines: +21 -34
+    move to mail attribute instead of custom email.
 
-	Work on Slackware-like superadduser for diradm.
+commit d4145cdacb6ade5b482ac9e4acc63fd9b23ee14e
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 09:30:51 2005 +0000
 
-2005-07-04 01:45  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    ready for 2.2 this time.
 
-	Added:
-		TODO (1.1)
+commit 99b8c8f2ea21d5e1134b4b9ebfb864b2b8efaf44
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 08:05:48 2005 +0000
 
-	Add todo file.
+    whoami primaitve.
 
-2005-05-18 22:58  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 39006bfe9426c926c2f6b60ce32f43262e50d790
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 08:05:09 2005 +0000
 
-	Changed:
-		NEWS (1.9), "Exp", lines: +7 -0
+    fix renaming usage, and add whoami primative.
 
-	update news.
+commit 4e79d21f153a2cc892993d799a81e5048eadaaba
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:24:23 2005 +0000
 
-2005-05-18 22:58  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    update copyright dates.
 
-	Changed:
-		configure.ac (1.20), "Exp", lines: +4 -3
+commit 7421ea7c6b7f1b022ea9389516e036421c9874c1
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:23:25 2005 +0000
 
-	fix up configure script.
+    changelog.
 
-2005-05-18 22:58  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 8c58f5e7ab6c537b04e0132644eb6cf14c4a0bc8
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:23:19 2005 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.6), "Exp", lines: +3 -2
+    add 2.2 news.
 
-	update comments.
+commit 872d7b15ca64bac6653cc85910e2a8491f02356c
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:18:49 2005 +0000
 
-2005-05-18 22:57  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    make sure LDAP.*_CMD instead of just LDAP.*.
 
-	Changed:
-		src/diradm.user.sh.in (1.16), "Exp", lines: +43 -19
+commit a9b19f472aa5f5d120fb252c533e3ef9aa446ea5
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:09:21 2005 +0000
 
-	chsh and chfn completed and tested.
+    cvsignore.
 
-2005-05-18 22:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 911c12621af3cb95ad76304d2c08b5fb99445b45
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:08:55 2005 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.8), "Exp", lines: +2 -2
+    add false.
 
-	dont debug searches.
+commit 588cf75deea4546ec09d0dd504d86679af54d87c
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:07:03 2005 +0000
 
-2005-05-18 22:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    build components.
 
-	Changed:
-		src/diradm.shadow.sh.in (1.5), "Exp", lines: +3 -3
+commit 9fc7420f9548cb378b73c587df587c197846dfaa
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:06:55 2005 +0000
 
-	clean up WHOAMI usage.
+    building.
 
-2005-05-18 01:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 9b5e1e9d3e87c5aadc8f44bdd14551d9029b5d96
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:05:14 2005 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.4), "Exp", lines: +3 -2
+    move to custom build of components.
 
-	raw password input method.
+commit e08282fd60bd63906a71f5190761876bf187504e
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:03:26 2005 +0000
 
-2005-05-18 01:07  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    update for seperation.
 
-	Changed:
-		src/diradm.user.sh.in (1.15), "Exp", lines: +52 -28
+commit c8bce25458aed609859bb5e440c322b10455577f
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 07:01:49 2005 +0000
 
-	chfn finished, and move away from WHOAMI.
+    seperate groups of function, for faster load time.
 
-2005-05-11 01:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 9cff2c06e0d5afd8f0f2fb2cdbfdca0a060df83d
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 06:31:46 2005 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.3), "Exp", lines: +35 -23
+    cleanup hostdel. remove smbhostmod again - not needed. make append_attrib work better.
 
-	fix getopt behavior. compelete chage.
+commit 28d61b65b8387fefa6e1fded253d7b02c68872f6
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 06:00:25 2005 +0000
 
-2005-05-11 01:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    use better BASEDN variables.
 
-	Changed:
-		src/diradm.common.sh.in (1.7), "Exp", lines: +5 -1
+commit 0b7dcb33a2004fc6aedc03a15d28bc95c37964ee
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 03:24:41 2005 +0000
 
-	add isinteger.
+    fix some glitches, add cvs_header output, change running method.
 
-2005-05-11 01:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 9aebcd84934a5b0c89a53546d7eebaeb1f91866e
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 03:04:52 2005 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.14), "Exp", lines: +17 -11
+    update changelog.
 
-	fix getopt behavior. fix samba/irix usage. force -- on internal
-	commands. fix amadd call. add initial irix support to usermod.
+commit a2eeff945ab33b483dec7e26922ab0ae3ae5571d
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 03:04:10 2005 +0000
 
-2005-05-11 01:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add new commands, bump version.
 
-	Changed:
-		src/diradm.group.sh.in (1.5), "Exp", lines: +4 -1
-		src/diradm.host.sh.in (1.3), "Exp", lines: +3 -1
-		src/diradm.samba.sh.in (1.2), "Exp", lines: +2 -1
+commit ce7e63f6713d66347a1e5c13c0f4d069eed2e4aa
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 03:03:43 2005 +0000
 
-	fix getopt input and behavior.
+    fix variable conflicts with DATE. Configurize DATE, CUT, UNIQ. Update config testing. Make config and self testing available to user. Config test not run by default anymore. Update copyright year for my edits. Force -R in date format to ensure correct locale output for date_to_days. Remove cvsadd function. Abstract command list.
 
-2005-05-11 01:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 7efbe7011307d2deac6c20ccfd6e325af18f5aeb
+Author: robbat2 <robbat2>
+Date:   Sun Jan 9 03:00:11 2005 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.6), "Exp", lines: +4 -1
+    fix typos with groupbase
 
-	unset command when complete.
+commit f81197c9529d84ebf9570b4ecfabaaa8e2398111
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 22:27:03 2004 +0000
 
-2005-05-11 01:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add news.
 
-	Changed:
-		src/diradm.automount.sh.in (1.4), "Exp", lines: +3 -2
+commit b5603c5e0d793f8e0d95bbc1ba46d1bca72e0e31
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 22:25:19 2004 +0000
 
-	fix getopt input and behavior.
+    release version 2.1.
 
-2005-05-09 21:33  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit f23b8bffa72af3bff1afa6792f334b6233127674
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 22:23:39 2004 +0000
 
-	Changed:
-		src/diradm.shadow.sh.in (1.2), "Exp", lines: +39 -7
+    variable fixes.
 
-	work on passwd command.
+commit 25f42a44f27d54faa7b0c821c1f7883c037407f3
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 21:39:41 2004 +0000
 
-2005-05-04 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    changelog update.
 
-	Changed:
-		configure.ac (1.19), "Exp", lines: +1 -0
+commit bced73128cc235ae4e29a72a67b8ee531e2446e2
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 21:27:21 2004 +0000
 
-	forgot automount.
+    bump version number.
 
-2005-05-04 08:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 92eb4c86991520961afa5ce1fa83a51695c5a2d8
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 21:16:22 2004 +0000
 
-	Added:
-		src/diradm.shadow.sh.in (1.1)
-		src/superadduser.diradm.in (1.1)
-	Changed:
-		src/.cvsignore (1.5), "Exp", lines: +3 -0
-		src/Makefile.am (1.9), "Exp", lines: +2 -2
-		src/diradm.in (1.17), "Exp", lines: +6 -5
-		src/diradm.user.sh.in (1.13), "Exp", lines: +2 -83
+    autoconf stuff again, and fix smbhostadd.
 
-	split out shadow/passwd stuff, and start superadduser.
+commit 809d072a1ce4a7cbce4238d9e81885b905fbb5d0
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 09:38:44 2004 +0000
 
-2005-05-04 07:38  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    improve autoconf system.
 
-	Changed:
-		configure.ac (1.18), "Exp", lines: +24 -17
+commit 90c354a3181640abea88340e92923fbf766139c7
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 09:37:00 2004 +0000
 
-	clean up configure.ac and bump version.
+    improve autoconf system.
 
-2005-05-04 07:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit d930a0931c5c8faccee5df8f4a0c00560ba9a619
+Author: robbat2 <robbat2>
+Date:   Thu Dec 23 09:36:07 2004 +0000
 
-	Changed:
-		src/diradm-mkpasswd.pl.in (1.3), "Exp", lines: +5 -5
+    force versions.
 
-	make crypt-smbhash optional.
+commit 375bcce8704424daf4d9d48b2d74ab093a84fdf8
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 08:33:17 2004 +0000
 
-2005-05-04 07:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    latest changelog.
 
-	Changed:
-		src/diradm.conf.in (1.11), "Exp", lines: +2 -2
-		src/diradm.user.sh.in (1.12), "Exp", lines: +2 -2
+commit ef5794955769f9620463db5f25c194383c791a84
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 08:32:48 2004 +0000
 
-	rename irix to irixpasswd.
+    add config.cache to cvsignore.
 
-2005-05-03 20:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 31fe5c7450117de8fb7a53ae2146ebaadb68906a
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 08:32:23 2004 +0000
 
-	Changed:
-		configure.ac (1.17), "Exp", lines: +18 -2
+    chmod +x stuff. remove dud define.
 
-	automount and irix are now optional.
+commit d6ff56564ce27574f78f48ca8d0f0682739f7621
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 08:31:31 2004 +0000
 
-2005-05-03 20:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    validation, commenting.
 
-	Changed:
-		src/diradm.automount.sh.in (1.3), "Exp", lines: +27 -10
-		src/diradm.in (1.16), "Exp", lines: +9 -6
+commit afa5bf2a424b42ef73b2add9d5f98573482eb553
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:42:41 2004 +0000
 
-	automount stuff now available to external use.
+    Make 2.0 release.
 
-2005-05-03 20:48  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit df0ab83da6068296cf98c3d96f2ee7d599f4d592
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:42:16 2004 +0000
 
-	Changed:
-		src/diradm-mkpasswd.pl.in (1.2), "Exp", lines: +5 -5
+    Make release.
 
-	samba optional stuff, needs testing still.
+commit 130a8bdea6e68fe662d59978bf938f35da726eb6
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:41:38 2004 +0000
 
-2005-05-03 20:47  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add accum.
 
-	Changed:
-		src/diradm.conf.in (1.10), "Exp", lines: +21 -11
+commit 354ef8dff8e662c2abdeaecf099e33725007da08
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:41:04 2004 +0000
 
-	automount and irix cleanup and optional stuff.
+    ready for release.
 
-2005-05-03 20:47  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 9cf4e930f8c34e69fb048ec23d71b01852ef6a71
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:40:19 2004 +0000
 
-	Changed:
-		src/diradm.check.sh.in (1.3), "Exp", lines: +2 -2
-		src/diradm.group.sh.in (1.4), "Exp", lines: +2 -2
+    new version number for release.
 
-	== cleanup.
+commit c1222bc094b69fac4e160b4eacf2f6ccb5920b90
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:39:26 2004 +0000
 
-2005-05-03 20:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    helper script.
 
-	Changed:
-		src/diradm.common.sh.in (1.5), "Exp", lines: +3 -3
+commit 09eb40cde54aec691a9e8f34559e06e5cd2b9bc6
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:34:30 2004 +0000
 
-	remove usage of egrep and refactor sed expression for more speed.
+    for auto-data.
 
-2005-05-03 20:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit ccd027964354c5a0a5c52a647ebb32f449ba243c
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 07:30:14 2004 +0000
 
-	Changed:
-		src/diradm.host.sh.in (1.2), "Exp", lines: +10 -6
+    initial changelog by cvs2cl.
 
-	remove TODO notes as these are completed.
+commit ae4d84823255062a8aaf65e12dffb65a2561211f
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 03:03:19 2004 +0000
 
-2005-05-03 20:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    BASHSH var, any version of auto*.
 
-	Changed:
-		src/diradm.misc.sh.in (1.2), "Exp", lines: +33 -25
+commit fee8960c6855070cc1734cfd5a7f34f64e23f758
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 03:01:38 2004 +0000
 
-	cleanup display and add automount docs.
+    readme in build
 
-2005-05-03 20:45  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 84b5c40a2ea952cd4ce4fbbd3288d474f8006c38
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 03:01:31 2004 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.11), "Exp", lines: +23 -21
+    autoconf version
 
-	make automount and irix optional, cleanup == usage.
+commit 4c60e36d373098b78a32e923ae18c474a11f9bbe
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 02:57:56 2004 +0000
 
-2005-05-03 09:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    automake foreign mode
 
-	Changed:
-		src/diradm.automount.sh.in (1.2), "Exp", lines: +8 -4
-		src/diradm.user.sh.in (1.10), "Exp", lines: +2 -2
+commit 57fc372b0f2fa617b618a9be98e08f198426144c
+Author: robbat2 <robbat2>
+Date:   Sun Dec 12 02:44:30 2004 +0000
 
-	all passing of automount options.
+    auto-ize nearly done!
 
-2005-05-03 04:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 39e35ac9505551d58507641aad78e718f82d01db
+Author: robbat2 <robbat2>
+Date:   Fri Dec 10 03:59:54 2004 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.4), "Exp", lines: +3 -3
-		src/diradm.user.sh.in (1.9), "Exp", lines: +9 -9
+    cvsignore
 
-	complete sed fixes.
+commit 19689c2a2827baf7bf624e17fe8339e96c9c3508
+Author: robbat2 <robbat2>
+Date:   Fri Dec 10 03:46:37 2004 +0000
 
-2005-05-03 04:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    autotool!
 
-	Changed:
-		NEWS (1.8), "Exp", lines: +5 -0
-		configure.ac (1.16), "Exp", lines: +20 -3
-		src/diradm.in (1.15), "Exp", lines: +5 -4
+commit 5be8fe47c7c021e0ec3d31254535e6c73704b5af
+Author: robbat2 <robbat2>
+Date:   Fri Dec 10 03:18:34 2004 +0000
 
-	Fix bug Gentoo:#90026 and start work on portable sed stuff.
+    autohell
 
-2005-05-03 04:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 6371a9f9307e681a0ba010a35bea5e89391ee04c
+Author: robbat2 <robbat2>
+Date:   Fri Dec 10 03:12:50 2004 +0000
 
-	Changed:
-		src/diradm.group.sh.in (1.3), "Exp", lines: +3 -3
-		src/diradm.user.sh.in (1.8), "Exp", lines: +3 -3
+    auto-toolize, move source to new file.
 
-	allow '.','_' and '-' in user and group names.
+commit 83cfad239723a05fc6486aab6c2df6fdd656137b
+Author: robbat2 <robbat2>
+Date:   Fri Dec 10 01:46:49 2004 +0000
 
-2005-02-07 09:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    cleanup.
 
-	Changed:
-		src/diradm.user.sh.in (1.7), "Exp", lines: +51 -19
+commit a602ecfe1ab8dc77dc04660e1339519b6f052bc4
+Author: robbat2 <robbat2>
+Date:   Fri Dec 10 01:12:12 2004 +0000
 
-	attempt to fix trailing dn bug in usermod -G.
+    rename mkpasswd.
 
-2005-01-14 02:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 5cb527ccbb82dfb0982d0d2cf7de5df985c7271d
+Author: robbat2 <robbat2>
+Date:   Thu Dec 9 14:01:34 2004 +0000
 
-	Changed:
-		src/Makefile.am (1.8), "Exp", lines: +2 -2
+    perl cleanup.
 
-	add new script to automake.
+commit d3d97a294beaa9207c5e15e4e2da38acf9bf5408
+Author: robbat2 <robbat2>
+Date:   Thu Dec 9 13:57:13 2004 +0000
 
-2005-01-14 02:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    versioning
 
-	Added:
-		src/diradm.automount.sh.in (1.1)
-	Changed:
-		src/diradm.check.sh.in (1.2), "Exp", lines: +2 -2
-		src/diradm.conf.in (1.9), "Exp", lines: +22 -12
-		src/diradm.user.sh.in (1.6), "Exp", lines: +21 -23
+commit 6ae2f1de642767a4784075fa28a995f2ca3ebab4
+Author: robbat2 <robbat2>
+Date:   Thu Dec 9 13:56:14 2004 +0000
 
-	new automount stuff, properly abstracted. still need to add it to
-	groups.
+    versioning
 
-2005-01-09 13:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 05213e5850fe999c896a4bd54acd378d28db4f8c
+Author: robbat2 <robbat2>
+Date:   Thu Dec 9 13:55:21 2004 +0000
 
-	Changed:
-		README.in (1.4), "Exp", lines: +6 -0
+    gpasswd implementation, help cleanup, versioning, sets.
 
-	add debug instructions.
+commit d696ff5e1f1d27b23b9b114afb0f551f96008760
+Author: robbat2 <robbat2>
+Date:   Fri Nov 19 02:26:51 2004 +0000
 
-2005-01-09 13:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    add complete password locking algorithm, fix usermod.
 
-	Changed:
-		NEWS (1.7), "Exp", lines: +2 -1
+commit 962086198caa0fe63f736fe092ab9602c3888aa4
+Author: robbat2 <robbat2>
+Date:   Wed Sep 22 05:16:06 2004 +0000
 
-	add to news.
+    Add support for emails. Fix password system. Fix homedir creation.
 
-2005-01-09 13:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit b3ba258b98eae406d3d2d1095b2fe87d8c670f47
+Author: robbat2 <robbat2>
+Date:   Wed Sep 22 05:12:16 2004 +0000
 
-	Changed:
-		src/diradm.user.sh.in (1.5), "Exp", lines: +16 -6
+    make life easier.
 
-	fix empty password glitch.
+commit 0a79a705475f3d5911b5b977d92939f01482c743
+Author: robbat2 <robbat2>
+Date:   Wed Sep 22 05:12:09 2004 +0000
 
-2005-01-09 12:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    fix syntax error.
 
-	Changed:
-		configure.ac (1.15), "Exp", lines: +1 -1
+commit 60b5f27ef8893edf7ec618624f753b5576602f3e
+Author: robbat2 <robbat2>
+Date:   Thu Sep 9 20:36:04 2004 +0000
 
-	bump version.
+    correct hashing code.
 
-2005-01-09 12:49  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 2ebbb7a34eb21cba38b813bf16376db68739ae42
+Author: robbat2 <robbat2>
+Date:   Thu Sep 9 20:35:53 2004 +0000
 
-	Changed:
-		NEWS (1.6), "Exp", lines: +13 -6
+    cleanup ldap info pulling.
 
-	new news.
+commit 045af2e487b06a9d6d5401e69a49b9889a3382d4
+Author: robbat2 <robbat2>
+Date:   Mon Jul 12 03:32:30 2004 +0000
 
-2005-01-09 12:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    latest changes
 
-	Changed:
-		Makefile.am (1.9), "Exp", lines: +2 -2
+commit 67611be35205769faa28b7c2bba9c4b489a6b836
+Author: pat <pat>
+Date:   Thu Oct 9 11:55:45 2003 +0000
 
-	add irixpassword to makefileam.
+    SMB host add/del additions
 
-2005-01-09 12:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 8f1232913383e58cefaf94c6a937ce21647a3d7a
+Author: pat <pat>
+Date:   Mon Oct 6 11:39:05 2003 +0000
 
-	Added:
-		irixpassword.schema (1.1)
+    Combined mkirixpasswd and mkntpasswd into mkpasswd
 
-	add irixpassword schema.
+commit 3c54f3cd7adcfefde45b8190a762ca8e125440d3
+Author: pat <pat>
+Date:   Thu Oct 2 17:37:08 2003 +0000
 
-2005-01-09 12:17  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Added irixAccount support to diradm useradd
+    
+    Added mkirixpasswd.pl as a helper program to generate irix passwords
 
-	Changed:
-		src/diradm.user.sh.in (1.4), "Exp", lines: +15 -7
+commit 2d68e061a8c51289076a547b677fd4eb07b153ef
+Author: pat <pat>
+Date:   Thu Oct 2 17:01:01 2003 +0000
 
-	move to mail attribute instead of custom email.
+    Added mkntpasswd.pl to create nt and ntlm passwords
+    
+    Began adding samba information to diradm
 
-2005-01-09 08:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c207c9cd32d07f713591473bce0587b6aed6beef
+Author: robbat2 <robbat2>
+Date:   Thu Jul 31 15:32:27 2003 +0000
 
-	Changed:
-		configure.ac (1.14), "Exp", lines: +1 -0
+    chsh should work now
 
-	whoami primaitve.
+commit 2626602acb56cd9347bf55ea10939b53669bf34b
+Author: robbat2 <robbat2>
+Date:   Tue Jul 29 23:43:07 2003 +0000
 
-2005-01-09 08:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    cleanups and initial samba-ldap support
 
-	Changed:
-		src/diradm.common.sh.in (1.3), "Exp", lines: +3 -3
-		src/diradm.group.sh.in (1.2), "Exp", lines: +2 -2
-		src/diradm.in (1.14), "Exp", lines: +5 -4
-		src/diradm.user.sh.in (1.3), "Exp", lines: +22 -13
+commit 6d788c495a3287544f1ee7631264d5bae4dc95e5
+Author: robbat2 <robbat2>
+Date:   Fri Jul 25 13:13:45 2003 +0000
 
-	fix renaming usage, and add whoami primative.
+    append_attribute usage
 
-2005-01-09 07:24  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 56178de00e55d697e3c50e51d8f8f7c2fc28fcbb
+Author: robbat2 <robbat2>
+Date:   Mon Jul 14 11:04:09 2003 +0000
 
-	Changed:
-		configure.ac (1.13), "Exp", lines: +1 -1
-		reconf (1.5), "Exp", lines: +1 -1
+    notes on what to finish/fix
 
-	update copyright dates.
+commit c60844b6a23739d31b8ecd5149a72a8bb70fd01f
+Author: robbat2 <robbat2>
+Date:   Mon Jul 14 10:58:06 2003 +0000
 
-2005-01-09 07:23  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    removed some old code
 
-	Changed:
-		NEWS (1.5), "Exp", lines: +2 -0
+commit c2b798a92973a4c4a8ff4d65e25a6e8b80801aeb
+Author: robbat2 <robbat2>
+Date:   Mon Jul 14 10:56:46 2003 +0000
 
-	add 2.2 news.
+    missed fixing $#
 
-2005-01-09 07:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 0c2bf9667fae735d25b3438252af2c17e16bf0d3
+Author: robbat2 <robbat2>
+Date:   Mon Jul 14 10:55:19 2003 +0000
 
-	Changed:
-		src/diradm.common.sh.in (1.2), "Exp", lines: +8 -8
-		src/diradm.in (1.13), "Exp", lines: +11 -8
-		src/diradm.user.sh.in (1.2), "Exp", lines: +1 -2
+    full GECOS functionality for useradd
 
-	make sure LDAP.*_CMD instead of just LDAP.*.
+commit 1eb43675361d5859a9994fede4c88616810b3579
+Author: robbat2 <robbat2>
+Date:   Mon Jul 14 10:08:21 2003 +0000
 
-2005-01-09 07:09  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Fix braces on _every_ variable $foo.
+    Add 'run*' and append abstractions.
+    Convert LDAPADD calls to LDAPMODIFY calls for more speed.
 
-	Changed:
-		src/.cvsignore (1.4), "Exp", lines: +7 -0
+commit 5c433a876c48ef415ef6eae231359e364d6bb1df
+Author: robbat2 <robbat2>
+Date:   Mon Jul 14 09:36:56 2003 +0000
 
-	cvsignore.
+    added docs for chage,gpasswd. helper functions
 
-2005-01-09 07:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c10c165baff5c6d2d07356c8487e9ceba7baa9e7
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 11:02:44 2003 +0000
 
-	Changed:
-		src/diradm.in (1.12), "Exp", lines: +5 -4
+    Start on chfn code.
+    Escape many variables properly.
+    Multiple config file detection.
+    Correct shadowLastChange value.
+    Work on correct GECOS/cn/sn values.
 
-	add false.
+commit c2a25677c07ae5f5691bb5bef2cf595b0e9cd997
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:59:45 2003 +0000
 
-2005-01-09 07:07  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    fix GID stuff
 
-	Changed:
-		configure.ac (1.12), "Exp", lines: +8 -0
+commit ddb15db2a38a823f39745aee155c8f5c3dd16a15
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:59:24 2003 +0000
 
-	build components.
+    my custom improvements
 
-2005-01-09 07:06  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit c0cc4489c25190f7b98190ecbb6a94c4a158f1c3
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:59:08 2003 +0000
 
-	Changed:
-		src/Makefile.am (1.7), "Exp", lines: +1 -2
+    initial old file
 
-	building.
+commit b77580aaa7138ecae31bacd0731c570c3d137605
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:55:33 2003 +0000
 
-2005-01-09 07:05  Robin H. Johnson <robbat2@orbis-terrarum.net>
+    Abstract module names (\$modulename).
+    Add easy lookup functions (ldap_search_getattr) and convert code to use it.
+    Add chsh code.
 
-	Deleted:
-		src/diradm.check.sh (1.2)
-		src/diradm.common.sh (1.2)
-		src/diradm.group.sh (1.2)
-		src/diradm.host.sh (1.2)
-		src/diradm.misc.sh (1.2)
-		src/diradm.samba.sh (1.2)
-		src/diradm.user.sh (1.2)
-	Added:
-		src/diradm.check.sh.in (1.1)
-		src/diradm.common.sh.in (1.1)
-		src/diradm.group.sh.in (1.1)
-		src/diradm.host.sh.in (1.1)
-		src/diradm.misc.sh.in (1.1)
-		src/diradm.samba.sh.in (1.1)
-		src/diradm.user.sh.in (1.1)
-	Changed:
-		src/Makefile.am (1.6), "Exp", lines: +2 -1
+commit 90e5d937f5936644f1d547650179ebf4d93645db
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:52:56 2003 +0000
 
-	move to custom build of components.
+    initial fixes so it actually works!
 
-2005-01-09 07:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
+commit 45298dbc0eacbca0d42748fada02b739ea950bec
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:28:12 2003 +0000
 
-	Changed:
-		src/Makefile.am (1.5), "Exp", lines: +3 -2
+    This commit was generated by cvs2svn to compensate for changes in r2,
+    which included commits to RCS files with non-trunk default branches.
 
-	update for seperation.
+commit 34622adb8d9619e84fc8990e19fa2b36aa189e51
+Author: robbat2 <robbat2>
+Date:   Sat Jul 12 10:28:12 2003 +0000
 
-2005-01-09 07:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		src/diradm.check.sh (1.1)
-		src/diradm.common.sh (1.1)
-		src/diradm.group.sh (1.1)
-		src/diradm.host.sh (1.1)
-		src/diradm.misc.sh (1.1)
-		src/diradm.samba.sh (1.1)
-		src/diradm.user.sh (1.1)
-	Changed:
-		src/diradm.conf.in (1.8), "Exp", lines: +5 -5
-		src/diradm.in (1.11), "Exp", lines: +22 -1628
-
-	seperate groups of function, for faster load time.
-
-2005-01-09 06:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.in (1.10), "Exp", lines: +92 -98
-
-	cleanup hostdel. remove smbhostmod again - not needed. make
-	append_attrib work better.
-
-2005-01-09 06:00  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.conf.in (1.7), "Exp", lines: +5 -5
-		src/diradm.in (1.9), "Exp", lines: +72 -78
-
-	use better BASEDN variables.
-
-2005-01-09 03:24  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.conf.in (1.6), "Exp", lines: +4 -4
-		src/diradm.in (1.8), "Exp", lines: +51 -42
-
-	fix some glitches, add cvs_header output, change running method.
-
-2005-01-09 03:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		configure.ac (1.11), "Exp", lines: +7 -1
-
-	add new commands, bump version.
-
-2005-01-09 03:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.in (1.7), "Exp", lines: +139 -130
-
-	fix variable conflicts with DATE. Configurize DATE, CUT, UNIQ.
-	Update config testing. Make config and self testing available to
-	user. Config test not run by default anymore. Update copyright year
-	for my edits. Force -R in date format to ensure correct locale
-	output for date_to_days. Remove cvsadd function. Abstract command
-	list.
-
-2005-01-09 03:00  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.conf.in (1.5), "Exp", lines: +3 -3
-
-	fix typos with groupbase
-
-2004-12-23 22:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		NEWS (1.4), "Exp", lines: +2 -0
-
-	add news.
-
-2004-12-23 22:23  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.conf.in (1.4), "Exp", lines: +4 -4
-		src/diradm.in (1.6), "Exp", lines: +5 -5
-
-	variable fixes.
-
-2004-12-23 21:27  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		configure.ac (1.10), "Exp", lines: +1 -1
-
-	bump version number.
-
-2004-12-23 21:16  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.in (1.5), "Exp", lines: +108 -65
-
-	autoconf stuff again, and fix smbhostadd.
-
-2004-12-23 09:38  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		m4/Makefile.am (1.5), "Exp", lines: +1 -1
-
-	improve autoconf system.
-
-2004-12-23 09:37  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		.cvsignore (1.7), "Exp", lines: +3 -0
-		m4/Makefile.am (1.4), "Exp", lines: +1 -1
-
-	improve autoconf system.
-
-2004-12-23 09:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		reconf (1.4), "Exp", lines: +4 -4
-
-	force versions.
-
-2004-12-12 08:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		.cvsignore (1.6), "Exp", lines: +1 -0
-
-	add config.cache to cvsignore.
-
-2004-12-12 08:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		config.h.in (1.4), "Exp", lines: +0 -3
-		configure.ac (1.9), "Exp", lines: +2 -5
-
-	chmod +x stuff. remove dud define.
-
-2004-12-12 08:31  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		src/diradm.conf.in (1.3), "Exp", lines: +6 -11
-		src/diradm.in (1.4), "Exp", lines: +220 -169
-
-	validation, commenting.
-
-2004-12-12 07:42  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		NEWS (1.3), "Exp", lines: +1 -1
-
-	Make release.
-
-2004-12-12 07:41  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		cvs2cl-update.sh (1.2), "Exp", lines: +3 -1
-
-	add accum.
-
-2004-12-12 07:40  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		configure.ac (1.8), "Exp", lines: +1 -1
-
-	new version number for release.
-
-2004-12-12 07:39  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		cvs2cl-update.sh (1.1)
-
-	helper script.
-
-2004-12-12 07:34  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		cvs2cl.ufile (1.1)
-
-	for auto-data.
-
-2004-12-12 07:30  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		CHANGES.prefork (1.1)
-		README.prefork (1.1)
-		diradm.spec.in (1.1)
-	Changed:
-		.cvsignore (1.5), "Exp", lines: +2 -1
-		AUTHORS (1.2), "Exp", lines: +8 -0
-		Makefile.am (1.8), "Exp", lines: +7 -4
-		NEWS (1.2), "Exp", lines: +2 -0
-		README.in (1.3), "Exp", lines: +2 -0
-		THANKS (1.2), "Exp", lines: +4 -6
-		config.h.in (1.3), "Exp", lines: +3 -0
-		configure.ac (1.7), "Exp", lines: +15 -8
-		m4/Makefile.am (1.3), "Exp", lines: +2 -2
-		src/.cvsignore (1.3), "Exp", lines: +2 -1
-		src/Makefile.am (1.4), "Exp", lines: +7 -7
-		src/diradm.conf.in (1.2), "Exp", lines: +58 -20
-		src/diradm.in (1.3), "Exp", lines: +35 -8
-
-	initial changelog by cvs2cl.
-
-2004-12-12 03:03  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		reconf (1.3), "Exp", lines: +3 -3
-		src/diradm.in (1.2), "Exp", lines: +3 -4
-
-	BASHSH var, any version of auto*.
-
-2004-12-12 03:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		Makefile.am (1.7), "Exp", lines: +4 -2
-
-	readme in build
-
-2004-12-12 03:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		configure.ac (1.6), "Exp", lines: +1 -0
-
-	autoconf version
-
-2004-12-12 02:57  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		.cvsignore (1.4), "Exp", lines: +1 -0
-		Makefile.am (1.6), "Exp", lines: +3 -2
-		README.in (1.2), "Exp", lines: +2 -2
-		configure.ac (1.5), "Exp", lines: +1 -1
-
-	automake foreign mode
-
-2004-12-12 02:44  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Deleted:
-		README (1.3)
-		aclocal.m4 (1.2)
-		configure.in (1.2)
-		src/diradm-mkpasswd.pl (1.2)
-		src/diradm.conf (1.2)
-		src/diradm.sh (1.2)
-	Added:
-		m4/autoconf-path_progs_error.m4 (1.1)
-		m4/autoconf-prog_perl_modules.m4 (1.1)
-		src/diradm-mkpasswd.pl.in (1.1)
-		src/diradm.conf.in (1.1)
-		src/diradm.in (1.1)
-	Changed:
-		.cvsignore (1.3), "Exp", lines: +1 -0
-		Makefile.am (1.5), "Exp", lines: +3 -1
-		config.h.in (1.2), "Exp", lines: +3 -0
-		configure.ac (1.4), "Exp", lines: +31 -1
-		reconf (1.2), "Exp", lines: +3 -3
-		m4/Makefile.am (1.2), "Exp", lines: +3 -1
-		src/.cvsignore (1.2), "Exp", lines: +1 -0
-		src/Makefile.am (1.3), "Exp", lines: +7 -11
-
-	auto-ize nearly done!
-
-2004-12-10 03:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Deleted:
-		Makefile.in (1.4)
-		src/Makefile.in (1.2)
-	Added:
-		m4/.cvsignore (1.1)
-		src/.cvsignore (1.1)
-	Changed:
-		.cvsignore (1.2), "Exp", lines: +5 -0
-		Makefile.am (1.4), "Exp", lines: +1 -12
-		README (1.2), "Exp", lines: +5 -0
-		configure.ac (1.3), "Exp", lines: +1 -0
-		src/Makefile.am (1.2), "Exp", lines: +13 -0
-
-	cvsignore
-
-2004-12-10 03:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Deleted:
-		diradm (1.26)
-		diradm-mkpasswd.pl (1.3)
-		diradm.conf (1.10)
-		diradm.sh (1.2)
-	Added:
-		.cvsignore (1.1)
-		README.in (1.1)
-		THANKS (1.1)
-		aclocal.m4 (1.1)
-		config.h.in (1.1)
-		configure.in (1.1)
-		reconf (1.1)
-		m4/Makefile.am (1.1)
-		src/Makefile.am (1.1)
-		src/Makefile.in (1.1)
-		src/diradm-mkpasswd.pl (1.1)
-		src/diradm.conf (1.1)
-		src/diradm.sh (1.1)
-	Changed:
-		INSTALL (1.2), "Exp", lines: +231 -0
-		Makefile.am (1.3), "Exp", lines: +7 -1
-		Makefile.in (1.3), "Exp", lines: +247 -62
-		configure.ac (1.2), "Exp", lines: +26 -4
-
-	autotool!
-
-2004-12-10 03:18  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		Makefile.am (1.2), "Exp", lines: +3 -32
-		Makefile.in (1.2), "Exp", lines: +30 -115
-
-	autohell
-
-2004-12-10 03:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		AUTHORS (1.1)
-		COPYING (1.1)
-		INSTALL (1.1)
-		Makefile.am (1.1)
-		Makefile.in (1.1)
-		NEWS (1.1)
-		README (1.1)
-		configure.ac (1.1)
-		diradm.sh (1.1)
-	Changed:
-		diradm-mkpasswd.pl (1.2), "Exp", lines: +37 -11
-		diradm.conf (1.9), "Exp", lines: +3 -2
-
-	auto-toolize, move source to new file.
-
-2004-12-10 01:46  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.25), "Exp", lines: +30 -14
-
-	cleanup.
-
-2004-12-10 01:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Deleted:
-		mkpasswd.pl (1.5)
-	Added:
-		diradm-mkpasswd.pl (1.1)
-
-	rename mkpasswd.
-
-2004-12-09 14:01  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		mkpasswd.pl (1.4), "Exp", lines: +13 -5
-
-	perl cleanup.
-
-2004-12-09 13:57  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.24), "Exp", lines: +2 -2
-
-	versioning
-
-2004-12-09 13:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.23), "Exp", lines: +2 -2
-
-	versioning
-
-2004-12-09 13:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.22), "Exp", lines: +247 -81
-
-	gpasswd implementation, help cleanup, versioning, sets.
-
-2004-11-19 02:26  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.21), "Exp", lines: +36 -19
-
-	add complete password locking algorithm, fix usermod.
-
-2004-09-22 05:16  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.20), "Exp", lines: +41 -23
-
-	Add support for emails. Fix password system. Fix homedir creation.
-
-2004-09-22 05:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		mkpasswd.pl (1.3), "Exp", lines: +1 -1
-
-	make life easier.
-
-2004-09-22 05:12  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm.conf (1.8), "Exp", lines: +2 -2
-
-	fix syntax error.
-
-2004-09-09 20:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.19), "Exp", lines: +5 -2
-
-	correct hashing code.
-
-2004-09-09 20:35  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm.conf (1.7), "Exp", lines: +6 -6
-
-	cleanup ldap info pulling.
-
-2004-07-12 03:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.18), "Exp", lines: +387 -43
-		diradm.conf (1.6), "Exp", lines: +23 -8
-
-	latest changes
-
-2003-10-09 11:55  Patrick Lougheed <pat@tfsb.org>
-
-	Changed:
-		diradm (1.17), "Exp", lines: +107 -24
-		diradm.conf (1.5), "Exp", lines: +22 -3
-		mkpasswd.pl (1.2), "Exp", lines: +2 -1
-
-	SMB host add/del additions
-
-2003-10-06 11:39  Patrick Lougheed <pat@tfsb.org>
-
-	Deleted:
-		mkirixpasswd.pl (1.2)
-		mkntpasswd.pl (1.2)
-	Added:
-		mkpasswd.pl (1.1)
-
-	Combined mkirixpasswd and mkntpasswd into mkpasswd
-
-2003-10-02 17:37  Patrick Lougheed <pat@tfsb.org>
-
-	Added:
-		mkirixpasswd.pl (1.1)
-	Changed:
-		diradm (1.16), "Exp", lines: +13 -4
-
-	Added irixAccount support to diradm useradd
-
-		Added mkirixpasswd.pl as a helper program to generate irix
-	passwords
-
-2003-10-02 17:01  Patrick Lougheed <pat@tfsb.org>
-
-	Added:
-		mkntpasswd.pl (1.1)
-	Changed:
-		diradm (1.15), "Exp", lines: +25 -4
-
-	Added mkntpasswd.pl to create nt and ntlm passwords
-
-		Began adding samba information to diradm
-
-2003-07-31 15:32  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.14), "Exp", lines: +2 -10
-
-	chsh should work now
-
-2003-07-29 23:43  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.13), "Exp", lines: +17 -10
-		diradm.conf (1.4), "Exp", lines: +1 -0
-
-	cleanups and initial samba-ldap support
-
-2003-07-25 13:13  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.12), "Exp", lines: +22 -5
-
-	append_attribute usage
-
-2003-07-14 11:04  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.11), "Exp", lines: +30 -8
-
-	notes on what to finish/fix
-
-2003-07-14 10:58  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.10), "Exp", lines: +1 -24
-
-	removed some old code
-
-2003-07-14 10:56  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.9), "Exp", lines: +11 -11
-
-	missed fixing $#
-
-2003-07-14 10:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.8), "Exp", lines: +51 -28
-
-	full GECOS functionality for useradd
-
-2003-07-14 10:08  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.7), "Exp", lines: +377 -357
-
-	Fix braces on _every_ variable $foo.  Add 'run*' and append
-	abstractions.  Convert LDAPADD calls to LDAPMODIFY calls for more
-	speed.
-
-2003-07-14 09:36  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.6), "Exp", lines: +29 -4
-
-	added docs for chage,gpasswd. helper functions
-
-2003-07-12 11:02  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.5), "Exp", lines: +1 -1
-
-	Start on chfn code.  Escape many variables properly.  Multiple
-	config file detection.	Correct shadowLastChange value.  Work on
-	correct GECOS/cn/sn values.
-
-2003-07-12 10:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm.conf (1.3), "Exp", lines: +2 -2
-
-	fix GID stuff
-
-2003-07-12 10:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.4), "Exp", lines: +55 -17
-		diradm.conf (1.2), "Exp", lines: +43 -13
-
-	my custom improvements
-
-2003-07-12 10:59  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		diradm.conf (1.1)
-
-	initial old file
-
-2003-07-12 10:55  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.3), "Exp", lines: +148 -69
-
-	Abstract module names (\$modulename).  Add easy lookup functions
-	(ldap_search_getattr) and convert code to use it.  Add chsh code.
-
-2003-07-12 10:52  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.2), "Exp", lines: +9 -9
-
-	initial fixes so it actually works!
-
-2003-07-12 10:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Changed:
-		diradm (1.1.1.1), "Exp", lines: +0 -0
-
-	Initial import
-
-2003-07-12 10:28  Robin H. Johnson <robbat2@orbis-terrarum.net>
-
-	Added:
-		diradm (1.1)
-
-	Initial revision
-
+    Initial import
