@@ -1,3 +1,21 @@
+commit 8fdef44ba55e8964525c51fc3655eacd1c4aef31
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Wed Sep 24 22:50:38 2008 -0700
+
+    Version bump.
+
+commit a624e3504ffb8064002d8b36f0ff30dce7998e3a
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Wed Sep 24 22:50:23 2008 -0700
+
+    Allow older setups that have orgunit directory as the objectclass instead of the newer automountMap.
+
+commit 00d320c8e8e852d1c62394a1340904a7bb0def79
+Author: Robin H. Johnson <robbat2@gentoo.org>
+Date:   Tue Sep 23 17:53:04 2008 -0700
+
+    Update changelog .
+
 commit d3c2adfae247fffd1a7f3ea51d211b3f0bc93b0e
 Author: Robin H. Johnson <robbat2@gentoo.org>
 Date:   Tue Sep 23 17:52:07 2008 -0700
