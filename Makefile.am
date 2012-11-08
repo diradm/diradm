@@ -9,7 +9,7 @@ built_DOCS = README ChangeLog
 DOCS = $(dist_DOCS) $(built_DOCS)
 
 noinst_DATA = $(built_DOCS)
-EXTRA_DIST = configure Makefile.in diradm.spec.in diradm.spec reconf $(DOCS)
+EXTRA_DIST = configure diradm.spec Makefile.in $(built_DOCS)
 
 CLEANFILES = *~ *.swp diradm.sum diradm.log
 
