@@ -3,17 +3,36 @@
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = m4 src testsuite man
-dist_DOCS = AUTHORS CHANGES.prefork COPYING ChangeLog DEBUGGING DEVELOPMENT INSTALL KNOWN-BUGS NEWS README.prefork THANKS TODO autofs-4.1.3.schema irixpassword.schema samba-3.0.23d.schema
+dist_DOCS = AUTHORS CHANGES.prefork COPYING DEBUGGING DEVELOPMENT INSTALL KNOWN-BUGS NEWS README.prefork THANKS TODO autofs-4.1.3.schema irixpassword.schema samba-3.0.23d.schema
 # built from README.in
-built_DOCS = README
+built_DOCS = README ChangeLog
 DOCS = $(dist_DOCS) $(built_DOCS)
 
 noinst_DATA = $(built_DOCS)
-EXTRA_DIST = configure Makefile.in diradm.spec.in diradm.spec reconf $(dist_DOCS)
+EXTRA_DIST = configure Makefile.in diradm.spec.in diradm.spec reconf $(DOCS)
 
 CLEANFILES = *~ *.swp diradm.sum diradm.log
-MAINTAINERCLEANFILES = Makefile.in
 
 AUTOMAKE_OPTIONS = dejagnu
 
 RUNTESTDEFAULTFLAGS = --tool diradm --srcdir $$srcdir/testsuite -a
+
+PACKAGE_VERSION = `/bin/fgrep PACKAGE_VERSION= configure | sed "/^PACKAGE_VERSION/s/.*='\([^']\+\)'/\1/"`
+PACKAGE_NAME = `/bin/fgrep PACKAGE_NAME= configure | sed "/^PACKAGE_NAME/s/.*='\([^']\+\)'/\1/"`
+distdir = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+
+ChangeLog:
+	git log >$@
+
+check-git-repository:
+	git diff --quiet || { echo 'STOP, you have uncommitted changes in the working directory' ; false ; }
+	git diff --cached --quiet || { echo 'STOP, you have uncommitted changes in the index' ; false ; }
+
+dist: check-git-repository $(EXTRA_DIST)
+	rm -Rf "$(distdir)" "$(distdir)".tar "$(distdir)".tar.bz2
+	mkdir "$(distdir)"
+	git ls-files -z | xargs -0 cp --no-dereference --parents --target-directory="$(distdir)" \
+		$(EXTRA_DIST)
+	tar cf "$(distdir)".tar "$(distdir)"
+	bzip2 -9v "$(distdir)".tar
+	rm -Rf "$(distdir)"

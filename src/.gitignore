@@ -1,0 +1,13 @@
+diradm.automount.sh
+diradm.check.sh
+diradm.common.sh
+diradm.conf
+diradm.group.sh
+diradm.host.sh
+diradm
+diradm.misc.sh
+diradm-mkpasswd.pl
+diradm.samba.sh
+diradm.shadow.sh
+diradm.user.sh
+superadduser.diradm

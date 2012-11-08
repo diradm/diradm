@@ -1,0 +1,14 @@
+Makefile.in
+aclocal.m4
+configure
+config/install-sh
+config/missing
+Makefile
+stamp-h1
+diradm.spec
+config.status
+config.log
+config.h
+config.cache
+autom4te.cache/
+README
