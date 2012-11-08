@@ -2,7 +2,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = m4 src testsuite man
+SUBDIRS = m4 src testsuite man config
 dist_DOCS = AUTHORS CHANGES.prefork COPYING DEBUGGING DEVELOPMENT INSTALL KNOWN-BUGS NEWS README.prefork THANKS TODO autofs-4.1.3.schema irixpassword.schema samba-3.0.23d.schema
 # built from README.in
 built_DOCS = README ChangeLog
@@ -10,7 +10,7 @@ DOCS = $(dist_DOCS) $(built_DOCS)
 
 noinst_DATA = $(built_DOCS)
 autotools_DIST = configure Makefile.in aclocal.m4 config/install-sh config/missing stamp-h1 */Makefile.in testsuite/*/Makefile.in
-EXTRA_DIST = .gitignore diradm.spec $(autotools_DIST) $(DOCS)
+EXTRA_DIST = .gitignore diradm.spec reconf $(autotools_DIST) $(DOCS)
 
 CLEANFILES = *~ *.swp diradm.sum diradm.log
 
