@@ -107,9 +107,10 @@ AC_CONFIG_FILES([
    README
    diradm.spec
    Makefile
+   config/Makefile
    m4/Makefile
-   src/Makefile
    man/Makefile
+   src/Makefile
    testsuite/Makefile
    testsuite/config-slapd/Makefile
    testsuite/config/Makefile
