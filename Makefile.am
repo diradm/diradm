@@ -18,7 +18,7 @@ AUTOMAKE_OPTIONS = dejagnu
 
 RUNTESTDEFAULTFLAGS = --tool diradm --srcdir $$srcdir/testsuite -a
 
-distdir = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+#distdir = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 ChangeLog:
 	git log >$@
