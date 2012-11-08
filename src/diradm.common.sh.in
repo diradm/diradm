@@ -265,10 +265,10 @@ isinteger() {
 usernextfreeuid() {
 	uidlist="$(ldap_search_getattr "${USER_BASEDN}" "(uidNumber=*)" "uidNumber" | ${SORT} -rg)"
 	# if nothing was returned, the next number up is ours
-	[ -z "${uidlist}" ] && uidlist="$((${UIDNUMBERMIN}))"
+	# --> we'll return empty.
 	# we do NOT do UID recycling at all, our code used to, but it turns out to be really slow
 	for i in ${uidlist} ; do
-		if [ ${i} -lt ${UIDNUMBERMAX} -a ${i} -gt ${UIDNUMBERMIN} ]; then
+		if [ ${i} -lt ${UIDNUMBERMAX} -a ${i} -ge ${UIDNUMBERMIN} ]; then
 			i=$((${i}+1))
 			if [ ${i} -lt ${UIDNUMBERMAX} -a ${i} -gt ${UIDNUMBERMIN} ]; then
 				echo $i
