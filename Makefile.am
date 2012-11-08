@@ -9,7 +9,8 @@ built_DOCS = README ChangeLog
 DOCS = $(dist_DOCS) $(built_DOCS)
 
 noinst_DATA = $(built_DOCS)
-EXTRA_DIST = configure diradm.spec Makefile.in $(built_DOCS)
+autotools_DIST = configure Makefile.in install-sh aclocal.m4 config/install-sh config/missing stamp-h1 */Makefile.in testsuite/*/Makefile.in
+EXTRA_DIST = diradm.spec $(autotools_DIST) $(built_DOCS)
 
 CLEANFILES = *~ *.swp diradm.sum diradm.log
 
