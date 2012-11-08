@@ -1,1 +1,1 @@
-EXTRA_DIST = Makefile.am unix.exp
+EXTRA_DIST = Makefile.am unix.exp .gitignore
