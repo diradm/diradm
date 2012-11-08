@@ -1,1 +1,1 @@
-EXTRA_DIST = .cvsignore amadd-1-customopt-description.tst amadd-1-customopt.tst amadd-1-defaultopt-description.tst amadd-1-defaultopt.tst amadd-1.exp amdel-1-add.tst amdel-1-readd.tst amdel-1.exp ammapadd-1-add.tst ammapadd-1.exp ammapdel-1-add.tst ammapdel-1-readd.tst ammapdel-1.exp
+EXTRA_DIST = .gitignore amadd-1-customopt-description.tst amadd-1-customopt.tst amadd-1-defaultopt-description.tst amadd-1-defaultopt.tst amadd-1.exp amdel-1-add.tst amdel-1-readd.tst amdel-1.exp ammapadd-1-add.tst ammapadd-1.exp ammapdel-1-add.tst ammapdel-1-readd.tst ammapdel-1.exp
