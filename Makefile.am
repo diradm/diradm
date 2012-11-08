@@ -9,8 +9,8 @@ built_DOCS = README ChangeLog
 DOCS = $(dist_DOCS) $(built_DOCS)
 
 noinst_DATA = $(built_DOCS)
-autotools_DIST = configure Makefile.in install-sh aclocal.m4 config/install-sh config/missing stamp-h1 */Makefile.in testsuite/*/Makefile.in
-EXTRA_DIST = diradm.spec $(autotools_DIST) $(built_DOCS)
+autotools_DIST = configure Makefile.in aclocal.m4 config/install-sh config/missing stamp-h1 */Makefile.in testsuite/*/Makefile.in
+EXTRA_DIST = diradm.spec $(autotools_DIST) $(DOCS)
 
 CLEANFILES = *~ *.swp diradm.sum diradm.log
 
@@ -28,6 +28,8 @@ check-git-repository:
 	git diff --cached --quiet || { echo 'STOP, you have uncommitted changes in the index' ; false ; }
 
 dist: check-git-repository $(EXTRA_DIST)
+
+dist-git: check-git-repository $(EXTRA_DIST)
 	rm -Rf "$(distdir)" "$(distdir)".tar "$(distdir)".tar.bz2
 	mkdir "$(distdir)"
 	git ls-files -z | xargs -0 cp --no-dereference --parents --target-directory="$(distdir)" \

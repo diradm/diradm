@@ -1,15 +1,17 @@
-Makefile.in
-aclocal.m4
-configure
-config/install-sh
-config/missing
-Makefile
-stamp-h1
+# Custom
 diradm.spec
-config.status
-config.log
-config.h
-config.cache
-autom4te.cache/
 README
 ChangeLog
+# Autotools
+aclocal.m4
+autom4te.cache/
+config.cache
+config.h
+config/install-sh
+config.log
+config/missing
+config.status
+configure
+Makefile
+Makefile.in
+stamp-h1
