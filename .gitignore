@@ -7,11 +7,15 @@ aclocal.m4
 autom4te.cache/
 config.cache
 config.h
-config/install-sh
 config.log
-config/missing
 config.status
 configure
+diradm.log
+diradm.sum
+diradm-*.tar.bz2
+diradm-*.tar.gz
 Makefile
 Makefile.in
+site.exp
 stamp-h1
+stamp-h.in
