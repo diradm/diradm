@@ -17,8 +17,6 @@ AUTOMAKE_OPTIONS = dejagnu
 
 RUNTESTDEFAULTFLAGS = --tool diradm --srcdir $$srcdir/testsuite -a
 
-PACKAGE_VERSION = `/bin/fgrep PACKAGE_VERSION= configure | sed "/^PACKAGE_VERSION/s/.*='\([^']\+\)'/\1/"`
-PACKAGE_NAME = `/bin/fgrep PACKAGE_NAME= configure | sed "/^PACKAGE_NAME/s/.*='\([^']\+\)'/\1/"`
 distdir = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 ChangeLog:
