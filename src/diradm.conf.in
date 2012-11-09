@@ -51,21 +51,23 @@ function pullsetting() {
 	# Parameter 2 is the setting to get
 	src="$1"
 	setting="$2"
-	#${GREP} -i "^${setting}" ${src} | ${TAIL} -n1 | ${AWK} '{print $2}'
-	${AWK} "BEGIN{IGNORECASE=1} /^${setting}/{print \$2}" ${src} | ${TAIL} -n1
+	if [ -f "$src" ]; then
+		#${GREP} -i "^${setting}" ${src} | ${TAIL} -n1 | ${AWK} '{print $2}'
+		${AWK} "BEGIN{IGNORECASE=1} /^${setting}/{print \$2}" ${src} | ${TAIL} -n1
+	fi
 }
 
 function grabconf() {
-	# Parameter 1 is the file to pull from
+	# Parameter 1 is the variable to fetch
 	# Parameter 2 is the default if we can't get a value from /etc/ldap.conf or
 	# /etc/openldap/ldap.conf
 	setting="${1}"
 	default="${2}"
 	src="${NSS_LDAP_CONF}"
-	val="`pullsetting "${src}" "${setting}"`"
+	val="$(pullsetting "${src}" "${setting}")"
 	if [ -z "${val}" ]; then
 		src=/etc/openldap/ldap.conf
-		val="`pullsetting "${src}" "${setting}"`"
+		val="$(pullsetting "${src}" "${setting}")"
 	fi
 	[ -z "${val}" ] && val="${default}"
 	echo "${val}"
@@ -73,7 +75,8 @@ function grabconf() {
 
 function grabpasswd() {
 	#pullsetting /etc/ldap.secret ''
-	${SED} -n -e '1p' /etc/ldap.secret
+	LPS=/etc/ldap.secret 
+	[ -f $LPS ] && ${SED} -n -e '1p' $LPS
 }
 
 
